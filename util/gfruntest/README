@@ -1,0 +1,67 @@
+	How to run tests with gfruntest
+
+Requirements
+============
+In the following description we assume an Unix user named 'test_user'
+executes testcases with gfruntest.
+
+ * test_user must be registered as a Gfarm user.
+ * test_user should be able to log on to remote hosts by ssh with
+   no password (using ssh-agent is recommended).
+ * In some tests, test_user should be listed in /etc/sudoers with
+   NOPASSWD tag like follows:
+
+	test_user	ALL=(ALL)	NOPASSWD: ALL
+
+ * In some tests, test_user need to be in gfarmroot/gfarmadm Gfarm group.
+
+Create gfservice.conf file
+==========================
+Since gfruntest invokes gfservice command, the configuration file of
+gfservice ('$HOME/.gfservice' by default) is required to execute
+testcases with 'gfruntest'.  See gfservice.conf(5) for more details.
+
+Execute gfruntest
+=================
+To execute a testcase with gfruntest, type:
+
+	% gfruntest <testcase name>
+
+where <testcase name> is a shell script under the following directory:
+
+	$datadir/gfarm/systest/testcases/
+
+Note that each '::' in <testcase name> is replaced with '/'.
+For example, the testcase name 'aa::bb:cc' corresponds with the script
+
+	$datadir/gfarm/systest/testcases/aa/bb/cc
+
+'-d' (debug), '-f' (specify configuration file) and '-k' (setup key)
+options are passed to 'gfservice'.
+
+	% gfruntest -f <gfservice.conf> -d -k ...
+
+gfruntest can also execute multiple testcases using a scenario file.
+In the scenario file, testcase names are listed one per line, like:
+
+	gfarm_v2::failover_by_kill
+	gfarm_v2::failover_by_reboot
+	gfarm_v2::failover_by_stop
+
+Note that lines beginning with '#' and empty lines are ignored.
+Then, invoke gfruntest with '-s' option:
+
+	% gfruntest -s <scenario file>
+
+gfruntest assumes <scenario file> exists under the directory:
+
+	$datadir/gfarm/systest/scenarios/
+
+It runs testcases specified in the scenario file successively.
+
+gfruntest records logs output by testcases to the log file 'gfruntest.log'
+at the current directory.  To alter the path of the log file, use '-l'
+option:
+
+	% gfruntest -l <log file>
+

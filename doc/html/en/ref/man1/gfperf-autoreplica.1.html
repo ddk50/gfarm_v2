@@ -1,0 +1,59 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-autoreplica</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-autoreplica">
+<a name="gfperf-autoreplica.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-autoreplica — Gfarm measure autoreplica performance</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-autoreplica</code>  [-t, --testdir <em class="replaceable"><code>test directory</code></em>] [-m, --gfarm2fs <em class="replaceable"><code>gfarm2fs mount point</code></em>] [-l, --filesize <em class="replaceable"><code>file size</code></em>] [-f, --number <em class="replaceable"><code>number of files</code></em>] [-r, --replica <em class="replaceable"><code>number of replica</code></em>] [-s, --stop <em class="replaceable"><code>wait time</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>This command measures file creation performance in auto replication by gfmd. This command creates specified number of files in specified size. Between creation of files per second is performance of auto replica.</p>
+<p>All test files are created in <em class="parameter"><code>test directory</code></em>, and automatically removed on success.
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-t, --testdir</code> <em class="parameter"><code>test directory</code></em></span></dt>
+<dd><p>
+Test files are created in this directory.
+Specify gfarm url (that begins with gfarm:///).
+The default is 'gfarm:///tmp'.
+</p></dd>
+<dt><span class="term"><code class="option">-m, --gfarm2fs</code> <em class="parameter"><code>gfarm2fs mount point</code></em></span></dt>
+<dd><p>
+Specify gfarm2fs mount point.
+</p></dd>
+<dt><span class="term"><code class="option">-l, --filesize</code> <em class="parameter"><code>file size</code></em></span></dt>
+<dd><p>
+File size to be created.
+The default is 1G. (1G = 2^30)
+</p></dd>
+<dt><span class="term"><code class="option">-f, --number</code> <em class="parameter"><code>number of files</code></em></span></dt>
+<dd><p>
+Number of files to be created.
+The default is 10.
+</p></dd>
+<dt><span class="term"><code class="option">-r, --replica</code> <em class="parameter"><code>number of replica</code></em></span></dt>
+<dd><p>
+Number of replica that is automatically replicated by gfmd.
+The default is 1.
+</p></dd>
+<dt><span class="term"><code class="option">-s, --stop</code> <em class="parameter"><code>wait time</code></em></span></dt>
+<dd><p>
+Wait time for file replication in seconds.
+The default is 60 seconds.
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

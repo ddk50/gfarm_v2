@@ -1,0 +1,59 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-copy</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-copy">
+<a name="gfperf-copy.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-copy — Gfarm measure file copy performance</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-copy</code>   -s, --src <em class="replaceable"><code>source url</code></em>   -d, --dst <em class="replaceable"><code>destination url</code></em>  [-l, --filesize <em class="replaceable"><code>file size</code></em>] [-b, --busize <em class="replaceable"><code>buffer size</code></em>] [-g, --gfsd <em class="replaceable"><code>gfsd name</code></em>] [-m, --gfarm2fs <em class="replaceable"><code>gfarm2fs mount point</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>This command measures file copy performance from source directory to destination directory. One of source and destination url must be gfarm url (that begins with gfarm:///). Other must be file url (that begins with file:///).
+</p>
+<p>
+Test file is automatically created but source file is not removed. When this command is executed on same parameters, source file is reused again.
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-s, --src</code> <em class="parameter"><code>source url</code></em></span></dt>
+<dd><p>
+Test file is created automatically in source url. If <em class="parameter"><code>source url</code></em> is gfarm url, <em class="parameter"><code>destination url</code></em> must be file url.
+</p></dd>
+<dt><span class="term"><code class="option">-d, --dst</code> <em class="parameter"><code>destination url</code></em></span></dt>
+<dd><p>
+Test file is copied to <em class="parameter"><code>destination url</code></em>. If <em class="parameter"><code>destinatiln url</code></em> is gfarm url, <em class="parameter"><code>source url</code></em> must be file url.
+</p></dd>
+<dt><span class="term"><code class="option">-l, --filesize</code> <em class="parameter"><code>file size</code></em></span></dt>
+<dd><p>
+File size to be created.
+The default is 1M. (1M=2^20)
+</p></dd>
+<dt><span class="term"><code class="option">-b, --bufsize</code> <em class="parameter"><code>buffer size</code></em></span></dt>
+<dd><p>
+Copy buffer size.
+The default is 4K. (1K=2^10)
+</p></dd>
+<dt><span class="term"><code class="option">-g, --gfsd</code> <em class="parameter"><code>gfsd name</code></em></span></dt>
+<dd><p>
+Target gfsd name. Test file is created or copied on this gfsd.
+If no gfsd is specified, gfmd determines automatically.
+</p></dd>
+<dt><span class="term"><code class="option">-m, --gfarm2fs</code> <em class="parameter"><code>gfarm2fs mount point</code></em></span></dt>
+<dd><p>
+Specify gfarm2fs mount point.
+This mount point path is added to gfarm url.
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

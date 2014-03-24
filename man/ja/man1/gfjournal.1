@@ -1,0 +1,110 @@
+'\" t
+.\"     Title: gfjournal
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 2 Jul 2012
+.\"    Manual: Gfarm
+.\"    Source: Gfarm
+.\"  Language: English
+.\"
+.TH "GFJOURNAL" "1" "2 Jul 2012" "Gfarm" "Gfarm"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gfjournal \- ジャーナルファイルの状態を出力する。
+.SH "SYNOPSIS"
+.HP \w'\fBgfjournal\fR\ 'u
+\fBgfjournal\fR [\fIオプション\fR] \fIジャーナルファイル\fR
+.SH "DESCRIPTION"
+.PP
+
+\fBgfjournal\fR
+はジャーナルファイルを読み込み、 ファイルの状態に関する情報を標準出力に表示します。 オプションを指定しなかった場合は、ジャーナルファイルの状態のサマリを 以下のような形で表示します。
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+	records  seqnum(min/max)          record length(min/max/ave)
+	     30           2/          31          24/    120/     37
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\*(Aq\-l\*(Aq オプションを指定すると、これに加えてジャーナルファイル内のすべての レコードも表示します。
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+	seqnum    operation        length  argument
+	        2 BEGIN                 24
+	        3 MDHOST_ADD            56 name=gfmd1\&.example\&.com
+	        4 END                   24
+	        5 BEGIN                 24
+	        6 USER_ADD              68 username=gfarmadm
+	        7 END                   24
+	(中略)
+	records  seqnum(min/max)          record length(min/max/ave)
+	     30             2/        31          24/    120/     37
+.fi
+.if n \{\
+.RE
+.\}
+.SH "OPTIONS"
+.PP
+\fB\-d\fR
+.RS 4
+ログレベルを \*(Aqdebug\*(Aq に設定します。
+.RE
+.PP
+\fB\-h\fR
+.RS 4
+引数オプションを表示します。
+.RE
+.PP
+\fB\-?\fR
+.RS 4
+
+\fB\-h\fRと同じです。
+.RE
+.PP
+\fB\-l\fR
+.RS 4
+ジャーナルファイルの状態のサマリに加え、ジャーナルファイル内のすべての レコードも表示します。
+.RE
+.PP
+\fB\-m\fR
+.RS 4
+最大のシーケンス番号だけを表示します。
+.RE
+.PP
+\fB\-r\fR
+.RS 4
+状態のサマリ、およびレコードのリストのヘッダ表示を抑止します。
+\fB\-l\fR
+と一緒に指定されたときだけ、有効です。
+.RE
+.PP
+\fB\-v\fR
+.RS 4
+冗長な表示を行います。
+.RE

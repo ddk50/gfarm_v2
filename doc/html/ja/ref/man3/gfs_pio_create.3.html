@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_pio_create</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_pio_create">
+<a name="gfs-pio-create.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_pio_create — Gfarmファイルシステムのファイルの作成</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_pio_create</b>(</code></td>
+<td>
+<var class="pdparam">gfarm_url</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">flags</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">mode</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">gfp</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>const char * <var class="pdparam">gfarm_url</var></code>;<br><code>int <var class="pdparam">flags</var></code>;<br><code>gfarm_mode_t <var class="pdparam">mode</var></code>;<br><code>GFS_File * <var class="pdparam">gfp</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>指定した
+<em class="parameter"><code>gfarm_url</code></em>
+に、モード
+<em class="parameter"><code>mode</code></em>
+でファイルを新規作成し、
+<em class="parameter"><code>GFS_File</code></em>
+構造体を
+<em class="parameter"><code>gfp</code></em>
+の指す先に返します。</p>
+<p>
+引数
+<em class="parameter"><code>flags</code></em>
+は、
+<code class="function">gfs_pio_open()</code>
+の第二引数と同じ意味を持ちます。
+<em class="parameter"><code>GFARM_FILE_RDONLY</code></em>、
+<em class="parameter"><code>GFARM_FILE_WRONLY</code></em>、
+<em class="parameter"><code>GFARM_FILE_RDWR</code></em>
+のいずれか一つのフラグを必ず指定しなければならない点も同じです。
+
+</p>
+<p>
+引数
+<em class="parameter"><code>flags</code></em>
+の値として
+<em class="parameter"><code>GFARM_FILE_TRUNC</code></em>
+が必要な場合は、
+明示的に指定する必要がありますので、ご注意ください。
+</p>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>正常終了を示します。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_IS_A_DIRECTORY</code></span></dt>
+<dd><p>指定されたファイルはディレクトリです。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_IS_A_SYMBOLIC_LINK</code></span></dt>
+<dd><p>指定されたファイルはシンボリックリンクです。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_OPERATION_NOT_PERMITTED</code></span></dt>
+<dd><p>指定されたファイルはファイルではありません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NOT_A_DIRECTORY</code></span></dt>
+<dd><p>指定したパス名の親ディレクトリが、ディレクトリではありません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PERMISSION_DENIED</code></span></dt>
+<dd><p>指定されたファイルに対し、
+<em class="parameter"><code>flags</code></em>
+で指定されたモードでアクセスする権限がないか、その親ディレクトリへの
+書き込み権限がありません。
+あるいは、メタデータサーバへの認証に失敗しました。
+</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_MEMORY</code></span></dt>
+<dd><p>メモリ不足のため処理を中止しました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_INVALID_ARGUMENT</code></span></dt>
+<dd><p><em class="parameter"><code>flags</code></em>
+の指定が不正です。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_GFARM_URL_HOST_IS_MISSING</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em>
+で指定されたGfarm URLにおいて、
+メタデータサーバが指定されていません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_GFARM_URL_PORT_IS_MISSING</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em>
+で指定されたGfarm URLにおいて、
+メタデータサーバのポート番号が指定されていません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_UNKNOWN_HOST</code></span></dt>
+<dd><p>指定されたメタデータサーバのアドレス解決ができません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_TOO_MANY_OPEN_FILES</code></span></dt>
+<dd><p>プロセスにおけるオープン可能なファイル数の限界に達しました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_TOO_MANY_OPEN_FILES_IN_SYSTEM</code></span></dt>
+<dd><p>システムにおけるオープンできるファイル数の限界に達しました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NETWORK_IS_UNREACHABLE</code></span></dt>
+<dd><p>メタデータサーバに到達できません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_OPERATION_TIMED_OUT</code></span></dt>
+<dd><p>メタデータサーバへの接続がタイムアウトをおこしました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL</code></span></dt>
+<dd><p>メタデータサーバとの通信にプロトコルエラーが発生しました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_BROKEN_PIPE</code></span></dt>
+<dd><p>メタデータサーバとの通信が切断しました。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL_NOT_SUPPORTED</code></span></dt>
+<dd><p>指定された認証プロトコルはサポートしていません。</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_AUTHENTICATION</code></span></dt>
+<dd><p>メタデータサーバに対する認証に失敗しました。</p></dd>
+<dt><span class="term">その他</span></dt>
+<dd><p>上記以外のエラーが生じたことを示します。
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>
+によりエラーの原因を文字列に変換することができます。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_close</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_create</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_eof</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_error</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_flush</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_getc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_getline</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_open</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_putc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_putline</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_puts</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_read</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_seek</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_ungetc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_write</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

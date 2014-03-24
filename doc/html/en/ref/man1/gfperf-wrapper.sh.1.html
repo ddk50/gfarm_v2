@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-wrapper.sh</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-wrapper.sh">
+<a name="gfperf-wrapper.sh.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-wrapper.sh — Gfarm execute command on specified authentication</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-wrapper.sh</code>   sharedsecret | gsi_auth | gsi    <em class="replaceable"><code>command</code></em> </p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>execute command on sharedsecret, gsi_auth or gsi authentication.
+The servers (gfmd &amp; gfsd) may allow specified authentication.
+</p>
+<p>
+This command uses GFARM_CONFIG_FILE enviroment variable.
+If GFARM_CONFIG_FILE is set, the variable is overwritten by this command.
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">sharedsecret | gsi_auth | gsi</code></span></dt>
+<dd><p>
+Specify authenticaion.
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

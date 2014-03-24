@@ -1,0 +1,405 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfservice-agent</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfservice-agent">
+<a name="gfservice-agent.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfservice-agent — <span class="command"><strong>gfservice</strong></span> のエージェント</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfservice-agent</code>  [<em class="replaceable"><code>オプション</code></em>]  ホスト ID   サブコマンド  [<em class="replaceable"><code>引数 ...</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+<span class="command"><strong>gfservice-agent</strong></span> は、<span class="command"><strong>gfservice</strong></span> の
+エージェントです。
+<span class="command"><strong>gfservice</strong></span> を用いて操作したいホストすべてに、この
+エージェントをインストールする必要があります。
+<span class="command"><strong>gfservice</strong></span> と異なり、設定ファイルは読み込みません。
+</p>
+<p>
+<span class="command"><strong>gfservice-agent</strong></span> は、ユーザが直接実行することを意図
+して作成されたものではありません。
+日常の利用では、SSH と Sudo を介して <span class="command"><strong>gfservice</strong></span> コマンド
+によって実行されるだけです。
+</p>
+<p>
+ホスト ID 引数は <span class="command"><strong>gfservice</strong></span> のものと同じですが、
+<span class="command"><strong>gfservice-agent</strong></span> ではホスト ID をホストの種別
+("gfmd", "gfsd", "client" のいずれか) を区別するため、および
+デバッグメッセージのためにしか使っていません。
+</p>
+<p>
+<span class="command"><strong>gfservice-agent</strong></span> のサブコマンド名は 
+<span class="command"><strong>gfservice</strong></span> のものに似ていますが、引数は異なります。
+たとえば、<span class="command"><strong>gfservice-agent</strong></span> の <span class="command"><strong>unmount</strong></span>
+サブコマンドは、
+「<em class="parameter"><code>directory</code></em>=<em class="replaceable"><code>ディレクトリ</code></em>」
+という引数をとります。
+</p>
+<div class="literallayout"><p><br>
+	gfservice-agent client3 unmount directory=/somewhere<br>
+</p></div>
+<p>
+これに対して、<span class="command"><strong>gfservice</strong></span> では、
+「<em class="replaceable"><code>ディレクトリ</code></em>」という引数をとります。
+</p>
+<div class="literallayout"><p><br>
+	gfservice unmount client3 /somewhere<br>
+</p></div>
+<p>
+<span class="command"><strong>gfservice-agent</strong></span> の引数はほとんどすべて、「キー=値」
+という形になっています。
+複数の引数をとる場合、引数の順序は任意です。
+<span class="command"><strong>gfservice-agent</strong></span> は、未知のキーを無視します。
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd><p>
+デバッグ情報を出力します。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS">
+<a name="sub-commands"></a><h2>SUB-COMMANDS</h2>
+<p>
+<span class="command"><strong>gfservice-agent</strong></span> は現在のところ、次のサブコマンドを
+認識します。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>get-config-gfarm-param</strong></span>
+<em class="parameter"><code>param</code></em>=<em class="replaceable"><code>パラメタ名</code></em>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+「<span class="command"><strong>config-gfarm -T</strong></span>」コマンドを実行して、
+「<em class="replaceable"><code>パラメタ名</code></em> 」の値を標準出力に出力します。
+引数「<em class="parameter"><code>param</code></em>=<em class="replaceable"><code>パラメタ名</code></em>」
+が省略された場合は、「<span class="command"><strong>config-gfarm -T</strong></span>」コマンドの
+結果すべてを出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>get-config-gfsd-param</strong></span>
+<em class="parameter"><code>param</code></em>=<em class="replaceable"><code>パラメタ名</code></em>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+「<span class="command"><strong>config-gfsd -T</strong></span>」コマンドを実行して、
+「<em class="replaceable"><code>パラメタ名</code></em>」の値を標準出力に
+出力します。
+引数「<em class="parameter"><code>param</code></em>=<em class="replaceable"><code>パラメタ名</code></em>」
+が省略された場合は、「<span class="command"><strong>config-gfsd -T</strong></span>」コマンドの
+結果すべてを出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backend-db-status</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースが動作中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfmd-status</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+gfmd が動作中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfsd-status</strong></span>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+gfsd が動作中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-backend-db</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+<em class="parameter"><code>timeout</code></em>=<em class="replaceable"><code>時間</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースが実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+<em class="parameter"><code>timeout</code></em>=<em class="replaceable"><code>時間</code></em>
+</span></dt>
+<dd><p>
+gfmd が実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfsd</strong></span>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+<em class="parameter"><code>timeout</code></em>=<em class="replaceable"><code>時間</code></em>
+</span></dt>
+<dd><p>
+gfsd が実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+「<span class="command"><strong>config-gfarm</strong></span>」コマンドを実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm-master</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+「<span class="command"><strong>config-gfarm</strong></span> <em class="parameter"><code>-r</code></em>」コマンドを実行
+します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfsd</strong></span>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+「<span class="command"><strong>config-gfsd</strong></span>」コマンドを実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>stop-gfarm</strong></span> サブコマンドを実行して、その後 gfmd と
+バックエンドデータベースが作成したファイルやディレクトリをすべて削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfsd</strong></span>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfsd</strong></span> を実行し、その後 gfsd が作成した
+ファイルやディレクトリをすべて削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-client</strong></span>
+<em class="parameter"><code>config-gfsd-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+<code class="filename">gfarm2.conf</code> ファイルと共有秘密鍵ファイルを削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfmd</strong></span> をスレーブからマスターへ昇格させます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote-gfmd</strong></span>
+<em class="parameter"><code>config-gfarm-options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>promote</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>mount</strong></span>
+<em class="parameter"><code>directory</code></em>=<em class="replaceable"><code>ディレクトリ</code></em>
+<em class="parameter"><code>options</code></em>=<em class="replaceable"><code>オプション</code></em>
+</span></dt>
+<dd><p>
+Gfarm2 ファイルシステムを「<em class="replaceable"><code>ディレクトリ</code></em>」に
+マウントします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unmount</strong></span>
+<em class="parameter"><code>directory</code></em>=<em class="replaceable"><code>ディレクトリ</code></em>
+</span></dt>
+<dd><p>
+「<em class="replaceable"><code>ディレクトリ</code></em>」にマウントされた Gfarm2
+ファイルシステムをアンマウントします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>umount</strong></span>
+<em class="parameter"><code>directory</code></em>=<em class="replaceable"><code>ディレクトリ</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>unmount</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfmd-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+<em class="parameter"><code>value</code></em>=<em class="replaceable"><code>値</code></em>
+</span></dt>
+<dd>
+<p>
+<code class="filename">gfmd.conf</code> ファイルに、
+</p>
+<div class="literallayout"><p><br>
+	<em class="replaceable"><code>設定名称</code></em> <em class="replaceable"><code>値</code></em><br>
+</p></div>
+<p>
+という行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfarm-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+<em class="parameter"><code>value</code></em>=<em class="replaceable"><code>値</code></em>
+</span></dt>
+<dd>
+<p>
+<code class="filename">gfarm2.conf</code> ファイルに、
+</p>
+<div class="literallayout"><p><br>
+	<em class="replaceable"><code>設定名称</code></em> <em class="replaceable"><code>値</code></em><br>
+</p></div>
+<p>
+という行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfsd-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+<em class="parameter"><code>value</code></em>=<em class="replaceable"><code>値</code></em>
+</span></dt>
+<dd>
+<p>
+<code class="filename">gfsd.conf</code> ファイルに、
+</p>
+<div class="literallayout"><p><br>
+	<em class="replaceable"><code>設定名称</code></em> <em class="replaceable"><code>値</code></em><br>
+</p></div>
+<p>
+という行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfmd-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+「<em class="replaceable"><code>設定名称</code></em>」行を <code class="filename">gfmd.conf</code>
+ファイルから削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfarm-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+「<em class="replaceable"><code>設定名称</code></em>」行を <code class="filename">gfarm.conf</code>
+ファイルから削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfsd-conf</strong></span>
+<em class="parameter"><code>directive</code></em>=<em class="replaceable"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+「<em class="replaceable"><code>設定名称</code></em>」行を <code class="filename">gfsd.conf</code>
+ファイルから削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-backend-db</strong></span>
+</span></dt>
+<dd><p>
+バックエンドデータベースのバックアップを行い、バックアップデータを標準出力
+へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfmd-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfmd.conf</code> ファイルを標準出力に出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfarm-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfarm2.conf</code> ファイルを標準出力に出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfsd-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfsd.conf</code> ファイルを標準出力に出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-usermap</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">usermap</code> ファイルを標準出力に出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-shared-key</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">$HOME/.gfarm_shared_key</code> ファイルを標準出力に
+出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-backend-db</strong></span>
+</span></dt>
+<dd><p>
+バックエンドデータベースをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfmd-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfmd.conf</code> ファイルをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfarm-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfarm2.conf</code> ファイルをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfsd-conf</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">gfsd.conf</code> ファイルをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-usermap</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">usermap</code> ファイルをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-shared-key</strong></span>
+</span></dt>
+<dd><p>
+<code class="filename">$HOME/.gfarm_shared_key</code> ファイルをリストアします。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfcmd</strong></span>
+<em class="parameter"><code>cmd</code></em>=<em class="replaceable"><code>コマンド名</code></em>
+<em class="parameter"><code>args</code></em>="<em class="replaceable"><code>コマンドの引数 ...</code></em>"
+</span></dt>
+<dd><p>
+Gfarm コマンドを実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>grid-proxy-init</strong></span>
+<em class="parameter"><code>args</code></em>="<em class="replaceable"><code>コマンドの引数 ...</code></em>"
+</span></dt>
+<dd><p>
+<span class="command"><strong>grid-proxy-init</strong></span> コマンドを実行します。
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

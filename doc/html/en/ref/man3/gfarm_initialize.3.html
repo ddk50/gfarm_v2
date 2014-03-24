@@ -1,0 +1,83 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfarm_initialize</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfarm_initialize">
+<a name="gfarm-initialize.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfarm_initialize — initialize the Gfarm execution environment for client</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfarm_initialize</b>(</code></td>
+<td>
+<var class="pdparam">argcp</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">argvp</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>int *<var class="pdparam">argcp</var></code>;<br><code>char *** <var class="pdparam">argvp</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p><code class="function">gfarm_initialize()</code> initializes the Gfarm
+execution environment for client application.
+This function should be called before any Gfarm library API.
+<em class="parameter"><code>argcp</code></em> is a pointer to the number of
+arguments and <em class="parameter"><code>argvp</code></em> is a pointer to the argument vector.</p>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_MEMORY</code></span></dt>
+<dd><p>Insufficient memory was available.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_UNKNOWN_HOST</code></span></dt>
+<dd><p>The metadata server cannot be resolved.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NETWORK_IS_UNREACHABLE</code></span></dt>
+<dd><p>Network is unrechable.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_OPERATION_TIMED_OUT</code></span></dt>
+<dd><p>Connetion timeout occurs.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL</code></span></dt>
+<dd><p>Protocol error occurs.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_BROKEN_PIPE</code></span></dt>
+<dd><p>Connection to the metadata server is broken.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PERMISSION_DENIED</code></span></dt>
+<dd><p>The requested access to the file is not allowed, or one of the
+directories in <em class="parameter"><code>gfarm_url</code></em> did not allow search (execute)
+permission.  Or, the authentication to the metadata server fails.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL_NOT_SUPPORTED</code></span></dt>
+<dd><p>Specified authentication protocol is not supported.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_AUTHENTICATION</code></span></dt>
+<dd><p>User authentication failed when connecting to the metadata server.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by its
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfarm_terminate</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

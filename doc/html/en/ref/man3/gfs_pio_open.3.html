@@ -1,0 +1,145 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_pio_open</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_pio_open">
+<a name="gfs-pio-open.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_pio_open — open a file in the Gfarm file system</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_pio_open</b>(</code></td>
+<td>
+<var class="pdparam">gfarm_url</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">flags</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">gfp</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>const char * <var class="pdparam">gfarm_url</var></code>;<br><code>int <var class="pdparam">flags</var></code>;<br><code>GFS_File * <var class="pdparam">gfp</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p><code class="function">gfs_pio_open()</code> opens a file in the Gfarm
+file system specified by <em class="parameter"><code>gfarm_url</code></em>,
+and returns a <em class="parameter"><code>GFS_File</code></em> structure
+to the address pointed by <em class="parameter"><code>gfp</code></em>.
+<em class="parameter"><code>gfarm_url</code></em> is a path name in the Gfarm file
+system, or a Gfarm URL in the form of gfarm://metaserver:port/path/name.
+</p>
+<p>
+Values of <em class="parameter"><code>flags</code></em> are constructed by a
+bitwise-inclusive-OR of the following list.  Exactly one of the first
+three values should be specified:
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_FILE_RDONLY</code></span></dt>
+<dd><p>Open for reading only.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_FILE_WRONLY</code></span></dt>
+<dd><p>Open for writing only.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_FILE_RDWR</code></span></dt>
+<dd><p>Open for reading and writing.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_FILE_TRUNC</code></span></dt>
+<dd><p>If the file already exist and is a regular file, it will be
+truncated to length 0 if the open mode allows writing.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_IS_A_DIRECTORY</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em> refers to a directory.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_IS_A_SYMBOLIC_LINK</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em> refers to a symbolic link.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_OPERATION_NOT_PERMITTED</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em> refers to not a regular file.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_SUCH_OBJECT</code></span></dt>
+<dd><p>A component used as a directory in <em class="parameter"><code>gfarm_url</code></em> does not exist.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NOT_A_DIRECTORY</code></span></dt>
+<dd><p>A component used as a directory in <em class="parameter"><code>gfarm_url</code></em> is not, in fact, a
+directory.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PERMISSION_DENIED</code></span></dt>
+<dd><p>The requested access to the file is not allowed, or one of the
+directories in <em class="parameter"><code>gfarm_url</code></em> did not allow search (execute)
+permission.  Or, the authentication to the metadata server fails.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_MEMORY</code></span></dt>
+<dd><p>Insufficient memory was available.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_INVALID_ARGUMENT</code></span></dt>
+<dd><p><em class="parameter"><code>flags</code></em>
+is not valid.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_GFARM_URL_HOST_IS_MISSING</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em>
+does not include a metadata server.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_GFARM_URL_PORT_IS_MISSING</code></span></dt>
+<dd><p><em class="parameter"><code>gfarm_url</code></em>
+does not include a port number of the metadata server.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_UNKNOWN_HOST</code></span></dt>
+<dd><p>The metadata server cannot be resolved.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_TOO_MANY_OPEN_FILES</code></span></dt>
+<dd><p>The process opens too many files.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_TOO_MANY_OPEN_FILES_IN_SYSTEM</code></span></dt>
+<dd><p>The system limit on the total number of open files has been reached.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NETWORK_IS_UNREACHABLE</code></span></dt>
+<dd><p>Network is unrechable.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_OPERATION_TIMED_OUT</code></span></dt>
+<dd><p>Connetion timeout occurs.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL</code></span></dt>
+<dd><p>Protocol error occurs.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_BROKEN_PIPE</code></span></dt>
+<dd><p>Connection to the metadata server is broken.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_PROTOCOL_NOT_SUPPORTED</code></span></dt>
+<dd><p>Specified authentication protocol is not supported.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_AUTHENTICATION</code></span></dt>
+<dd><p>User authentication failed when connecting to the metadata server.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_close</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_create</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_eof</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_error</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_flush</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_getc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_getline</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_open</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_putc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_putline</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_puts</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_read</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_seek</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_ungetc</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_pio_write</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

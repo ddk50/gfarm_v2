@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_to_xattr_value</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_to_xattr_value">
+<a name="gfs-acl-to-xattr-value.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_to_xattr_value — convert a Gfarm ACL to binary data for Gfarm extended attribute</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_acl_to_xattr_value</b>(</code></td>
+<td>
+<var class="pdparam">acl</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">xattr_value_p</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">size_p</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>gfarm_acl_t <var class="pdparam">acl</var></code>;<br><code>void **<var class="pdparam">xattr_value_p</var></code>;<br><code>size_t *<var class="pdparam">size_p</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>acl</code></em></span></dt>
+<dd><p>An ACL structure type which is sorted.</p></dd>
+<dt><span class="term"><em class="parameter"><code>xattr_value_p</code></em></span></dt>
+<dd><p>A pointer to the converted binary data.</p></dd>
+<dt><span class="term"><em class="parameter"><code>size_p</code></em></span></dt>
+<dd><p>A value pointed to by <em class="parameter"><code>size_p</code></em> is set to
+the length of the converted binary data.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_MEMORY</code></span></dt>
+<dd><p>Insufficient memory was available.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_sort</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_set_file</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_setxattr</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_from_xattr_value</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

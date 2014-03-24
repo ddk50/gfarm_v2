@@ -1,0 +1,58 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-autoreplica</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-autoreplica">
+<a name="gfperf-autoreplica.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-autoreplica — Gfarm 自動複製機能の性能測定を行う。</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-autoreplica</code>  [-t, --testdir <em class="replaceable"><code>テストディレクトリ</code></em>] [-m, --gfarm2fs <em class="replaceable"><code>gfarm2fsマウントポイント</code></em>] [-l, --filesize <em class="replaceable"><code>ファイルサイズ</code></em>] [-f, --number <em class="replaceable"><code>ファイル数</code></em>] [-r, --replica <em class="replaceable"><code>複製数</code></em>] [-s, --stop <em class="replaceable"><code>待ち時間</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>引数 <em class="parameter"><code>テストディレクトリ</code></em> に指定されたサイズのファイルを指定された数作成し、その作成性能を測定します。それぞれのファイルは指定された複製数で自動複製が行われます。
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-t, --testdir</code> <em class="parameter"><code>テストディレクトリ</code></em></span></dt>
+<dd><p>
+テストを実施するディレクトリを指定します。
+gfarm url (gfarm:///で始まるもの) を指定します。
+デフォルトはgfarm:///tmpです。
+</p></dd>
+<dt><span class="term"><code class="option">-m, --gfarm2fs</code> <em class="parameter"><code>gfarm2fsマウントポイント</code></em></span></dt>
+<dd><p>
+gfarm2fsのマウントポイントを指定します。
+</p></dd>
+<dt><span class="term"><code class="option">-l, --filesize</code> <em class="parameter"><code>ファイルサイズ</code></em></span></dt>
+<dd><p>
+使用するファイルサイズを指定します。
+デフォルトは1Gです。
+</p></dd>
+<dt><span class="term"><code class="option">-f, --number</code> <em class="parameter"><code>ファイル数</code></em></span></dt>
+<dd><p>
+生成するファイル数を指定します。
+デフォルトは10です。
+</p></dd>
+<dt><span class="term"><code class="option">-r, --replica</code> <em class="parameter"><code>複製数</code></em></span></dt>
+<dd><p>
+自動複製機能で複製する数を指定します。
+デフォルトは1です。
+</p></dd>
+<dt><span class="term"><code class="option">-s, --stop</code> <em class="parameter"><code>待ち時間</code></em></span></dt>
+<dd><p>
+複製が作成されるのを最大何秒待つのかを指定します。
+デフォルトは60です。
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<!-- $Id: gfpcopy.1.docbook 8752 2013-12-09 04:46:36Z takuya-i $ -->
+
+<refentry id="gfpcopy.1">
+
+<refentryinfo><date>9 Dec 2013</date></refentryinfo>
+
+<refmeta>
+<refentrytitle>gfpcopy</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gfarm</refmiscinfo>
+</refmeta>
+
+<refnamediv id="name">
+<refname>gfpcopy</refname>
+<refpurpose>copy Gfarm files in parallel</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="synopsis">
+<cmdsynopsis sepchar=" ">
+  <command moreinfo="none">gfpcopy</command>
+  <arg choice="opt" rep="norepeat">-nqvdpPU</arg>
+  <arg choice="opt" rep="norepeat">-f</arg>
+  <arg choice="opt" rep="norepeat">-S <replaceable>source-domainname</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-h <replaceable>source-hostfile</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-D <replaceable>destination-domainname</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-H <replaceable>destination-hostfile</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-j <replaceable>num-of-processes</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-J <replaceable>num-of-processes</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-M <replaceable>limit-byte</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-w <replaceable>way-of-scheduling</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-W <replaceable>kilobytes-for-threshold</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-s <replaceable>KB/s-to-simulate</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-F <replaceable>num-for-readahead</replaceable></arg>
+  <arg choice="opt" rep="norepeat">-b <replaceable>bufsize</replaceable></arg>
+  <arg choice="plain" rep="norepeat"><replaceable>source-path</replaceable></arg>
+  <arg choice="plain" rep="norepeat"><replaceable>destination-path</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<!-- body begins here -->
+
+<refsect1 id="description"><title>DESCRIPTION</title>
+
+<para>
+<command moreinfo="none">gfpcopy</command> copies files and directries
+in parallel.
+</para>
+<para>
+A set of source/destination hosts can be specified by a domain name
+and/or a hostlist file. When both a domain name and a hostlist file
+are specified, a set of hosts is determined by both conditions. When a
+set of source hosts is specified, only files stored on the source
+hosts are replicated.
+
+
+When a set of source hosts are specified, only files stored on the set
+of source hosts are copied.  A set of hosts can be specified by a
+domain name and/or a host file.  When both a domain name and a host
+file are specified, a set of hosts is determined by both conditions.
+</para>
+<para>
+If the <parameter moreinfo="none">source-url</parameter> parameter is a directory,
+files under the directory will be copied recursively.
+</para>
+<para>
+<command moreinfo="none">gfpcopy</command> can also read the directory and get
+informations of the entries in parallel.
+</para>
+</refsect1>
+
+<refsect1 id="options"><title>GFPCOPY OPTIONS</title>
+<para>
+These are the options only for <command moreinfo="none">gfpcopy</command>.
+</para>
+<variablelist>
+
+<varlistentry>
+<term><option>-b</option> <parameter moreinfo="none">bufsize</parameter></term>
+<listitem>
+<para>
+Specifies the buffer size to copy.
+This option is obsolete in Gfarm version 2.6 or later.
+</para>
+<para>
+The default value is 64KiB (64 * 1024).
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-f</option></term>
+<listitem>
+<para>
+With -f option, existing destination files will be overwritten when
+the size is different or the modification time (mtime) is different from the
+source file.
+</para>
+<para>
+Without -f option, existing destination files will be overwritten when
+the size is different or the modification time (mtime) is older than the
+source file.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+<refsect1 id="common-options"><title>COMMON OPTIONS</title>
+<para>
+<command moreinfo="none">gfpcopy</command> has the same options
+with <command moreinfo="none">gfprep</command>.  (see man <command moreinfo="none">gfprep</command>)
+</para>
+</refsect1>
+
+<refsect1 id="examples"><title>EXAMPLES</title>
+<para>
+To copy files under the directory recursively.
+</para>
+<literallayout format="linespecific" class="normal">
+$ gfpcopy gfarm:///dir file:///tmp/dir
+</literallayout>
+<literallayout format="linespecific" class="normal">
+$ gfpcopy file:///tmp/dir gfarm:///dir
+</literallayout>
+<literallayout format="linespecific" class="normal">
+$ gfpcopy gfarm:///dir1 gfarm:///dir2
+</literallayout>
+<literallayout format="linespecific" class="normal">
+$ cd /mnt/gfarm2fs
+$ gfpcopy dir /tmp/dir
+</literallayout>
+
+ <para>
+To copy a file.
+</para>
+<literallayout format="linespecific" class="normal">
+$ gfpcopy gfarm:///dir/file file:///dir
+</literallayout>
+<literallayout format="linespecific" class="normal">
+$ cd /mnt/gfarm2fs
+$ gfpcopy file /tmp/dir
+</literallayout>
+</refsect1>
+
+<refsect1 id="notes"><title>NOTES</title>
+<para>
+If the gfmd and <command moreinfo="none">gfpcopy</command> are far
+apart, the <command moreinfo="none">gfpcopy</command> operation is
+slow.  Specifying a large value by -j or -J options may be effective
+in such a case.
+</para>
+</refsect1>
+
+<refsect1 id="see-also"><title>SEE ALSO</title>
+<para>
+  <citerefentry>
+  <refentrytitle>gfprep</refentrytitle><manvolnum>1</manvolnum>
+  </citerefentry>,
+  <citerefentry>
+  <refentrytitle>gfreg</refentrytitle><manvolnum>1</manvolnum>
+  </citerefentry>,
+  <citerefentry>
+  <refentrytitle>gfexport</refentrytitle><manvolnum>1</manvolnum>
+  </citerefentry>,
+  <citerefentry>
+  <refentrytitle>gfarm2.conf</refentrytitle><manvolnum>5</manvolnum>
+  </citerefentry>
+</para>
+</refsect1>
+
+</refentry>

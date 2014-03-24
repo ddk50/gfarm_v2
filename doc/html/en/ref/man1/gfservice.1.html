@@ -1,0 +1,887 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfservice</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfservice">
+<a name="gfservice.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfservice — control Gfarm servers from a remote host</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfservice</code>  [<em class="replaceable"><code>options</code></em>]  sub-command  [host-id] [<em class="replaceable"><code>argument ...</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+<span class="command"><strong>gfservice</strong></span> is an utility for Gfarm administrators
+to operate servers (<span class="command"><strong>gfmd</strong></span>, <span class="command"><strong>gfsd</strong></span> and
+PostgreSQL) on remote hosts.
+OpenLDAP is not supported currently.
+It can start, stop, set up (execute <span class="command"><strong>config-gfarm</strong></span>
+and <span class="command"><strong>config-gfsd</strong></span>) and clean up the servers, for example.
+</p>
+<p>
+A sample command line of <span class="command"><strong>gfservice</strong></span> looks like:
+</p>
+<div class="literallayout"><p><br>
+	<span class="command"><strong>gfservice <em class="replaceable"><code>start-gfmd</code></em> <em class="replaceable"><code>gfmd2</code></em></strong></span><br>
+</p></div>
+<p>
+where "<em class="replaceable"><code>start-gfmd</code></em>" is a sub-command and
+<em class="replaceable"><code>gfmd2</code></em> is a host-id respectively.
+Executing the command, <span class="command"><strong>gfservice</strong></span> tries to start gfmd
+on the host named <em class="replaceable"><code>gfmd2</code></em>.
+To specify a remote server host, <span class="command"><strong>gfservice</strong></span> uses
+host-id instead of hostname.
+All host-ids (<em class="replaceable"><code>gfmd1</code></em>,
+<em class="replaceable"><code>gfmd2</code></em>, and so on) are defined in a configuration
+file of <span class="command"><strong>gfservice</strong></span>.
+Here is an example of the configuration file:
+</p>
+<div class="literallayout"><p><br>
+	gfmd1=metadb1.example.com<br>
+	gfmd1_CONFIG_GFARM_OPTIONS="-A $LOGNAME -X"<br>
+	gfmd2=metadb2.example.com<br>
+	gfmd2_CONFIG_GFARM_OPTIONS="-A $LOGNAME -X"<br>
+<br>
+	gfsd1=spool1.example.com<br>
+	gfsd2=spool2.example.com<br>
+</p></div>
+<p>
+<span class="command"><strong>gfservice</strong></span> determines a path of the configuration
+file to be read with the following procedures:
+</p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+<code class="option">-f</code> <em class="parameter"><code>file</code></em> option is specified, read
+<em class="parameter"><code>file</code></em>.
+</p></li>
+<li class="listitem"><p>Otherwise, the environment variable
+<code class="varname">GFSERVICE_CONF</code> is defined and not empty, read the file.
+</p></li>
+<li class="listitem"><p>Otherwise, read <code class="filename">$HOME/.gfservice</code>.
+</p></li>
+</ol></div>
+<p>
+If <span class="command"><strong>gfservice</strong></span> fails to read a configuration file,
+it prints an error message and exits immediately.
+Note that the configuration file itself is a Bourne-shell script and
+<span class="command"><strong>gfservice</strong></span> includes (exactly to say, 
+<span class="emphasis"><em>evaluates</em></span>) the file.
+See gfservice.conf(5) for more details about the configuration file.
+</p>
+<p>
+<span class="command"><strong>gfservice</strong></span> uses SSH (Secure Shell) to connect with
+a remote host.
+Since it may execute <span class="command"><strong>ssh</strong></span> several times during a
+sub-command operation, it is recommended to use an SSH agent
+(e.g. <span class="command"><strong>ssh-agent</strong></span> of OpenSSH) or an authentication key
+with an empty passphrase to avoid typing a passphrase every time.
+</p>
+<p>
+In addition with SSH, <span class="command"><strong>gfservice</strong></span> uses Sudo to get
+root privilege on the remote host.
+Please add a line like below to <code class="filename">sudoers</code> file
+(Sudo's configuration file) on each remote host.
+</p>
+<div class="literallayout"><p><br>
+	<em class="replaceable"><code>user</code></em> ALL=(root, _gfarmfs, _gfarmmd) NOPASSWD: gfservice-agent<br>
+</p></div>
+<p>
+where <em class="replaceable"><code>user</code></em> is an user name who executes
+<span class="command"><strong>gfservice</strong></span>.
+The NOPASSWD option is not mandatory, but <span class="command"><strong>sudo</strong></span> may
+ask you a password several times if omitted.
+</p>
+<p>
+Since <span class="command"><strong>gfservice</strong></span> executes an agent command named
+<span class="command"><strong>gfservice-agent</strong></span> on the remote host using SSH and Sudo,
+<span class="command"><strong>gfservice-agent</strong></span> command must have been installed on
+all hosts you want to operate using <span class="command"><strong>gfservice</strong></span>.
+</p>
+<p>
+<span class="command"><strong>gfservice</strong></span> has a plug-in system so that user can add
+new sub-commands. See "PLUG-IN SYSTEM" section of this man page for
+more details.
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd><p>
+Print debug information.
+<span class="command"><strong>gfservice</strong></span> passes this option to
+<span class="command"><strong>gfservice-agent</strong></span> so that also
+<span class="command"><strong>gfservice-agent</strong></span> outputs debug information.
+</p></dd>
+<dt><span class="term"><code class="option">-f</code> <em class="parameter"><code>file</code></em></span></dt>
+<dd><p>
+Read configuration from <em class="parameter"><code>file</code></em> instead of the default.
+</p></dd>
+<dt><span class="term"><code class="option">-t</code> <em class="parameter"><code>time</code></em></span></dt>
+<dd><p>
+Set operation timeout in <em class="parameter"><code>time</code></em> seconds.
+When <span class="command"><strong>gfservice</strong></span> tries to start or stop a server program
+(gfmd, gfsd or a backend database), it waits until the operation is complete
+or <em class="parameter"><code>time</code></em> interval is elapsed.
+If "no" is specified as <em class="parameter"><code>time</code></em>, timeout never occurs.
+The default value is "no".
+</p></dd>
+<dt><span class="term"><code class="option">-k</code></span></dt>
+<dd><p>
+When this option is specified with sub-command
+<span class="command"><strong>config-gfarm</strong></span> or
+<span class="command"><strong>config-gfarm-master</strong></span>, <span class="command"><strong>gfservice</strong></span>
+creates a shared secret key files using <span class="command"><strong>gfkey</strong></span>
+command.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR GFMD">
+<a name="gfmd-sub-commands"></a><h2>SUB-COMMANDS FOR GFMD</h2>
+<p>
+The followings are sub-commands which operate <span class="command"><strong>gfmd</strong></span>.
+The given host-id argument must be "gfmd<em class="replaceable"><code>n</code></em>"
+(gfmd1, gfmd2, ...).
+Otherwise <span class="command"><strong>gfservice</strong></span> reports an error and exits
+immediately.
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>backend-db-status</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Exit with an exit code 0, if a backend database is currently running.
+Otherwise exits with 1.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfmd-status</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Exit with an exit code 0, if <span class="command"><strong>gfmd</strong></span> is currently running.
+Otherwise exits with 1.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-backend-db</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Start a backend database if it is not running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Start <span class="command"><strong>gfmd</strong></span> if it is not running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>start-gfmd</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+This sub-command is the same as "<span class="command"><strong>start-gfmd</strong></span>",
+but <code class="option">-S</code> option is added to <span class="command"><strong>gfmd</strong></span>.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Start a backend database and <span class="command"><strong>gfmd</strong></span> if they are
+not running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>start-gfarm</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+This sub-command is the same as "<span class="command"><strong>start-gfarm</strong></span>",
+but <code class="option">-S</code> option is added to <span class="command"><strong>gfmd</strong></span>.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-backend-db</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Stop a backend database if it is running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Stop <span class="command"><strong>gfmd</strong></span> if it is running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfarm</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Stop <span class="command"><strong>gfmd</strong></span> and a backend database if they are running
+currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>kill-gfmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Kill <span class="command"><strong>gfmd</strong></span> (send SIGKILL) if it is running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-backend-db</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-backend-db</strong></span>" and 
+"<span class="command"><strong>start-backend-db</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-gfmd</strong></span>" and
+"<span class="command"><strong>start-gfmd</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>restart-gfmd</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-gfmd</strong></span>" and 
+"<span class="command"><strong>start-gfmd-slave</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-gfarm</strong></span>" and 
+"<span class="command"><strong>start-gfarm</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>restart-gfarm</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-gfarm</strong></span>" and 
+"<span class="command"><strong>start-gfarm-slave</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Promote <span class="command"><strong>gfmd</strong></span> from a slave to a master.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote-gfmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>promote</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfmd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+<em class="parameter"><code>value</code></em>
+</span></dt>
+<dd>
+<p>
+Add
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>directive</code></em> <em class="parameter"><code>value</code></em><br>
+</p></div>
+<p>
+line to <code class="filename">gfmd.conf</code> file on the remote host.
+If <code class="filename">gfmd.conf</code> already has a
+<em class="parameter"><code>directive</code></em> line, <span class="command"><strong>gfservice</strong></span>
+deletes it and then add a new line.
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+<em class="parameter"><code>value</code></em>
+</span></dt>
+<dd>
+<p>
+Add
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>directive</code></em> <em class="parameter"><code>value</code></em><br>
+</p></div>
+<p>
+line to <code class="filename">gfsd.conf</code> file on the remote host.
+If <code class="filename">gfsd.conf</code> already has a
+<em class="parameter"><code>directive</code></em> line, <span class="command"><strong>gfservice</strong></span>
+deletes it and then add a new line.
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfmd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+</span></dt>
+<dd><p>
+Delete a <em class="parameter"><code>directive</code></em> line in
+<code class="filename">gfmd.conf</code> file on the remote host.
+If <code class="filename">gfmd.conf</code> file doesn't contain
+<em class="parameter"><code>directive</code></em> line, the file is unchanged.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+</span></dt>
+<dd><p>
+Delete a <em class="parameter"><code>directive</code></em> line in
+<code class="filename">gfsd.conf</code> file on the remote host.
+If <code class="filename">gfsd.conf</code> file doesn't contain
+<em class="parameter"><code>directive</code></em> line, the file is unchanged.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-backend-db</strong></span>
+</span></dt>
+<dd><p>
+Backup a backend database on the remote host and output the backup data
+to standard out.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfmd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Output <code class="filename">gfmd.conf</code> file on the remote host to
+standard out.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Output <code class="filename">gfsd.conf</code> file on the remote host to
+standard out.
+This sub-command can be worked only when the remote host is configured
+in the private mode.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-usermap</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Output <code class="filename">usermap</code> file on the remote host to
+standard out.
+This sub-command can be worked only when the remote host is configured
+in the private mode.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-backend-db</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Restore a backend database on the remote host.
+The backup data are read from standard in.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfmd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Recover <code class="filename">gfmd.conf</code> file on the remote host.
+<span class="command"><strong>gfservice</strong></span> reads a backup of <code class="filename">gfmd.conf</code>
+from standard in.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Recover <code class="filename">gfsd.conf</code> file on the remote host.
+<span class="command"><strong>gfservice</strong></span> reads a backup of <code class="filename">gfsd.conf</code>
+from standard in.
+This sub-command can be worked only when the remote host is configured
+in the private mode.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-usermap</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Recover <code class="filename">usermap</code> file on the remote host.
+<span class="command"><strong>gfservice</strong></span> reads a backup of <code class="filename">usermap</code>
+from standard in.
+This sub-command can be worked only when the remote host is configured
+in the private mode.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Execute <span class="command"><strong>config-gfarm</strong></span> command on the remote host.
+If "gfmd<em class="replaceable"><code>n</code></em>_CONFIG_GFARM_OPTIONS" variable is
+declared in the configuration file of <span class="command"><strong>gfservice</strong></span>,
+its value is passed to <span class="command"><strong>config-gfarm</strong></span> command as
+options.
+Don't use this sub-command when you want to enable replication of gfmd.
+Instead, use "<span class="command"><strong>config-gfarm-master</strong></span>" or
+"<span class="command"><strong>config-gfarm-slave</strong></span>" sub-command in that case.
+If <code class="option">-k</code> option is specified, <span class="command"><strong>gfservice</strong></span>
+also creates a shared secret key files onto the gfmd host, using
+<span class="command"><strong>gfkey</strong></span> command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+This sub-command is the same as <span class="command"><strong>config-gfarm</strong></span>
+but gfmd replication is enabled automatically.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>master-host-id</code></em>
+</span></dt>
+<dd><p>
+This sub-command is the same as <span class="command"><strong>config-gfarm</strong></span>
+but gfmd replication is enabled automatically and the remote gfmd host
+is configured as a slave of <em class="parameter"><code>master-host-id</code></em>.
+Then <span class="command"><strong>gfservice</strong></span> registers the slave host to a server list
+using <span class="command"><strong>gfmdhost</strong></span> command.
+<span class="command"><strong>gfservice</strong></span> also adds the slave host to
+<code class="varname">metadb_server_list</code> directive in
+<code class="filename">gfarm2.conf</code> file on the master gfmd host and
+distribute the updated <code class="filename">gfarm2.conf</code> file to all hosts
+defined in the configuration file.
+It also updates <code class="filename">gfsd.conf</code> file and distributes it to
+all gfmd and gfsd hosts, if "gfmd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE"
+variable is set to "true".
+If the value of the variable "gfmd<em class="replaceable"><code>n</code></em>_AUTH_TYPE"
+is "sharedsecret", it also copies a shared key file from the maste gfmd
+to the slave gfmd host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Execute "<span class="command"><strong>stop-gfarm</strong></span>" sub-command and then delete all
+files and directories created by gfmd and a backend database.
+If you want to unconfigure a slave gfmd, use
+"<span class="command"><strong>unconfig-gfarm-slave</strong></span>" sub-command instead.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm-master</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>unconfig-gfarm</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm-slave</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>master-host-id</code></em>
+</span></dt>
+<dd><p>
+This sub-command is the same as "<span class="command"><strong>unconfig-gfarm</strong></span>",
+but <span class="command"><strong>gfservice</strong></span> does some additional works.
+It also deletes the slave host from a server list using
+<span class="command"><strong>gfmdhost</strong></span> command and from
+<code class="varname">metadb_server_list</code> directive in
+<code class="filename">gfarm2.conf</code> file on all hosts defined in the
+configuration file.
+It also updates <code class="filename">gfsd.conf</code> file and distributes it to
+all gfmd and gfsd hosts, if "gfmd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE"
+variable is set to "true".
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR GFSD">
+<a name="gfsd-sub-commands"></a><h2>SUB-COMMANDS FOR GFSD</h2>
+<p>
+The followings are sub-commands which operate <span class="command"><strong>gfsd</strong></span>.
+The given host-id argument must be "gfsd<em class="replaceable"><code>n</code></em>"
+(gfsd1, gfsd2, ...).
+Otherwise <span class="command"><strong>gfservice</strong></span> reports an error and exits
+immediately.
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>gfsd-status</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Exit with an exit code 0, if <span class="command"><strong>gfsd</strong></span> is currently running.
+Otherwise exits with 1.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfsd</strong></span>
+</span></dt>
+<dd><p>
+Start <span class="command"><strong>gfsd</strong></span> if it is not running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfsd</strong></span>
+</span></dt>
+<dd><p>
+Stop <span class="command"><strong>gfsd</strong></span> if it is running currently.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfsd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-gfsd</strong></span>" and "<span class="command"><strong>start-gfsd</strong></span>"
+sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+<em class="parameter"><code>value</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>set-gfsd-conf</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>unset-gfsd-conf</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>backup-gfsd-conf</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-usermap</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>backup-usermap</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfsd-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>restore-gfsd-conf</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-usermap</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Same as <span class="command"><strong>restore-usermap</strong></span> sub-command for gfmd.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfsd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Execute "<span class="command"><strong>config-gfsd</strong></span>" command on the remote host.
+If "gfsd<em class="replaceable"><code>n</code></em>_CONFIG_GFSD_OPTIONS" variable is
+declared in the configuration file of <span class="command"><strong>gfservice</strong></span>,
+its value is passed to <span class="command"><strong>config-gfsd</strong></span> command as
+options.
+<span class="command"><strong>gfservice</strong></span> also registers the configured remote host
+as a filesystem node using <span class="command"><strong>gfhost</strong></span> command.
+If the value of the variable "gfsd<em class="replaceable"><code>n</code></em>_AUTH_TYPE"
+is "sharedsecret", it also copies a shared key file from gfmd1 to the
+gfsd host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfsd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Execute "<span class="command"><strong>stop-gfsd</strong></span>" sub-command and then delete all
+files and directories created by gfsd.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR CLIENT">
+<a name="client-sub-commands"></a><h2>SUB-COMMANDS FOR CLIENT</h2>
+<p>
+The followings are sub-commands which operate a client.
+The given host-id argument must be "gfmd<em class="replaceable"><code>n</code></em>"
+(gfmd1, gfmd2, ...), "gfsd<em class="replaceable"><code>n</code></em>" (gfsd1, gfsd2, ...)
+or "client<em class="replaceable"><code>n</code></em>" (client1, client2, ...).
+Otherwise <span class="command"><strong>gfservice</strong></span> reports an error and exits
+immediately.
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>mount</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directory</code></em>
+<em class="parameter"><code>option...</code></em>
+</span></dt>
+<dd><p>
+Mount a Gfarm2 filesystem on <em class="parameter"><code>directory</code></em> on the
+remote host.
+The argument <em class="parameter"><code>option</code></em> is an option to 
+<span class="command"><strong>gfarm2fs</strong></span> command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unmount</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directory</code></em>
+</span></dt>
+<dd><p>
+Unmount a Gfarm2 filesystem on <em class="parameter"><code>directory</code></em> on the
+remote host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>umount</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directory</code></em>
+</span></dt>
+<dd><p>
+An alias of "<span class="command"><strong>unmount</strong></span>" sub-command.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfarm-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+<em class="parameter"><code>value</code></em>
+</span></dt>
+<dd>
+<p>
+Add
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>directive</code></em> <em class="parameter"><code>value</code></em><br>
+</p></div>
+<p>
+line to <code class="filename">gfarm2.conf</code> file on the remote host.
+If <code class="filename">gfarm2.conf</code> already has a
+<em class="parameter"><code>directive</code></em> line, <span class="command"><strong>gfservice</strong></span>
+deletes it and then add a new line.
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfarm-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>directive</code></em>
+</span></dt>
+<dd><p>
+Delete a <em class="parameter"><code>directive</code></em> line in
+<code class="filename">gfarm2.conf</code> file on the remote host.
+If <code class="filename">gfarm2.conf</code> file doesn't contain
+<em class="parameter"><code>directive</code></em> line, the file is unchanged.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfarm-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Output <code class="filename">gfarm2.conf</code> file on the remote host to
+standard out.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-shared-key</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Output a shared secret key file to standard out.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfarm-conf</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Recover <code class="filename">gfarm2.conf</code> file on the remote host.
+<span class="command"><strong>gfservice</strong></span> reads a backup of <code class="filename">gfarm2.conf</code>
+from standard in.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-shared-key</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Recover a shared secret key file on the remote host.
+<span class="command"><strong>gfservice</strong></span> reads a backup of the shared secret key from
+standard in.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-client</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Copy <code class="filename">gfarm2.conf</code> file from gfmd1 to the client
+host.
+If the value of the variable "client<em class="replaceable"><code>n</code></em>_AUTH_TYPE"
+is "sharedsecret", it also copies a shared key file from gfmd1 to the
+client host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-client</strong></span>
+<em class="parameter"><code>host-id</code></em>
+</span></dt>
+<dd><p>
+Delete <code class="filename">gfarm2.conf</code> file and a shared secret key file
+on the remote host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfcmd</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>command-name</code></em>
+<em class="parameter"><code>command-argument ...</code></em>
+</span></dt>
+<dd><p>
+Execute a Gfarm command on the remote host.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfcmd-root</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>command-name</code></em>
+<em class="parameter"><code>command-argument ...</code></em>
+</span></dt>
+<dd><p>
+Execute a Gfarm command on the remote host with root privilege.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>grid-proxy-init</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>command-argument ...</code></em>
+</span></dt>
+<dd><p>
+Execute <span class="command"><strong>grid-proxy-init</strong></span> command on
+the remote host.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR MULTIPLE HOSTS">
+<a name="multi-host-sub-commands"></a><h2>SUB-COMMANDS FOR MULTIPLE HOSTS</h2>
+<p>
+The followings are sub-commands which operate on multiple hosts.
+The host-id argument must not be specified.
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>start-all</strong></span>
+</span></dt>
+<dd><p>
+Start all backend databases, <span class="command"><strong>gfmd</strong></span> servers and 
+<span class="command"><strong>gfsd</strong></span> servers.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-all</strong></span>
+</span></dt>
+<dd><p>
+Stop all <span class="command"><strong>gfsd</strong></span> servers, <span class="command"><strong>gfmd</strong></span> servers
+and backend databases,
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>kill-gfmd-all</strong></span>
+</span></dt>
+<dd><p>
+Kill (send SIGKILL) all <span class="command"><strong>gfmd</strong></span> servers.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-all</strong></span>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>stop-all</strong></span>" and
+"<span class="command"><strong>start-all</strong></span>" sub-commands successively.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-all</strong></span>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>config-gfarm-master</strong></span>" for
+<em class="replaceable"><code>gfmd1</code></em> and "<span class="command"><strong>config-gfarm-slave</strong></span>"
+for all other gfmd nodes.
+Then, perform "<span class="command"><strong>config-gfsd</strong></span>" for all gfds nodes.
+Finally, perform "<span class="command"><strong>config-client</strong></span>" for all client nodes.
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-all</strong></span>
+</span></dt>
+<dd><p>
+Perform "<span class="command"><strong>unconfig-client</strong></span>" for all client nodes.
+Then, perform "<span class="command"><strong>unconfig-gfsd</strong></span>" for all gfds nodes.
+Finally, perform "<span class="command"><strong>unconfig-gfarm</strong></span>" for all gfmd nodes.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="PLUG-IN SYSTEM">
+<a name="plugin"></a><h2>PLUG-IN SYSTEM</h2>
+<p>
+<span class="command"><strong>gfservice</strong></span> has a plug-in system so that user can add
+new sub-commands. If given sub-command is not provided by
+<span class="command"><strong>gfservice</strong></span>, <span class="command"><strong>gfservice</strong></span> refers to
+a file which has name of sub-command under %%DATADIR%%/gfarm/gfservice
+directory.
+</p>
+<p>
+Sub-command file must be written as Bourne shell script. Sub-command
+file for sub-command "<em class="replaceable"><code>name</code></em>", must have
+shell function named
+"<code class="function">subcmd_<em class="replaceable"><code>name</code></em></code>" which
+will be executed from <span class="command"><strong>gfservice</strong></span>, and
+"<code class="function">subcmd_<em class="replaceable"><code>name</code></em>_agent</code>"
+which will be executed from <span class="command"><strong>gfservice-agent</strong></span>.
+</p>
+<p>
+For the case a sub-command depends on a other user provided
+sub-command, Sub-command file for sub-command
+"<em class="replaceable"><code>name</code></em>", must have shell function named
+"<code class="function"><em class="replaceable"><code>name</code></em>_depends</code>" which
+must return list of sub-commands. List of sub-commands must be a
+string which is space separated list of sub-command names. If
+sub-command or it's agent does not have dependencies, return empty
+string.  Similarly, sub-command file must have shell function named
+"<code class="function"><em class="replaceable"><code>name</code></em>_agent_depends</code>"
+which must return list of sub-command's agents.
+</p>
+</div>
+</div></body>
+</html>

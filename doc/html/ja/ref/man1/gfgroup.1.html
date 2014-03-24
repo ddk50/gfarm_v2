@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfgroup</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfgroup">
+<a name="gfgroup.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfgroup — Gfarm グループ管理コマンド</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfgroup</code>  [-P <em class="replaceable"><code>path</code></em>] [-l] [<em class="replaceable"><code>group</code></em>...]</p></div>
+<div class="cmdsynopsis"><p><code class="command">gfgroup</code>  [-P <em class="replaceable"><code>path</code></em>]  -c   groupname  [<em class="replaceable"><code>user</code></em>...]</p></div>
+<div class="cmdsynopsis"><p><code class="command">gfgroup</code>  [-P <em class="replaceable"><code>path</code></em>]  -m   groupname  [<em class="replaceable"><code>user</code></em>...]</p></div>
+<div class="cmdsynopsis"><p><code class="command">gfgroup</code>  [-P <em class="replaceable"><code>path</code></em>]  -d   groupname </p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>Gfarm ファイルシステムにおけるグループ管理を行います．
+デフォルトでは全登録グループを表示します．
+グループ名が指定されたら，指定されたグループを表示します．
+Gfarmファイルシステムの管理者は，-c，-m，-d
+オプションを指定することにより，それぞれグループ作成，
+グループメンバ変更，グループ削除を行うことができます．
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-P</code> <em class="parameter"><code>パス名</code></em></span></dt>
+<dd><p>
+	このコマンドがアクセスするメタデータサーバを特定するための
+	パス名または Gfarm URL を指定します。
+	省略した場合は、「/」を指定したのと同じ意味になります。
+    </p></dd>
+<dt><span class="term"><code class="option">-l</code></span></dt>
+<dd><p>グループ名とグループメンバの情報を表示します．</p></dd>
+<dt><span class="term"><code class="option">-c</code></span></dt>
+<dd><p>
+グループの作成を行います．
+登録には初期グループメンバも指定することができます．
+Gfarmの管理者が実行可能です．
+</p></dd>
+<dt><span class="term"><code class="option">-m</code></span></dt>
+<dd><p>
+グループメンバの変更を行います．
+変更したいグループ名とメンバのリスト指定します．
+Gfarmの管理者が実行可能です．
+</p></dd>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd><p>
+グループを消去します．
+Gfarmの管理者が実行可能です．
+</p></dd>
+<dt><span class="term"><code class="option">-?</code></span></dt>
+<dd><p>引数オプションを表示します．</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+  <span class="citerefentry"><span class="refentrytitle">gfuser</span>(1)</span>
+</p>
+</div>
+</div></body>
+</html>

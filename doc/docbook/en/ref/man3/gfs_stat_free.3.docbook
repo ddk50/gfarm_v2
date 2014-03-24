@@ -1,0 +1,50 @@
+ <?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<!-- $Id: gfs_stat_free.3.docbook 8403 2013-07-26 05:56:08Z m-kasahr $ -->
+
+<refentry id="gfs-stat-free.3">
+
+<refentryinfo><date>1 May 2002</date></refentryinfo>
+
+<refmeta>
+<refentrytitle>gfs_stat_free</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>Gfarm</refmiscinfo>
+</refmeta>
+
+<refnamediv id="name">
+<refname>gfs_stat_free</refname>
+<refpurpose>free dynamic memory of file status</refpurpose>
+</refnamediv>
+<refsynopsisdiv id="synopsis">
+<funcsynopsis>
+<funcsynopsisinfo format="linespecific">
+#include &lt;gfarm/gfarm.h&gt;
+</funcsynopsisinfo>
+
+<funcprototype>
+  <funcdef><function moreinfo="none"><returnvalue>void </returnvalue>gfs_stat_free</function></funcdef>
+    <paramdef>struct gfs_stat * <parameter moreinfo="none">status</parameter></paramdef>
+</funcprototype>
+
+
+</funcsynopsis>
+</refsynopsisdiv>
+
+<!-- body begins here -->
+
+<refsect1 id="description"><title>DESCRIPTION</title>
+<para><function moreinfo="none">gfs_stat_free()</function> frees frees the memory space of file status
+<parameter moreinfo="none">status</parameter> allocated by gfs_stat(3).</para>
+
+</refsect1>
+
+<refsect1 id="see-also"><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gfs_stat</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+</para>
+</refsect1>
+</refentry>
+

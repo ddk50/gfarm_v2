@@ -1,0 +1,882 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfservice</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfservice">
+<a name="gfservice.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfservice — リモートホストから Gfarm のサーバーを制御する。</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfservice</code>  [<em class="replaceable"><code>オプション</code></em>]  サブコマンド  [ホストID] [<em class="replaceable"><code>引数 ...</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+<span class="command"><strong>gfservice</strong></span> は、Gfarm の管理者がリモートホスト上の
+サーバー (<span class="command"><strong>gfmd</strong></span>、<span class="command"><strong>gfsd</strong></span>、PostgreSQL)
+を操作するためのツールです。
+今のところ、OpenLDAP には対応していません。
+サーバーの実行開始、停止、セットアップ 
+(<span class="command"><strong>config-gfarm</strong></span> や <span class="command"><strong>config-gfsd</strong></span> の実行)、
+サーバー廃止の後始末といったことができます。
+</p>
+<p>
+<span class="command"><strong>gfservice</strong></span> のコマンド行は、たとえば次のようになります。
+</p>
+<div class="literallayout"><p><br>
+	<span class="command"><strong>gfservice <em class="replaceable"><code>start-gfmd</code></em> <em class="replaceable"><code>gfmd2</code></em></strong></span><br>
+</p></div>
+<p>
+ここで、「<em class="replaceable"><code>start-gfmd</code></em>」はサブコマンド、
+「<em class="replaceable"><code>gfmd2</code></em>」 はホストID をそれぞれ表しています。
+このコマンド行を実行すると、<span class="command"><strong>gfservice</strong></span> は
+「<em class="replaceable"><code>gfmd2</code></em>」と名付けられたホスト上の gfmd の
+実行開始を試みます。
+リモートのサーバーホストを指定する際、<span class="command"><strong>gfservice</strong></span> では
+ホスト名の代わりにホストID  を用います。
+ホストID (<em class="replaceable"><code>gfmd1</code></em>、
+<em class="replaceable"><code>gfmd2</code></em>、...) は <span class="command"><strong>gfservice</strong></span> 用
+の設定ファイルで定義します。
+以下に、設定ファイルの記述例を載せます。
+</p>
+<div class="literallayout"><p><br>
+	gfmd1=metadb1.example.com<br>
+	gfmd1_CONFIG_GFARM_OPTIONS="-A $LOGNAME -X"<br>
+	gfmd2=metadb2.example.com<br>
+	gfmd2_CONFIG_GFARM_OPTIONS="-A $LOGNAME -X"<br>
+<br>
+	gfsd1=spool1.example.com<br>
+	gfsd2=spool2.example.com<br>
+</p></div>
+<p>
+<span class="command"><strong>gfservice</strong></span> は、読み込むべき設定ファイルのパスを次の要領
+で決定します。
+</p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>
+「<code class="option">-f</code> <em class="parameter"><code>ファイル</code></em>」オプションが指定
+されていれば、その<em class="parameter"><code>ファイル</code></em>を読み込みます。
+</p></li>
+<li class="listitem"><p>
+上記以外の場合で、環境変数 <code class="varname">GFSERVICE_CONF</code> が定義され、
+かつ値が空文字列でなければ、値として記されたファイルを読み込みます。
+</p></li>
+<li class="listitem"><p>
+上記以外の場合は、<code class="filename">$HOME/.gfservice</code> を読み込みます。
+</p></li>
+</ol></div>
+<p>
+<span class="command"><strong>gfservice</strong></span> は設定ファイルの読み込みに失敗すると、
+エラーメッセージを出力して、ただちに終了します。
+設定ファイルそれ自体は Bourne シェルスクリプトで、<span class="command"><strong>gfservice</strong></span>
+はそのファイルを自身の一部として取り込みます (正確に言えば、スクリプト
+として評価します)。
+設定ファイルについての詳しい説明は、gfservice.conf(5) を参照して下さい。
+</p>
+<p>
+<span class="command"><strong>gfservice</strong></span> は、リモートホストと接続するために、SSH
+(Secure Shell) を使用します。
+サブコマンド 1 個の処理を遂行する間、何度も <span class="command"><strong>ssh</strong></span>
+を実行することがあるので、SSH エージェント (OpenSSH の
+<span class="command"><strong>ssh-agent</strong></span> など) を用いるか、パスフレーズが空の
+認証キーを用いるなどして、パスフレーズを毎回入力しなくて済むように
+することをお薦めします。
+</p>
+<p>
+SSH に加えて、<span class="command"><strong>gfservice</strong></span> はリモートホスト上で root
+権限を得るために Sudo コマンドを使用します。
+各リモートホストの <code class="filename">sudoers</code> ファイル (Sudo の設定
+ファイル) に以下のような行を足して下さい。
+</p>
+<div class="literallayout"><p><br>
+	<em class="replaceable"><code>user</code></em> ALL=(root, _gfarmfs, _gfarmmd) NOPASSWD: gfservice-agent<br>
+</p></div>
+<p>
+ここで、<em class="replaceable"><code>user</code></em> は <span class="command"><strong>gfservice</strong></span>
+を実行するユーザの名前です。
+NOPASSWD は必須ではありませんが、省くと <span class="command"><strong>sudo</strong></span> は何度も
+パスワードを訊いてくることがあります。
+</p>
+<p>
+gfservice は SSH と Sudo を用いて、リモートホスト上にある
+<span class="command"><strong>gfservice-agent</strong></span> というエージェントコマンドを実行します
+ので、<span class="command"><strong>gfservice</strong></span> コマンドで操作したいホストすべてに、
+<span class="command"><strong>gfservice-agent</strong></span> をインストールしておく必要があります。
+</p>
+<p>
+<span class="command"><strong>gfservice</strong></span>はユーザが新しくサブコマンドを追加できるよ
+うに、プラグインシステムを採用しています。
+詳しい説明は "PLUG-IN SYSTEM" の節を参照して下さい。
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd><p>
+デバッグ情報を出力します。
+<span class="command"><strong>gfservice</strong></span> は、このオプションを
+<span class="command"><strong>gfservice-agent</strong></span> に渡しますので、
+<span class="command"><strong>gfservice-agent</strong></span> からもデバッグ情報が出力されます。
+</p></dd>
+<dt><span class="term"><code class="option">-f</code> <em class="parameter"><code>ファイル</code></em></span></dt>
+<dd><p>
+デフォルトの設定ファイルの代わりに、「<em class="parameter"><code>ファイル</code></em>」を
+読み込みます。
+</p></dd>
+<dt><span class="term"><code class="option">-t</code> <em class="parameter"><code>時間</code></em></span></dt>
+<dd><p>
+操作のタイムアウトを、「<em class="parameter"><code>時間</code></em>」秒とします。
+<span class="command"><strong>gfservice</strong></span> がサーバープログラム (gfmd、gfsd、バックエンド
+データベース) の実行開始ないし終了を試みる際、処理が完了するか、もしくは
+<span class="command"><strong>gfservice</strong></span> の指定時間が経過するかまで待ちます。
+「<em class="parameter"><code>時間</code></em>」として 「no」を指定すると、タイムアウトは
+起きなくなります。
+デフォルト値は、「no」です。
+</p></dd>
+<dt><span class="term"><code class="option">-k</code></span></dt>
+<dd><p>
+このオプションが<span class="command"><strong>config-gfarm</strong></span> サブコマンドもしくは
+<span class="command"><strong>config-gfarm-master</strong></span> サブコマンドと共に指定された場合、
+<span class="command"><strong>gfservice</strong></span> は <span class="command"><strong>gfkey</strong></span> コマンドを用いて
+共有秘密鍵ファイルを作成します。 
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR GFMD">
+<a name="gfmd-sub-commands"></a><h2>SUB-COMMANDS FOR GFMD</h2>
+<p>
+以下に挙げているのは、<span class="command"><strong>gfmd</strong></span> を操作するサブコマンドです。
+コマンド行に与えるホストID は、「gfmd<em class="replaceable"><code>n</code></em>」
+(gfmd1, gfmd2, ...) でなくてはなりません。
+それ以外の場合、<span class="command"><strong>gfservice</strong></span> はエラーを通知してただちに
+終了します。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>backend-db-status</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースが実行中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfmd-status</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfmd が実行中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-backend-db</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースが実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfmd</strong></span> が実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>start-gfmd</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfmd-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>start-gfmd</strong></span> と同じですが、gfmd には
+<code class="option">-S</code> オプションが付与されます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースおよび <span class="command"><strong>gfmd</strong></span> が実行中でなければ、
+実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>start-gfarm</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfarm-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>start-gfarm</strong></span> と同じですが、gfmd には
+<code class="option">-S</code> オプションが付与されます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-backend-db</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースが実行中なら、実行を停止します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfmd</strong></span> が実行中なら、実行を停止します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfarm</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+バックエンドデータベースおよび <span class="command"><strong>gfmd</strong></span> が実行中なら、
+実行を停止します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>kill-gfmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfmd</strong></span> が実行中なら、強制停止 (SIGKILL を送付) します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-backend-db</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-backend-db</strong></span> と
+<span class="command"><strong>start-backend-db</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfmd</strong></span>」と
+「<span class="command"><strong>start-gfmd</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>restart-gfmd</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfmd-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfmd</strong></span> と
+<span class="command"><strong>start-gfmd-slave</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfarm</strong></span> と
+<span class="command"><strong>start-gfarm</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>restart-gfarm</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfarm-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfarm</strong></span> と
+<span class="command"><strong>start-gfarm-slave</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfmd</strong></span> をスレーブからマスターへ昇格させます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>promote-gfmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>promote</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfmd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+<em class="parameter"><code>値</code></em>
+</span></dt>
+<dd>
+<p>
+リモートホスト上の <code class="filename">gfmd.conf</code> ファイルに
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>設定名称</code></em> <em class="parameter"><code>値</code></em><br>
+</p></div>
+<p>
+という行を加えます。
+既に <code class="filename">gfmd.conf</code> に
+「<em class="parameter"><code>設定名称</code></em>」という行が存在している場合、
+<span class="command"><strong>gfservice</strong></span> はそれを削除してから、新たに行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+<em class="parameter"><code>値</code></em>
+</span></dt>
+<dd>
+<p>
+リモートホスト上の <code class="filename">gfsd.conf</code> ファイルに
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>設定名称</code></em> <em class="parameter"><code>値</code></em><br>
+</p></div>
+<p>
+という行を加えます。
+既に <code class="filename">gfsd.conf</code> に
+「<em class="parameter"><code>設定名称</code></em>」という行が存在している場合、
+<span class="command"><strong>gfservice</strong></span> はそれを削除してから、新たに行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfmd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfmd.conf</code> ファイルから
+「<em class="parameter"><code>設定名称</code></em>」行を削除します。
+<code class="filename">gfmd.conf</code> ファイルに「<em class="parameter"><code>設定名称</code></em>」
+行がない場合、ファイルは更新されません。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfsd.conf</code> ファイルから
+「<em class="parameter"><code>設定名称</code></em>」行を削除します。
+<code class="filename">gfsd.conf</code> ファイルに「<em class="parameter"><code>設定名称</code></em>」
+行がない場合、ファイルは更新されません。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-backend-db</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上のバックエンドデータベースのバックアップを行い、
+バックアップデータを標準出力へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfmd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルを、標準出力
+へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfsd.conf</code> ファイルを、標準出力
+へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-usermap</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">usermap</code> ファイルを、標準出力
+へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-backend-db</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上のバックエンドデータベースのデータを復旧します。
+バックアップデータは、標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfmd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfmd.conf</code> ファイルを復旧します。
+<span class="command"><strong>gfservice</strong></span> は、<code class="filename">gfmd.conf</code> の
+バックアップデータを標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfsd.conf</code> ファイルを復旧します。
+<span class="command"><strong>gfservice</strong></span> は、<code class="filename">gfsd.conf</code> の
+バックアップデータを標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-usermap</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">usermap</code> ファイルを復旧します。
+<span class="command"><strong>gfservice</strong></span> は、<code class="filename">usermap</code> の
+バックアップデータを標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上で <span class="command"><strong>config-gfarm</strong></span> コマンドを実行します。
+このとき、設定ファイルで変数
+「gfmd<em class="replaceable"><code>n</code></em>_CONFIG_GFARM_OPTIONS」が宣言されていれば、
+その値が <span class="command"><strong>config-gfarm</strong></span> にオプションとして付与されます。
+レプリケーション機能を有効にするときは、このサブコマンドは使用せず、代わりに
+<span class="command"><strong>config-gfarm-master</strong></span> ないし
+<span class="command"><strong>config-gfarm-slave</strong></span> を使って下さい。
+<code class="option">-k</code>オプションが指定されている場合、
+<span class="command"><strong>gfservice</strong></span>は <span class="command"><strong>gfkey</strong></span> コマンドを用いて
+gfmd ホスト上に共有秘密鍵ファイルを作成します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+このサブコマンドは <span class="command"><strong>config-gfarm</strong></span> と基本的に同じですが、
+gfmd のレプリケーションが自動的に有効になります。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfarm-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>マスターホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>config-gfarm</strong></span> と基本的に同じですが、
+レプリケーション機能が自動的に有効になり、
+「<em class="parameter"><code>マスターホストID</code></em>」上で動作する gfmd のスレーブ
+として動作します。
+<span class="command"><strong>gfservice</strong></span> は <span class="command"><strong>gfmdhost</strong></span> コマンドを
+用いてこのスレーブホストをサーバーリストに加えます。
+また、マスター gfmd ホスト上の <code class="filename">gfarm2.conf</code> ファイル
+を更新して、<code class="varname">metadb_server_list</code> にこのスレーブホストを
+加え、設定ファイルで定義されているすべてのホストに配布します。
+変数「gfmd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE」の値が「true」に
+セットされている場合は、同様に <code class="filename">gfsd.conf</code> ファイル
+を更新し、すべての gfmd ホストと gfsd ホストに配布します。
+変数「gfmd<em class="replaceable"><code>n</code></em>_AUTH_TYPE」の値が「sharedsecret」
+の場合、共有秘密鍵ファイルをマスター gfmd ホストからこのスレーブ gfmd
+ホストへコピーします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfsd</strong></span> を実行して、その後 gfmd や
+バックエンドデータベースが作成したファイルやディレクトリをすべて削除します。
+スレーブ gfmd を廃止する場合は、代わりにサブコマンド
+<span class="command"><strong>unconfig-gfarm-slave</strong></span> を使用して下さい。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm-master</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>unconfig-gfarm</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfarm-slave</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>マスターホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>unonfig-gfarm</strong></span> と基本的に同じですが、
+以下の追加処理を行います。
+<span class="command"><strong>gfmdhost</strong></span> コマンドを用いてサーバーリストから、その
+スレーブホストを削除します。
+また、設定ファイルで定義されているすべてのホストの
+<code class="filename">gfarm2.conf</code> を更新し、
+<code class="varname">metadb_server_list</code> に設定されたサーバーリストから、
+そのスレーブホストを削除します。
+変数「gfmd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE」の値が「true」に
+セットされている場合は、同様に <code class="filename">gfsd.conf</code> ファイル
+を更新し、すべての gfmd ホストと gfsd ホストに配布します。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR GFSD">
+<a name="gfsd-sub-commands"></a><h2>SUB-COMMANDS FOR GFSD</h2>
+<p>
+以下に挙げているのは、<span class="command"><strong>gfsd</strong></span> を操作するサブコマンドです。
+コマンド行に与えるホストID は、「gfsd<em class="replaceable"><code>n</code></em>」
+(gfsd1, gfsd2, ...) でなくてはなりません。
+それ以外の場合、<span class="command"><strong>gfservice</strong></span> はエラーを通知してただちに
+終了します。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>gfsd-status</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfsd が実行中であれば、終了コード 0 で終了します。
+それ以外の場合は、1 で終了します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>start-gfsd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfsd</strong></span> が実行中でなければ、実行を開始します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-gfsd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+<span class="command"><strong>gfsd</strong></span> が実行中なら、実行を停止します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-gfsd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド<span class="command"><strong>stop-gfsd</strong></span> と
+<span class="command"><strong>start-gfsd</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+<em class="parameter"><code>値</code></em></span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>set-gfsd-conf</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>unset-gfsd-conf</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>backup-gfsd-conf</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-usermap</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>backup-usermap</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfsd-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>restore-gfsd-conf</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-usermap</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+gfmd 用の <span class="command"><strong>restore-usermap</strong></span> サブコマンドと同じです。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-gfsd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上で <span class="command"><strong>config-gfsd</strong></span> コマンドを実行します。
+このとき、設定ファイルで変数
+「gfsd<em class="replaceable"><code>n</code></em>_CONFIG_GFARM_OPTIONS」が宣言されていれば、
+その値が <span class="command"><strong>config-gfsd</strong></span> にオプションとして付与されます。
+また、<span class="command"><strong>gfservice</strong></span> は <span class="command"><strong>gfhost</strong></span> コマンド
+を用いて、リモートホストをファイルシステムノードとして登録します。
+変数「gfsd<em class="replaceable"><code>n</code></em>_AUTH_TYPE」の値が「sharedsecret」
+の場合、共有秘密鍵ファイルを gfmd1 から gfsd ホストへコピーします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-gfsd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-gfsd</strong></span> を実行して、その後 gfsd が
+作成したファイルやディレクトリをすべて削除します。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR CLIENT">
+<a name="client-sub-commands"></a><h2>SUB-COMMANDS FOR CLIENT</h2>
+<p>
+以下に挙げているのは、クライアントを操作するサブコマンドです。
+コマンド行に与えるホストID は、「gfmd<em class="replaceable"><code>n</code></em>」
+(gfmd1, gfmd2, ...)、「gfsd<em class="replaceable"><code>n</code></em>」(gfsd1, gfsd2, ...)、
+「client<em class="replaceable"><code>n</code></em>」(client1, client2, ...) のいずれか
+でなくてはなりません。
+それ以外の場合、<span class="command"><strong>gfservice</strong></span> はエラーを通知してただちに
+終了します。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>mount</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>ディレクトリ</code></em>
+<em class="parameter"><code>オプション...</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の「<em class="parameter"><code>ディレクトリ</code></em>」に、Gfarm2
+ファイルシステムをマウントします。
+引数「<em class="parameter"><code>オプション</code></em>」は <span class="command"><strong>gfarm2fs</strong></span>
+コマンドへの引数とみなされます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unmount</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>ディレクトリ</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の「<em class="parameter"><code>ディレクトリ</code></em>」にマウントされた
+Gfarm2 ファイルシステムをアンマウントします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>umount</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>ディレクトリ</code></em>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>unmount</strong></span> の別名です。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>set-gfarm-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+<em class="parameter"><code>値</code></em></span></dt>
+<dd>
+<p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルに
+</p>
+<div class="literallayout"><p><br>
+	<em class="parameter"><code>設定名称</code></em> <em class="parameter"><code>値</code></em><br>
+</p></div>
+<p>
+という行を加えます。
+既に <code class="filename">gfarm2.conf</code> に
+「<em class="parameter"><code>設定名称</code></em>」という行が存在している場合、
+<span class="command"><strong>gfservice</strong></span> はそれを削除してから、新たに行を追加します。
+</p>
+</dd>
+<dt><span class="term">
+<span class="command"><strong>unset-gfarm-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>設定名称</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルから
+「<em class="parameter"><code>設定名称</code></em>」行を削除します。
+<code class="filename">gfarm2.conf</code> ファイルに「<em class="parameter"><code>設定名称</code></em>」
+行がない場合、ファイルは更新されません。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-gfarm-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルを、標準出力
+へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>backup-shared-key</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の共有秘密鍵ファイルを、標準出力へ出力します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-gfarm-conf</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルを復旧します。
+<span class="command"><strong>gfservice</strong></span> は、<code class="filename">gfarm2.conf</code> の
+バックアップデータを標準入力から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restore-shared-key</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の共有秘密鍵ファイルを復旧します。
+<span class="command"><strong>gfservice</strong></span> は、共有秘密鍵のバックアップデータを標準入力
+から読み込みます。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-client</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+変数「client<em class="replaceable"><code>n</code></em>_AUTH_TYPE」の値が「sharedsecret」
+の場合、共有秘密鍵ファイルを gfmd1 からクライアントホストへコピーします。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-client</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上の <code class="filename">gfarm2.conf</code> ファイルおよび
+共有秘密鍵ファイルを削除します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfcmd</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>コマンド名</code></em>
+<em class="parameter"><code>コマンド引数 ...</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上で Gfarm コマンドを実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>gfcmd-root</strong></span>
+<em class="parameter"><code>ホストID</code></em>
+<em class="parameter"><code>コマンド名</code></em>
+<em class="parameter"><code>コマンド引数 ...</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上にて、root 権限で Gfarm コマンドを実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>grid-proxy-init</strong></span>
+<em class="parameter"><code>host-id</code></em>
+<em class="parameter"><code>コマンド引数 ...</code></em>
+</span></dt>
+<dd><p>
+リモートホスト上で <span class="command"><strong>grid-proxy-init</strong></span>
+コマンドを実行します。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SUB-COMMANDS FOR MULTIPLE HOSTS">
+<a name="multi-host-sub-commands"></a><h2>SUB-COMMANDS FOR MULTIPLE HOSTS</h2>
+<p>
+以下に挙げているのは、複数のホストを操作するサブコマンドです。
+コマンド行で、ホストID を指定することはできません。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">
+<span class="command"><strong>start-all</strong></span>
+</span></dt>
+<dd><p>
+すべてのバックエンドデータベース、gfmd、gfsd を起動します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>stop-all</strong></span>
+</span></dt>
+<dd><p>
+すべての gfsd、gfmd、バックエンドデータベースを停止します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>kill-gfmd-all</strong></span>
+</span></dt>
+<dd><p>
+すべての gfmd を強制停止 (SIGKILL を送付) します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>restart-all</strong></span>
+</span></dt>
+<dd><p>
+サブコマンド <span class="command"><strong>stop-all</strong></span> と
+<span class="command"><strong>start-all</strong></span> を続けて実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>config-all</strong></span>
+</span></dt>
+<dd><p>
+<em class="replaceable"><code>gfmd1</code></em> に対して
+"<span class="command"><strong>config-gfarm-master</strong></span>" を実行し、それ以外のすべての gfmd
+に対して "<span class="command"><strong>config-gfarm-slave</strong></span>" を実行します。
+次にすべての gfsd に対して "<span class="command"><strong>config-gfsd</strong></span>" を実行します。
+最後にすべてのクライアントに対して、"<span class="command"><strong>config-client</strong></span>" を
+実行します。
+</p></dd>
+<dt><span class="term">
+<span class="command"><strong>unconfig-all</strong></span>
+</span></dt>
+<dd><p>
+すべてのクライアントに対して、"<span class="command"><strong>unconfig-client</strong></span>" を実行
+します。
+次にすべての gfsd に対して "<span class="command"><strong>unconfig-gfsd</strong></span>" を実行します。
+最後にすべての gfmd に対して "<span class="command"><strong>unconfig-gfarm</strong></span>" を
+実行します。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="PLUG-IN SYSTEM">
+<a name="plugin"></a><h2>PLUG-IN SYSTEM</h2>
+<p>
+<span class="command"><strong>gfservice</strong></span>はユーザが新しくサブコマンドが追加できるよ
+うに、プラグインシステムを採用しています。指定されたサブコマンドを
+<span class="command"><strong>gfservice</strong></span>が提供していない場合、
+<span class="command"><strong>gfservice</strong></span>コマンドは %%DATADIR%%/gfarm/gfservice 以
+下のサブコマンド名のファイルを参照します。
+</p>
+<p>
+サブコマンドのファイルは Bourneシェルスクリプトで書きます。
+サブコマンド "<em class="replaceable"><code>name</code></em>" のサブコマンドファイル
+は、<span class="command"><strong>gfservice</strong></span>から実行される
+"<code class="function">subcmd_<em class="replaceable"><code>name</code></em></code>"という名
+前のシェル関数、 <span class="command"><strong>gfservice-agent</strong></span>から実行される
+"<code class="function">subcmd_<em class="replaceable"><code>name</code></em>_agent</code>"
+という名前のシェル関数が実装されている必要があります。
+</p>
+<p>
+サブコマンドがユーザが追加した別のサブコマンドに依存している時のために、
+サブコマンド "<em class="replaceable"><code>name</code></em>" のサブコマンドファイル
+は、 "<code class="function"><em class="replaceable"><code>name</code></em>_depends</code>" と
+いう名前のシェル関数で、そのサブコマンドが依存している他のサブコマンド
+のリストを返す必要があります．サブコマンドのリストはスペースで区切られ
+たサブコマンドの文字列です．依存している他のサブコマンドがない場合は空文字列を返して
+下さい。同様に、サブコマンドファイルは
+"<code class="function"><em class="replaceable"><code>name</code></em>_agent_depends</code>"
+という名前のシェル関数で、そのサブコマンドのエージェントが依存している
+他のサブコマンドのリストを返す必要があります。
+</p>
+</div>
+</div></body>
+</html>

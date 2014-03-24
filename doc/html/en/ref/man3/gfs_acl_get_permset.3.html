@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_get_permset</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_get_permset">
+<a name="gfs-acl-get-permset.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_get_permset — get the permission set from a Gfarm ACL entry</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_acl_get_permset</b>(</code></td>
+<td>
+<var class="pdparam">entry_d</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">permset_p</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>gfarm_acl_entry_t <var class="pdparam">entry_d</var></code>;<br><code>gfarm_acl_permset_t *<var class="pdparam">permset_p</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>entry_d</code></em></span></dt>
+<dd><p>An ACL entry descriptor.</p></dd>
+<dt><span class="term"><em class="parameter"><code>permset_p</code></em></span></dt>
+<dd><p>A pointer to get an ACL permission set.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_add_perm</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_clear_perms</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_delete_perm</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_get_perm</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_get_qualifier</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_set_qualifier</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_get_tag_type</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_set_tag_type</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_set_permset</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

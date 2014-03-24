@@ -1,0 +1,45 @@
+#
+# Dependencies of this sub-command
+#
+kill_gfmd_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: systest::gfarm_v2::kill_gfmd
+#
+subcmd_kill_gfmd()
+{
+	log_debug "subcmd_kill_gfmd"
+
+	check_argc $# 0
+	check_hostid gfmd $HOSTID
+
+	exec_remote_host_agent $HOSTID root systest::gfarm_v2::kill_gfmd
+	[ $? -ne 0 ] && log_error "gfservice systest::gfarm_v2::kill_gfmd failed"
+
+	log_debug "end subcmd_kill_gfmd"
+}
+
+#
+# Dependencies of this sub-command agent
+#
+kill_gfmd_agent_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: systest::gfarm_v2::kill_gfmd
+# kill currently running gfmd
+#
+subcmd_kill_gfmd_agent()
+{
+	log_debug "subcmd_kill_gfmd_agent"
+
+	kill -KILL `cat $GFMD_PID_FILE`
+	[ $? -ne 0 ] && log_error "kill command failed"
+
+	log_debug "end subcmd_kill_gfmd_agent"
+}

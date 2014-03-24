@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfsched</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfsched">
+<a name="gfsched.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfsched — 
+
+ファイルシステムノードをスケジューリングし、利用可能なノードを表示
+</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfsched</code>   -f <em class="replaceable"><code>gfarm-URL</code></em>  [-D <em class="replaceable"><code>ドメイン名</code></em>] [-n <em class="replaceable"><code>ノード数</code></em>] [-LMclw]</p></div>
+<div class="cmdsynopsis"><p><code class="command">gfsched</code>  [-P <em class="replaceable"><code>gfarm-URL</code></em>] [-D <em class="replaceable"><code>ドメイン名</code></em>] [-n <em class="replaceable"><code>ノード数</code></em>] [-LMlw]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+  <span class="command"><strong>gfsched</strong></span> に
+  <code class="option">-f</code> <em class="parameter"><code>gfarm-URL</code></em> オプションを
+  指定した場合、そのgfarmファイルを保持するファイルシステムノードの
+  うちで、現在利用可能なもの表示します。
+
+</p>
+<p>
+  <code class="option">-f</code>オプションを指定しなかった場合、利用可能な
+  ファイルシステムノードを表示します。この場合、
+  <code class="option">-P</code> <em class="parameter"><code>gfarm-URL</code></em> オプションで
+  パス名か gfarm URL を指定することにより、表示対象のメタデータサーバを
+  切替えることができます。
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-D</code> <em class="parameter"><code>ドメイン名</code></em></span></dt>
+<dd><p>ドメイン名ないしホスト名を指定し、検索対象のファイルシステムノードを
+絞ります。
+</p></dd>
+<dt><span class="term"><code class="option">-L</code></span></dt>
+<dd><p>そのホストに対して、認証が成功するか否かの確認を省略します。
+高速になりますが、認証不能なホストがスケジューリングされてしまう
+危険があります。
+</p></dd>
+<dt><span class="term"><code class="option">-M</code></span></dt>
+<dd><p>メタデータサーバに問い合わせた結果のみを表示し、クライアント側での
+スケジューリング処理を行ないません。
+このオプションを指定すると、動作は高速になりますが、ネットワーク的に到
+達不能なホストや、認証不能なホストが表示される危険があります。
+</p></dd>
+<dt><span class="term"><code class="option">-P</code> <em class="parameter"><code>gfarm-URL</code></em></span></dt>
+<dd><p>ファイルシステムノードを管理するメタデータサーバを特定する
+ために、gfarm-URL ないしパス名を指定します。
+このオプションは、<code class="option">-f</code> オプションと排他的です。
+</p></dd>
+<dt><span class="term"><code class="option">-f</code> <em class="parameter"><code>gfarm-URL</code></em></span></dt>
+<dd><p>指定したファイルについて、その複製を保持するファイルシステムノードを
+検索します。
+このオプションは、<code class="option">-P</code> オプションと排他的です。
+</p></dd>
+<dt><span class="term"><code class="option">-c</code></span></dt>
+<dd>
+<p>オプション「<code class="option">-f</code>」で指定したファイルが存在しない
+場合で、かつ、このオプションを指定した場合、ファイルを新規作成した
+場合のスケジューリング情報を表示します。
+</p>
+<p>
+現在、このオプションを利用すると、指定したファイルを新規作成します。
+この挙動は将来変更される可能性があるのでご注意ください。
+</p>
+</dd>
+<dt><span class="term"><code class="option">-l</code></span></dt>
+<dd><p>ホスト名のみならず、ポート番号も表示します。
+このオプションの表示形式は、将来変更される可能性がありますのでご注意ください。
+</p></dd>
+<dt><span class="term"><code class="option">-n</code> <em class="parameter"><code>ノード数</code></em></span></dt>
+<dd><p>指定した数をファイルシステムノードの表示を試みます。
+ノード数がその数に満たない場合には、そこで表示を打ち切ります。
+このオプションを指定しない場合、条件を満たす全ノードを表示します。
+</p></dd>
+<dt><span class="term"><code class="option">-w</code></span></dt>
+<dd>
+<p>ファイルの書き込みを行なう前提で、スケジューリングを行ないます。
+このオプションを指定した場合、ディスクの空き容量が足りないファイルシステム
+ノードは除外されます。
+</p>
+<p>
+このオプションと、<code class="option">-f</code> オプションを同時に指定し、
+かつ、そのファイルが既存のプロセスによって書き込みオープンされている場合には、
+<code class="option">-n</code> の指定に関わらず、現在このファイルの書き込み用に
+割り当てられているファイルシステムノード 1つのみを表示します。
+</p>
+</dd>
+<dt><span class="term"><code class="option">-?</code></span></dt>
+<dd><p>引数オプションを表示します。</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="EXAMPLES">
+<a name="examples"></a><h2>EXAMPLES</h2>
+<p>
+以下は、メタデータサーバが動作中であると把握している、ファイルシステムノードを
+問い合わせる例です。
+</p>
+<div class="literallayout"><p><br>
+$ gfsched -M<br>
+</p></div>
+</div>
+</div></body>
+</html>

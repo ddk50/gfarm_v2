@@ -1,0 +1,46 @@
+#
+# Dependencies of this sub-command
+#
+gfjournal_m_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: systest::gfarm_v2::gfjournal_m
+#
+subcmd_gfjournal_m()
+{
+	log_debug "subcmd_gfjournal_m"
+
+	check_argc $# 0
+	check_hostid gfmd $HOSTID
+	exec_remote_host_agent $HOSTID root systest::gfarm_v2::gfjournal_m "$@"
+	[ $? -ne 0 ] && log_error "gfservice systest::gfarm_v2::gfjournal_m failed"
+
+	log_debug "end subcmd_gfjournal_m"
+}
+
+#
+# Dependencies of this sub-command agent
+#
+gfjournal_m_agent_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: gfjournal_m
+# execute gfjournal -m
+#
+subcmd_gfjournal_m_agent()
+{
+	log_debug "subcmd_gfjournal_m_agent"
+
+	JOURNAL_FILE_NAME="0000000000.gmj"
+
+	gfjournal -m "$JOURNAL_DIR/$JOURNAL_FILE_NAME"
+	[ $? -ne 0 ] && log_error "gfjournal command failed"
+
+	log_debug "end subcmd_gfjournal_m_agent"
+}

@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_from_text</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_from_text">
+<a name="gfs-acl-from-text.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_from_text — create a Gfarm ACL from text</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_acl_from_text</b>(</code></td>
+<td>
+<var class="pdparam">str</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">acl_p</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>const char *<var class="pdparam">str</var></code>;<br><code>gfarm_acl_t *<var class="pdparam">acl_p</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>str</code></em></span></dt>
+<dd><p>An ACL text string (long text form or short text form).</p></dd>
+<dt><span class="term"><em class="parameter"><code>acl_p</code></em></span></dt>
+<dd><p>A pointer of the ACL structure type.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_MEMORY</code></span></dt>
+<dd><p>Insufficient memory was available.</p></dd>
+<dt><span class="term"><code class="constant">GFARM_ERR_INVALID_ARGUMENT</code></span></dt>
+<dd><p>The argument str cannot be translated into an ACL.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_free</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_from_text_with_default</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_to_any_text</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_to_text</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

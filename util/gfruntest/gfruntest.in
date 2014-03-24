@@ -1,0 +1,417 @@
+#!/bin/sh
+PROGRAM=gfruntest
+GFSERVICE="@bindir@/gfservice"
+TESTCASES_DIR="@datadir@/gfarm/systest/testcases"
+SCENARIOS_DIR="@datadir@/gfarm/systest/scenarios"
+COMMON_SCRIPTS_DIR="@datadir@/gfarm/systest/common_scripts"
+TMP_FILE_DIR="/tmp/gfruntest.$$"
+CONFIG_FILE="$HOME/.gfservice"
+PARAMETER_FILE=
+SCENARIO_FILE=
+LOG_FILE=gfruntest.log
+DEBUG=false
+OPTIONS=
+
+PATH=@bindir@:@libexecdir@:${PATH}
+
+#
+# Result codes
+#
+RESULT_PASS=0
+RESULT_FAIL=1
+RESULT_XPASS=2			# passed, but it's unexpected. fixed recently?
+RESULT_XFAIL=3			# failed, but it's expected. i.e. known bug.
+RESULT_UNRESOLVED=4		# cannot determine whether (X)?PASS or (X)?FAIL
+RESULT_FATAL=5			# something fatal happend and cannot continue
+RESULT_UNTESTED=6		# not tested, this test haven't written yet.
+RESULT_UNSUPPORTED=7		# not tested, this environment can't test this.
+
+#
+# Output a debug message.
+#
+log_debug()
+{
+	[ "X$DEBUG" != Xtrue ] && return
+	echo "$PROGRAM: debug: $@" >&2
+	return 0
+}
+
+#
+# Output a warning message.
+#
+log_warn()
+{
+	echo "$PROGRAM: warning: $@" 1>&2
+	return 0
+}
+
+#
+# Output an error message.
+#
+log_error()
+{
+	echo "$PROGRAM: error: $@" 1>&2
+	exit 1
+}
+
+#
+# Output an error message with usage.
+#
+log_usage_error()
+{
+	echo "$PROGRAM: error: $@" 1>&2
+
+	echo "Usage: $PROGRAM [option...] testcase"			1>&2
+	echo "    or $PROGRAM [option...] -s <scenario_file>"		1>&2
+	echo "Option:"							1>&2
+	echo "  -d                  debug mode"				1>&2
+	echo "  -f <config_file>    specify a gfservice configuration file" \
+		1>&2
+	echo "  -j <classname>      specify a classname and outputs xml file" \
+		1>&2
+	echo "  -k                  pass '-k' option to gfservice"      1>&2
+	echo "  -l <log_file>       specify a log file"			1>&2
+	echo "  -p <parameter_file> specify a test parameter file (obsolete)"	1>&2
+	echo "  -s <scenario_file>  specify a scenario file"		1>&2
+	exit 1
+}
+
+#
+# Cleanup temporary files.
+#
+cleanup()
+{
+	cd $TMP_FILE_DIR || return
+	rm -f *
+	cd .. && rmdir $TMP_FILE_DIR
+}
+
+#
+# Internal function for 'load()'.
+#
+do_load()
+{
+	FILE=`echo $1 | sed -e 's|::|/|g'`
+	MODULE_VAR="LOADED_`echo $1 | sed -e 's|::|__|g'`"
+	[ "X`eval echo \\$$MODULE_VAR`" = Xtrue ] && return
+
+	if [ -f $COMMON_SCRIPTS_DIR/$FILE ]; then
+		. $COMMON_SCRIPTS_DIR/$FILE
+	elif [ -f $COMMON_SCRIPTS_DIR/gfarm_v2/$FILE ]; then
+		log_warn "use 'gfarm_v2::$FILE' instead of '$FILE'"
+		. $COMMON_SCRIPTS_DIR/gfarm_v2/$FILE
+	elif [ -f $COMMON_SCRIPTS_DIR/gfarm2fs/$FILE ]; then
+		log_warn "use 'gfarm2fs::$FILE' instead of '$FILE'"
+		. $COMMON_SCRIPTS_DIR/gfarm2fs/$FILE
+	else
+		log_warn "failed to open script file \"$FILE\""
+	fi
+
+	# $MODULE_VAR may be changed by recursive calls of load().
+	log_debug "module loaded '$1'"
+	MODULE_VAR="LOADED_`echo $1 | sed -e 's|::|__|g'`"
+	eval "$MODULE_VAR=true"
+}
+
+#
+# Load script files from common_scripts directory.
+#
+load()
+{
+	do_load "$@" >> $LOG_FILE 2>&1
+}
+
+#
+# set result code
+#
+set_result()
+{
+	if `eval [ \\$$1 -eq $RESULT_PASS -o \\$$1 -eq $RESULT_XFAIL ]`; then
+		eval $1=$2
+	fi
+}
+
+#
+# returns result message
+#
+get_result_string()
+{
+	case $1 in
+	$RESULT_PASS)
+		echo "PASS";;
+	$RESULT_FAIL)
+		echo "FAIL";;
+	$RESULT_XPASS)
+		echo "XPASS";;
+	$RESULT_XFAIL)
+		echo "XFAIL";;
+	$RESULT_UNRESOLVED)
+		echo "UNRESOLVED";;
+	$RESULT_FATAL)
+		echo "FATAL";;
+	$RESULT_UNTESTED)
+		echo "UNTESTED";;
+	$RESULT_UNSUPPORTED)
+		echo "UNSUPPORTED";;
+	*)
+		echo "UNKNOWN RESULT CODE";;
+	esac
+}
+
+#
+# print test result in xml format
+#
+print_test_result()
+{
+	# $1=$JENKINS_CLASSNAME
+	# $2=$TESTNAME
+	# $3=$RESULT
+	# $4=$ELAPSED_TIME
+	# $5=$JENKINS_FILE
+
+	TESTCASE_FMT_BEGIN="    <testcase classname=\"%s\" name=\"%s\" time=\"%d\">\n"
+	TESTCASE_FMT_END="    </testcase>\n"
+	FAILURE_FMT="    <failure message=\"%s\"/>\n"
+
+	printf -- "$TESTCASE_FMT_BEGIN" $1 $2 $4 >> $5
+	case $3 in
+	$RESULT_FAIL | $RESULT_XPASS | $RESULT_UNRESOLVED | $RESULT_FATAL)
+		printf -- "$FAILURE_FMT" "`get_result_string $3`" >> $5
+	esac
+	printf -- "$TESTCASE_FMT_END" >> $5
+}
+
+#
+# Do a testcase.
+#
+do_testcase()
+{
+	TESTNAME="`echo $1 | sed -e 's|^.*::||g'`"
+	TESTFILE="`echo $1 | sed -e 's|::|/|g'`"
+
+	TEST_EXEC_ID="test_`hostname`_$$"
+
+	if [ -f "$TESTCASES_DIR/$TESTFILE" ]; then
+		. "$TESTCASES_DIR/$TESTFILE"
+	elif [ -f "$TESTCASES_DIR/gfarm_v2/$TESTFILE" ]; then
+		log_warn "use 'gfarm_v2::$TESTNAME' instead of '$TESTNAME'"
+		. "$TESTCASES_DIR/gfarm_v2/$TESTFILE"
+	elif [ -f "$TESTCASES_DIR/gfarm2fs/$TESTFILE" ]; then
+		log_warn "use 'gfarm2fs::$TESTNAME' instead of '$TESTNAME'"
+		. "$TESTCASES_DIR/gfarm2fs/$TESTFILE"
+	else
+		log_error "invalid test case: $TESTNAME"
+	fi
+
+	echo "start: $TESTNAME `date '+%Y-%m-%d %H:%M:%S'`" >> $LOG_FILE
+	echo -n "`printf %-60.60s $TESTNAME` ... "
+
+	if [ X$JENKINS_CLASSNAME != X ]; then
+		JENKINS_FILE=TEST-${JENKINS_CLASSNAME}-${TESTNAME}.xml
+		rm -f $JENKINS_FILE
+
+		echo "<testsuite>" >> $JENKINS_FILE
+
+		START_TIME=`date +%s`
+	fi
+
+	trap "teardown_${TESTNAME}; cleanup; exit 1" 1 2 3 15
+
+	log_debug "start setup_${TESTNAME}"  >> $LOG_FILE 2>&1
+	setup_${TESTNAME} "$@" >> $LOG_FILE 2>&1
+	RESULT=$?
+	log_debug "end setup_${TESTNAME}: `get_result_string $RESULT`" \
+		>> $LOG_FILE 2>&1
+
+	if [ $RESULT -eq $RESULT_PASS ]; then
+		log_debug "start test_${TESTNAME}"  >> $LOG_FILE 2>&1
+		test_${TESTNAME} >> $LOG_FILE 2>&1
+		RESULT=$?
+		log_debug "end test_${TESTNAME}: `get_result_string $RESULT`" \
+			>> $LOG_FILE 2>&1
+	fi
+	RESULT_STRING=`get_result_string $RESULT`
+
+	if [ X$JENKINS_CLASSNAME != X ]; then
+		ELAPSED_TIME=`expr \`date +%s\` - $START_TIME`
+		print_test_result $JENKINS_CLASSNAME $TESTNAME $RESULT \
+			$ELAPSED_TIME $JENKINS_FILE
+		echo "</testsuite>" >> $JENKINS_FILE
+	fi
+
+	echo "end:   $TESTNAME `date '+%Y-%m-%d %H:%M:%S'` $RESULT_STRING" \
+		>> $LOG_FILE
+	echo "$RESULT_STRING"
+
+	log_debug "start teardown_${TESTNAME}"  >> $LOG_FILE 2>&1
+	teardown_${TESTNAME} >> $LOG_FILE 2>&1
+	log_debug "end teardown_${TESTNAME}"  >> $LOG_FILE 2>&1
+
+	trap "cleanup; exit 1" 1 2 3 15
+	return $RESULT
+}
+
+#
+# print total result in plain text.
+#
+print_total_result()
+{
+	TOTAL_PASS=`grep -hc '^PASS$' $1`
+	TOTAL_FAIL=`grep -hc '^FAIL$' $1`
+	TOTAL_XPASS=`grep -hc '^XPASS$' $1`
+	TOTAL_XFAIL=`grep -hc '^XFAIL$' $1`
+	TOTAL_UNRESOLVED=`grep -hc '^UNRESOLVED$' $1`
+	TOTAL_FATAL=`grep -hc '^FATAL$' $1`
+	TOTAL_UNTESTED=`grep -hc '^UNTESTED$' $1`
+	TOTAL_UNSUPPORTED=`grep -hc '^UNSUPPORTED$' $1`
+
+	echo "Total test: `expr $TOTAL_PASS + $TOTAL_FAIL`"
+	echo "  success            : $TOTAL_PASS"
+	echo "  failure            : $TOTAL_FAIL"
+	
+	[ $TOTAL_XPASS -gt 0 ] \
+		&& echo "  unexpected success : $TOTAL_XPASS"
+	[ $TOTAL_XFAIL -gt 0 ]  \
+		&& echo "  expected failure   : $TOTAL_XFAIL"
+	[ $TOTAL_UNRESOLVED -gt 0 ] \
+		&& echo "  unresolved         : $TOTAL_UNRESOLVED"
+	[ $TOTAL_FATAL -gt 0 ] \
+		&& echo "  fatal error        : $TOTAL_FATAL"
+	[ $TOTAL_UNTESTED -gt 0 ] \
+		&& echo "  untested           : $TOTAL_UNTESTED"
+	[ $TOTAL_UNSUPPORTED -gt 0 ] \
+		&& echo "  unsupported        : $TOTAL_UNSUPPORTED"
+}
+
+#
+# Do testcases listed in a schenario file.
+#
+do_scenario()
+{
+
+	if [ -f "$SCENARIOS_DIR/$SCENARIO_FILE" ]; then
+		SCENARIO_FILE_PATH="$SCENARIOS_DIR/$SCENARIO_FILE"
+	else
+		log_error "failed to open the scenario file -- $SCENARIO_FILE"
+	fi
+
+	RESULT_COUNT_FILE="/tmp/gfruntest-scenario.$$"
+	rm -f $RESULT_COUNT_FILE
+	trap "rm -f $RESULT_COUNT_FILE; exit 1" 1 2 3 15
+
+	sed -e '/^#/d' -e '/^$/d' $SCENARIO_FILE_PATH | while read TESTNAME; do
+		$0 $OPTIONS -- $TESTNAME < /dev/null
+		RESULT=$?
+		RESULT_STRING=
+		echo "`get_result_string $RESULT`" >> $RESULT_COUNT_FILE
+	done
+
+	echo ""
+	print_total_result $RESULT_COUNT_FILE
+	rm -f $RESULT_COUNT_FILE
+	echo ""
+}
+
+#
+# Parse command line options.
+#
+while [ $# -ge 1 ]; do
+	case "$1" in
+	--)	shift
+		break
+		;;
+	-)	break
+		;;
+	-d)	DEBUG=true
+		GFSERVICE="$GFSERVICE -d"
+		OPTIONS="$OPTIONS -d"
+		shift
+		;;
+	-f)	if [ $# -le 1 ]; then
+			log_usage_error "option requires an argument -- 'f'"
+		fi
+		if [ -f $2 ]; then
+			CONFIG_FILE="$2"
+			GFSERVICE="$GFSERVICE -f $2"
+		else
+			log_error "failed to open configuration file \"$2\""
+		fi
+		OPTIONS="$OPTIONS -f $2"
+		shift 2
+		;;
+	-j)	if [ $# -le 1 ]; then
+			log_usage_error "option requires an argument -- 'j'"
+		fi
+		JENKINS_CLASSNAME=$2
+		OPTIONS="$OPTIONS -j $2"
+		shift 2
+		;;
+	-k)	GFSERVICE="$GFSERVICE -k"
+		OPTIONS="$OPTIONS -k"
+		shift
+		;;
+	-l)	if [ $# -le 1 ]; then
+			log_usage_error "option requires an argument -- 'l'"
+		fi
+		LOG_FILE=$2
+		OPTIONS="$OPTIONS -l $2"
+		shift 2
+		;;
+	-p)	if [ $# -le 1 ]; then
+			log_usage_error "option requires an argument -- 'p'"
+		fi
+		PARAMETER_FILE="`echo $2 | sed -e 's|::|/|g'`"
+		# Do not add '-p' option to OPTIONS.
+		shift 2
+		;;
+	-s)	if [ $# -le 1 ]; then
+			log_usage_error "option requires an argument -- 's'"
+		fi
+		SCENARIO_FILE="`echo $2 | sed -e 's|::|/|g'`"
+		# Do not add '-s' option to OPTIONS.
+		shift 2
+		;;
+	-*)	log_usage_error "$0: invalid option -- '$1'"
+		;;
+	*)	break
+		;;
+	esac
+done
+
+. "$CONFIG_FILE"
+
+trap "cleanup; exit 1" 1 2 3 15
+mkdir -p $TMP_FILE_DIR
+[ $? -ne 0 ] && log_error "$0: failed to create a directory: $TMP_FILE_DIR"
+
+EXITCODE=0
+if [ $# -eq 0 ]; then
+	if [ "X$SCENARIO_FILE" = X ]; then
+		log_error "$0: no scenario file specified"
+	fi
+	do_scenario
+else
+	if [ "X$PARAMETER_FILE" = X ]; then
+		do_testcase "$1"
+		EXITCODE=$?
+	else
+		#
+		# If parameter file is specified, we ignore non-option
+		# arguments.
+		#
+		log_warn "use of parameter file is obsolete" 1>&2
+		if [ -f $TESTCASES_DIR/gfarm_v2/$PARAMETER_FILE ]; then
+			do_testcase "gfarm_v2::$PARAMETER_FILE"
+			EXITCODE=$?
+		elif [ -f $TESTCASES_DIR/gfarm2fs/$PARAMETER_FILE ]; then
+			do_testcase "gfarm2fs::$PARAMETER_FILE"
+			EXITCODE=$?
+		else
+			log_error "failed to open the parameter file --" \
+				"$PARAMETER_FILE"
+		fi
+	fi
+fi
+
+cleanup
+exit $EXITCODE

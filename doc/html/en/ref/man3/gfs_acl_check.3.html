@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_check</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_check">
+<a name="gfs-acl-check.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_check — check a Gfarm ACL for validity</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">gfarm_error_t gfs_acl_check</b>(</code></td>
+<td>
+<var class="pdparam">acl</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">last_p</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">acl_check_err_code_p</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>gfarm_acl_t <var class="pdparam">acl</var></code>;<br><code>int *<var class="pdparam">last_p</var></code>;<br><code>int *<var class="pdparam">acl_check_err_code_p</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>acl</code></em></span></dt>
+<dd><p>An ACL structure type which is sorted.
+</p></dd>
+<dt><span class="term"><em class="parameter"><code>last_p</code></em></span></dt>
+<dd><p>If this last_p is not NULL,
+ the <span class="citerefentry"><span class="refentrytitle">gfs_acl_check</span>(3)</span> function assigns the number of the ACL entry
+ at which the error was detected to the value pointed to by this last_p.
+</p></dd>
+<dt><span class="term"><em class="parameter"><code>acl_check_err_code</code></em></span></dt>
+<dd><p><em class="parameter"><code>GFARM_ACL_MULTI_ERROR</code></em> or <em class="parameter"><code>GFARM_ACL_DUPLICATE_ERROR</code></em> or <em class="parameter"><code>GFARM_ACL_MISS_ERROR</code></em> or <em class="parameter"><code>GFARM_ACL_ENTRY_ERROR</code></em>.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="constant">GFARM_ERR_NO_ERROR</code></span></dt>
+<dd><p>The function terminated successfully.</p></dd>
+<dt><span class="term">Others</span></dt>
+<dd><p>An error except the above occurred.  The reason is shown by
+<span class="citerefentry"><span class="refentrytitle">gfarm_error_string</span>(3)</span>.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_error</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_sort</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_valid</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

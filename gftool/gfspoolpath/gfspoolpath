@@ -1,0 +1,34 @@
+#!/bin/sh
+
+status=0
+TMP=/tmp/gfspoolpath-$$
+
+trap 'rm -f $TMP; exit $status' 0 1 2 25
+
+case $1 in
+-s)
+	shift
+	GFARM_SPOOL=$1
+	shift;;
+esac
+
+: ${GFARM_SPOOL:="/var/gfarm-spool"}
+
+for i
+do
+	gfstat $i > $TMP || continue
+	inum=`sed -n 's/.*Inode: \([0-9]*\).*/\1/p' $TMP`
+	gen=`sed -n 's/.*Gen: \([0-9]*\).*/\1/p' $TMP`
+	size=`sed -n 's/.*Size: \([0-9]*\).*/\1/p' $TMP`
+	path=`printf "%016X%016X" $inum $gen |
+		sed 's/\([0-9A-F]\{8\}\)\([0-9A-F][0-9A-F]\)\([0-9A-F][0-9A-F]\)\([0-9A-F][0-9A-F]\)\([0-9A-F]\{18\}\)/\1\/\2\/\3\/\4\/\5/'`
+	path="data/$path"
+	echo $path
+	if [ -f "$GFARM_SPOOL/$path" ]; then
+		rsize=`ls -ln "$GFARM_SPOOL/$path" | awk '{print $5}'`
+		if [ $size != $rsize ]; then
+			echo >&2 "$i: size mismatch (meta $size real $rsize)"
+			status=2
+		fi
+	fi
+done

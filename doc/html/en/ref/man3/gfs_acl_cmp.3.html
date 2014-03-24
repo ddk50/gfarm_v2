@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_cmp</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_cmp">
+<a name="gfs-acl-cmp.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_cmp — compare two Gfarm ACLs</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table">
+<tr>
+<td><code class="funcdef"><b class="fsfunc">int gfs_acl_cmp</b>(</code></td>
+<td>
+<var class="pdparam">acl1</var>, </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td>
+<var class="pdparam">acl2</var><code>)</code>;</td>
+<td> </td>
+</tr>
+</table>
+<div class="paramdef-list">
+<code>gfarm_acl_t <var class="pdparam">acl1</var></code>;<br><code>gfarm_acl_t <var class="pdparam">acl2</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>acl1</code></em>, <em class="parameter"><code>acl2</code></em></span></dt>
+<dd><p>An ACL structure type which is sorted.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUES">
+<a name="return-values"></a><h2>RETURN VALUES</h2>
+<p>
+If the two ACLs acl1 and acl2 are equal, this function returns 0. And
+if they differ, this function returns 1.
+</p>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_dup</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_sort</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_from_text</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_get_file</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_init</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

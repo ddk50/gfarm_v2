@@ -1,0 +1,111 @@
+'\" t
+.\"     Title: gfarm_initialize
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 26 Jun 2010
+.\"    Manual: Gfarm
+.\"    Source: Gfarm
+.\"  Language: English
+.\"
+.TH "GFARM_INITIALIZE" "3" "26 Jun 2010" "Gfarm" "Gfarm"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gfarm_initialize \- initialize the Gfarm execution environment for client
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <gfarm/gfarm\&.h>
+.fi
+.ft
+.HP \w'gfarm_error_t\ gfarm_initialize('u
+.BI "gfarm_error_t\ gfarm_initialize(int\ *" "argcp" ", char\ ***\ " "argvp" ");"
+.SH "DESCRIPTION"
+.PP
+\fBgfarm_initialize()\fR
+initializes the Gfarm execution environment for client application\&. This function should be called before any Gfarm library API\&.
+\fIargcp\fR
+is a pointer to the number of arguments and
+\fIargvp\fR
+is a pointer to the argument vector\&.
+.SH "RETURN VALUES"
+.PP
+\fBGFARM_ERR_NO_ERROR\fR
+.RS 4
+The function terminated successfully\&.
+.RE
+.PP
+\fBGFARM_ERR_NO_MEMORY\fR
+.RS 4
+Insufficient memory was available\&.
+.RE
+.PP
+\fBGFARM_ERR_UNKNOWN_HOST\fR
+.RS 4
+The metadata server cannot be resolved\&.
+.RE
+.PP
+\fBGFARM_ERR_NETWORK_IS_UNREACHABLE\fR
+.RS 4
+Network is unrechable\&.
+.RE
+.PP
+\fBGFARM_ERR_OPERATION_TIMED_OUT\fR
+.RS 4
+Connetion timeout occurs\&.
+.RE
+.PP
+\fBGFARM_ERR_PROTOCOL\fR
+.RS 4
+Protocol error occurs\&.
+.RE
+.PP
+\fBGFARM_ERR_BROKEN_PIPE\fR
+.RS 4
+Connection to the metadata server is broken\&.
+.RE
+.PP
+\fBGFARM_ERR_PERMISSION_DENIED\fR
+.RS 4
+The requested access to the file is not allowed, or one of the directories in
+\fIgfarm_url\fR
+did not allow search (execute) permission\&. Or, the authentication to the metadata server fails\&.
+.RE
+.PP
+\fBGFARM_ERR_PROTOCOL_NOT_SUPPORTED\fR
+.RS 4
+Specified authentication protocol is not supported\&.
+.RE
+.PP
+\fBGFARM_ERR_AUTHENTICATION\fR
+.RS 4
+User authentication failed when connecting to the metadata server\&.
+.RE
+.PP
+Others
+.RS 4
+An error except the above occurred\&. The reason is shown by its
+\fBgfarm_error_string\fR(3)\&.
+.RE
+.SH "SEE ALSO"
+.PP
+
+\fBgfarm_terminate\fR(3)

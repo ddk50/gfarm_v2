@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfs_acl_error</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfs_acl_error">
+<a name="gfs-acl-error.3"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfs_acl_error — convert a Gfarm ACL error code to a text message</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="funcsynopsis">
+<pre class="funcsynopsisinfo">
+#include &lt;gfarm/gfarm.h&gt;
+</pre>
+<table border="0" summary="Function synopsis" cellspacing="0" cellpadding="0" class="funcprototype-table"><tr>
+<td><code class="funcdef"><b class="fsfunc">const char * gfs_acl_error</b>(</code></td>
+<td>
+<var class="pdparam">acl_check_err_code</var><code>)</code>;</td>
+<td> </td>
+</tr></table>
+<div class="paramdef-list">
+<code>int <var class="pdparam">acl_check_err_code</var></code>;</div>
+<div class="funcprototype-spacer"> </div>
+</div>
+</div>
+<div class="refsect1" title="INPUT ARGUMENTS">
+<a name="input-arguments"></a><h2>INPUT ARGUMENTS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><em class="parameter"><code>acl_check_err_code</code></em></span></dt>
+<dd><p>A error code returned by <span class="citerefentry"><span class="refentrytitle">gfs_acl_check</span>(3)</span>.
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="RETURN VALUE">
+<a name="return-values"></a><h2>RETURN VALUE</h2>
+<p>
+If the acl_check_err_code is <em class="parameter"><code>GFARM_ACL_MULTI_ERROR</code></em>,
+ "Multiple entries" is returned.
+If the acl_check_err_code is <em class="parameter"><code>GFARM_ACL_DUPLICATE_ERROR</code></em>,
+ "Duplicate entries" is returned.
+If the acl_check_err_code is <em class="parameter"><code>GFARM_ACL_MISS_ERROR</code></em>,
+ "Missing or wrong entry" is returned.
+If the acl_check_err_code is <em class="parameter"><code>GFARM_ACL_ENTRY_ERROR</code></em>,
+ "Invalid entry type" is returned.
+ "No error" is returned  otherwise.
+</p>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_check</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gfs_acl_valid</span>(3)</span>
+</p>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,82 @@
+'\" t
+.\"     Title: gfperf-parallel-autoreplica
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 19 May 2012
+.\"    Manual: Gfarm
+.\"    Source: Gfarm
+.\"  Language: English
+.\"
+.TH "GFPERF\-PARALLEL\-AU" "1" "19 May 2012" "Gfarm" "Gfarm"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gfperf-parallel-autoreplica \- Gfarm measure autoreplica performance
+.SH "SYNOPSIS"
+.HP \w'\fBgfperf\-parallel\-autoreplica\fR\ 'u
+\fBgfperf\-parallel\-autoreplica\fR [\-t,\ \-\-testdir\ \fItest\ directory\fR] [\-m,\ \-\-gfarm2fs\ \fIgfarm2fs\ mount\ point\fR] [\-l,\ \-\-filesize\ \fIfile\ size\fR] [\-f,\ \-\-number\ \fInumber\ of\ files\fR] [\-r,\ \-\-replica\ \fInumber\ of\ replica\fR] [\-s,\ \-\-stop\ \fIwait\ time\fR] [\-n,\ \-\-name\ \fIgroup\ name\fR] [\-w,\ \-\-wait\ \fIstart\ time\fR]
+.SH "DESCRIPTION"
+.PP
+This command creates specified number of files of specified size in
+\fItest directory\fR\&. The created files will be automatically replicated by gfmd\&. This command measures creation time of the files\&.
+.PP
+This command is expected to be called by gfperf\&.rb in parallel\&.
+.SH "OPTIONS"
+.PP
+\fB\-t, \-\-testdir\fR \fItest directory\fR
+.RS 4
+Files are created in
+\fItest directory\fR\&. Specify only gfarm url (that begins with gfarm:///) \&. The default is gfarm:///tmp \&.
+.RE
+.PP
+\fB\-m, \-\-gfarm2fs\fR \fIgfarm2fs mount point \fR
+.RS 4
+Specify gfarm2fs mount point\&.
+.RE
+.PP
+\fB\-l, \-\-filesize\fR \fIfile size\fR
+.RS 4
+File size to be created\&. The default is 1G\&. (1G=2^30)
+.RE
+.PP
+\fB\-f, \-\-number\fR \fInumber of files\fR
+.RS 4
+Number of files to be created\&. The default is 10\&.
+.RE
+.PP
+\fB\-r, \-\-replica\fR \fInumber of replica\fR
+.RS 4
+Number of replica\&. The default is 1\&.
+.RE
+.PP
+\fB\-s, \-\-stop\fR \fIwait time\fR
+.RS 4
+Wait time in seconds for replication\&. The default is 60 seconds\&.
+.RE
+.PP
+\fB\-n, \-\-name\fR \fIgroup name\fR
+.RS 4
+Group name in parallel execution\&.
+.RE
+.PP
+\fB\-w, \-\-wait\fR \fIstart time\fR
+.RS 4
+Start time specified by gfperf\&.rb\&. This command waits until start time\&. Start time is written in UTC (YYYY\-MM\-DDThh:mm:ssZ) and must be in 10 seconds from current time\&.
+.RE

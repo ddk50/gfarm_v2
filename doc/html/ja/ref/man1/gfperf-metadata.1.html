@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-metadata</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-metadata">
+<a name="gfperf-metadata.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-metadata — Gfarm メタデータの性能測定を行う。</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-metadata</code>  [-n, --number <em class="replaceable"><code>テスト実施数</code></em>] [-t, --testdir <em class="replaceable"><code>テストディレクトリ</code></em>] [-u, --unit <em class="replaceable"><code>出力の単位</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>引数 <em class="parameter"><code>テストディレクトリ</code></em> にテスト用のファイルやディレクトリを作成し、その実行性能を測定します。
+</p>
+<p>測定する項目は次の通りです。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term">create</span></dt>
+<dd><p>
+	gfs_pio_create()またはcreat()の性能を測定します。
+	出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">readdir</span></dt>
+<dd><p>
+	gfs_opendir_caching()から<em class="parameter"><code>テスト実施数</code></em>分gfs_readdir()を行い、gfs_closedir()を実行するまでの性能を測定します。
+	posixの場合はopendir()から<em class="parameter"><code>テスト実施数</code></em>分readdir()を行い、closedir()を実行するまでの性能を測定します。
+        出力結果は上記測定にかかった時間を<em class="parameter"><code>テスト実施数</code></em>で割った平均値です，
+      </p></dd>
+<dt><span class="term">readdir+stat</span></dt>
+<dd><p>
+	上記readdirの測定時に<em class="parameter"><code>テスト実施数</code></em>分gfs_lstat_cached()またはlstat()を実行した時間を足して測定したものです。
+        出力結果は測定にかかった時間を<em class="parameter"><code>テスト実施数</code></em>で割った平均値です。
+      </p></dd>
+<dt><span class="term">unlink</span></dt>
+<dd><p>
+	gfs_unlink()またはunlink()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">mkdir</span></dt>
+<dd><p>
+	gfs_mkdir()またはmkdir()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">stat</span></dt>
+<dd><p>
+	gfs_lstat()またはlstat()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">chmod</span></dt>
+<dd><p>
+	gfs_chmod()またはchmod()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">utimes</span></dt>
+<dd><p>
+	gfs_utimes()またはutimes()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">rename</span></dt>
+<dd><p>
+	gfs_rename()またはrename()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">symlink</span></dt>
+<dd><p>
+	gfs_symlink()またはsymlink()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">readlink</span></dt>
+<dd><p>
+	gfs_readlink()またはreadlink()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">setxattr</span></dt>
+<dd><p>
+	gfs_setxattr()またはsetxattr()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">getxattr</span></dt>
+<dd><p>
+	gfs_getxattr()またはgetxattr()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">removexattr</span></dt>
+<dd><p>
+	gfs_removexattr()またはremovexattr()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+<dt><span class="term">rmdir</span></dt>
+<dd><p>
+	gfs_rmdir()またはrmdir()の性能を測定します。
+        出力結果は１回辺りの平均値です。
+      </p></dd>
+</dl></div>
+<p>
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-n, --number</code> <em class="parameter"><code>テスト実施数</code></em></span></dt>
+<dd><p>
+それぞれの測定項目に対して何回実施するかを指定します。デフォルトは250です。
+</p></dd>
+<dt><span class="term"><code class="option">-t, --testdir</code> <em class="parameter"><code>テストディレクトリ</code></em></span></dt>
+<dd><p>
+テストを実施するディレクトリを指定します。
+gfarm url(gfarm:///で始まるもの)を指定した場合、該当のgfarm上のディレクトリに対してlibgfarmの関数を使用した場合の性能を測定します。
+file url(file:///で始まるもの)を指定した場合、該当のunixファイルシステム上にposixの関数を使用した場合の性能を測定します。
+デフォルトはgfarm:///tmpです。
+</p></dd>
+<dt><span class="term"><code class="option">-u, --uinit</code> <em class="parameter"><code>出力の単位</code></em></span></dt>
+<dd><p>ops(operations per second)またはusecを指定します。指定した単位で出力を返します。デフォルトはopsです。
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

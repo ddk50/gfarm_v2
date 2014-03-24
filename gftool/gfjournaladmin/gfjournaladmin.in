@@ -1,0 +1,298 @@
+#! @RUBY@
+#
+# gfjournaladmin - Rewrite a particular record in a journal file to
+#                  NOP (no-operation).
+#
+
+require 'getoptlong.rb'
+require '@datadir@/gfarm/ruby/gfjournalfile.rb'
+require '@datadir@/gfarm/ruby/gfcrc32.rb'
+
+def print_usage()
+  warn("Usage: gfjournaladmin [-h?nv] <journal file path> <seqnum>")
+  warn("    -h,-? : show this message")
+  warn("       -n : read a journal file, but not write actually")
+  warn("       -v : verbose mode")
+end
+
+#
+# Main operation handler.
+#
+class GFJournalAdmin
+  include GFJournalFileConsts
+  include GFCRC32
+
+  #
+  # File format versions this program supports.
+  #
+  SUPPORTED_VERSIONS      = [1]
+
+  attr_reader :file
+  attr_reader :filename
+  attr_accessor :debug_mode
+
+  #
+  # Calculate CRC32.
+  #
+  public
+  def GFJournalAdmin.crc32(data, in_crc32 = 0)
+    crc32 = in_crc32 ^ 0xFFFFFFFF
+    data.unpack("C*").each do |i|
+      crc32 = (crc32 >> 8) ^ CRCTABLE[(crc32 ^ i) & 0xFF]
+    end
+    return crc32 ^ 0xFFFFFFFF
+  end
+
+  #
+  # Initializer.
+  #
+  public
+  def initialize(filename)
+    @debug_mode = false
+    @filename = filename
+    begin
+      @file = open(filename, "r+")
+    rescue => e
+      raise "failed to open the journal file, #{e}: #{@filename}"
+    end
+
+    #
+    # Read a header and check magic ID and version.
+    #
+    begin
+      data = @file.read(HEADER_LENGTH)
+    rescue => e
+      raise "failed to read a journal header, #{e}: #{@filename}"
+    end
+    if data.length != HEADER_LENGTH
+      raise "malformed journal header"  
+    end
+
+    magic = data.slice(HEADER_MAGIC_OFFSET, HEADER_MAGIC_LENGTH)
+    if magic != HEADER_MAGIC
+      raise "invalid journal file magic code: #{@filename}"
+    end
+
+    version = data.slice(HEADER_VERSION_OFFSET, 
+			 HEADER_VERSION_LENGTH).unpack("N")[0]
+    if !SUPPORTED_VERSIONS.include?(version)
+      raise "journal file version '#{version}' not supported: #{@filename}"
+    end
+  end
+
+  #
+  # Close the journal file.
+  #
+  public
+  def close()
+    @file.close
+  end
+
+  #
+  # Read a record at the current position and return its seqnum, opeid
+  # and length of the record.
+  #
+  private
+  def inspect_current_record()
+    while true
+      saved_pos = @file.pos
+      begin
+	data = @file.read(RECORD_DATA_OFFSET)
+	return -1, 0 if data == nil || data.length != RECORD_DATA_OFFSET
+	magic = data.slice(RECORD_MAGIC_OFFSET, RECORD_MAGIC_LENGTH)
+	break if magic == RECORD_MAGIC
+	@file.pos = saved_pos += 1
+      rescue => e
+	return -1, 0
+      end
+    end
+
+    seqnum = 0
+    data.slice(RECORD_SEQNUM_OFFSET,
+	       RECORD_SEQNUM_LENGTH).unpack("C*").each do |i|
+      seqnum = (seqnum << 8) + i
+    end
+
+    opeid   = data.slice(RECORD_OPEID_OFFSET,
+			 RECORD_OPEID_LENGTH).unpack("N")[0]
+    data_length = data.slice(RECORD_DATALEN_OFFSET,
+			     RECORD_DATALEN_LENGTH).unpack("N")[0]
+    record_length = RECORD_DATA_OFFSET + data_length + RECORD_CRC32_LENGTH
+
+    if @debug_mode
+      warn("debug: read a record (offset=#{saved_pos}, " +
+	   "seqnum=#{seqnum}, opeid=#{opeid}, length=#{record_length})")
+    end
+
+    begin
+      data = @file.read(data_length)
+    rescue => e
+      raise "failed to read a journal record body, #{e}: #{@filename}"
+    end
+    if data.length != data_length
+      raise "malformed journal record body: #{@filename}"
+    end
+
+    begin
+      data = @file.read(RECORD_CRC32_LENGTH)
+    rescue => e
+      raise "failed to read a journal record checksum, #{e}: #{@filename}"
+    end
+    if data.length != RECORD_CRC32_LENGTH
+      raise "malformed journal record checksum: #{@filename}"
+    end
+
+    return seqnum, opeid, record_length
+  end
+
+  #
+  # Create a NOP record of the specified length.
+  #
+  private
+  def create_nop_record_data(seqnum, record_length)
+    data_length = record_length - RECORD_DATA_OFFSET - RECORD_CRC32_LENGTH
+    raise "Target record is too small (corrupted?)\n" if data_length < 4
+
+    nop_record  = RECORD_MAGIC
+    nop_record += [(seqnum >> 32) & 0xFFFFFFFF, seqnum & 0xFFFFFFFF].pack("NN")
+    nop_record += [OPEID_NOP].pack("N")
+    nop_record += [data_length].pack("N")
+    nop_record += [data_length - 4].pack("N")
+    nop_record += "\0" * (data_length - 4)
+    nop_record += [GFJournalAdmin.crc32(nop_record)].pack("N")
+    return nop_record
+  end
+
+  #
+  # Internal method for 'rewrite_record()' and 'test_rewrite_record()'.
+  #
+  private
+  def rewrite_record_internal(target_seqnum, test_mode)
+    raise "File has already been closed: #{@filename}" if @file.closed?
+
+    #
+    # Rewind.
+    #
+    begin
+      @file.pos = HEADER_LENGTH
+    rescue => e
+      raise "Failed to seek the journal file, #{e}: #{@filename}"
+    end
+
+    while true
+      #
+      # Read a record.
+      #
+      seqnum, opeid, record_length = inspect_current_record()
+      if seqnum < 0
+	raise "a record with seqnum=#{target_seqnum} not found"
+      end
+      next if seqnum != target_seqnum
+
+      #
+      # Create a NOP record.
+      #
+      nop_record_data = create_nop_record_data(seqnum, record_length)
+
+      #
+      # Write the NOP record.
+      #
+      target_pos = @file.pos - record_length
+      if test_mode
+	warn("#{$0}: a record with seqnum=#{seqnum} found at")
+	warn("#{$0}:   offset=#{target_pos}, opeid=#{opeid}, " +
+	     "length=#{record_length}")
+      else
+	begin
+	  rest_length = nop_record_data.length
+	  @file.pos -= record_length
+	  while rest_length > 0
+	    written_length = @file.write(nop_record_data)
+	    rest_length -= written_length
+	    nop_record_data.slice!(0, written_length)
+	  end
+	rescue => e
+	  raise "Failed to write a NOP record, #{e}: #{@filename}"
+	end
+	if @debug_mode
+	  warn("debug: write a NOP record (offset=#{target_pos}, " + 
+	       "seqnum=#{seqnum}, length=#{record_length})")
+	end
+      end
+      break
+    end
+
+    return self
+  end
+
+  #
+  # Search a journal file for a record with the specified seqnum
+  # and rewrite the record with NOP.
+  #
+  public
+  def rewrite_record(target_seqnum)
+    return rewrite_record_internal(target_seqnum, false)
+  end
+
+  #
+  # Similar to rewrite_record() but it doesn't rewrite actually.
+  #
+  public
+  def test_rewrite_record(target_seqnum)
+    return rewrite_record_internal(target_seqnum, true)
+  end
+end
+
+#
+# Parse command line arguments.
+#
+$debug_mode = false
+$test_mode = false
+
+$opts = GetoptLong.new
+$opts.set_options(['-h', '-?', GetoptLong::NO_ARGUMENT],
+		  ['-n',       GetoptLong::NO_ARGUMENT],
+		  ['-v',       GetoptLong::NO_ARGUMENT])
+begin
+  $opts.each_option do |name, arg|
+    case name
+    when '-d'
+      $debug_mode = true
+    when '-n'
+      $test_mode = true
+    when '-h'
+      print_usage()
+      exit(0)
+    end
+  end
+rescue
+  print_usage()
+  exit(1)
+end
+
+if ARGV.length != 2 || ARGV[1] !~ /^(0|[1-9][0-9]*)$/
+  print_usage()
+  exit(1)
+end
+
+$journal_filename = ARGV[0]
+$target_seqnum = ARGV[1].to_i
+
+#
+# Rewrite a journal file.
+#
+begin
+  $gfnop = GFJournalAdmin.new($journal_filename)
+  $gfnop.debug_mode = $debug_mode
+  if $test_mode
+    $gfnop.test_rewrite_record($target_seqnum)
+  else
+    $gfnop.rewrite_record($target_seqnum)
+  end
+  $gfnop.close
+rescue => e
+  warn("#{$0}: #{e}")
+  exit(1)
+end
+
+exit(0)

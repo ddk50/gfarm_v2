@@ -1,0 +1,74 @@
+'\" t
+.\"     Title: gfs_pio_close
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 27 Jun 2010
+.\"    Manual: Gfarm
+.\"    Source: Gfarm
+.\"  Language: English
+.\"
+.TH "GFS_PIO_CLOSE" "3" "27 Jun 2010" "Gfarm" "Gfarm"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gfs_pio_close \- Gfarmファイルシステムのファイルのクローズ
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <gfarm/gfarm\&.h>
+.fi
+.ft
+.HP \w'gfarm_error_t\ gfs_pio_close('u
+.BI "gfarm_error_t\ gfs_pio_close(GFS_File\ " "gfp" ");"
+.SH "DESCRIPTION"
+.PP
+ファイル
+\fIgfp\fR
+をクローズします。
+.SH "RETURN VALUES"
+.PP
+\fBGFARM_ERR_NO_ERROR\fR
+.RS 4
+正常終了を示します。
+.RE
+.PP
+\fBGFARM_ERR_BAD_FILE_DESCRIPTOR\fR
+.RS 4
+\fIgfp\fR
+で指定されるファイルディスクリプタが不正です。
+.RE
+.PP
+\fBGFARM_ERR_NO_MEMORY\fR
+.RS 4
+メモリ不足のため処理を中止しました。
+.RE
+.PP
+その他
+.RS 4
+上記以外のエラーが生じたことを示します。
+\fBgfarm_error_string\fR(3)
+によりエラーの原因を文字列に変換することができます。
+.RE
+.SH "SEE ALSO"
+.PP
+
+\fBgfs_pio_create\fR(3),
+\fBgfs_pio_open\fR(3)

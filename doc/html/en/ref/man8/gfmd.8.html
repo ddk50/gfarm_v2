@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfmd</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfmd">
+<a name="gfmd.8"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfmd — Gfarm metadata server</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfmd</code>  [<em class="replaceable"><code>options</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p><span class="command"><strong>gfmd</strong></span> is a Gfarm filesystem metadata server for accessing
+the filesystem metadata of the Gfarm filesystem.  <span class="command"><strong>gfmd</strong></span> must
+be running on a metadata server node in advance.</p>
+<p>It is possible for <span class="command"><strong>gfmd</strong></span> to be executed as a non-privileged user
+process, although only the user that executes the <span class="command"><strong>gfmd</strong></span> can be authenticated.
+Other users cannot use it.
+For details, see SETUP.private.en document
+</p>
+<p>To access gfmd, 
+the hostname and the port number should be
+specified by the metadb_server_host and metadb_server_port statements,
+respectively, in <code class="filename">~/.gfarm2rc</code>
+or in <code class="filename">%%SYSCONFDIR%%/gfarm2.conf</code>
+on a client node.</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-L</code> <em class="parameter"><code>log-level</code></em></span></dt>
+<dd><p>Specifies a log priority level.  The log output, which priority
+is higher or equal to this level, will be sent to syslog or standard error.
+Please refer gfarm2.conf(5) for the priority levels which can be specified
+by this option.
+</p></dd>
+<dt><span class="term"><code class="option">-P</code> <em class="parameter"><code>pid-file</code></em></span></dt>
+<dd><p>Specifies a file name to be used to record the process ID of gfmd.</p></dd>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd>
+<p>Specifies the debug mode.  With the -d option, gfmd runs as a
+foreground process, not a daemon.</p>
+<p>
+If this option is specified and <code class="option">-L</code> is not specified,
+the log level is set to "debug".
+</p>
+</dd>
+<dt><span class="term"><code class="option">-f</code> <em class="parameter"><code>config-file</code></em></span></dt>
+<dd><p>Specifies a configuration file that is read instead of the default
+configuration file.</p></dd>
+<dt><span class="term"><code class="option">-p</code> <em class="parameter"><code>port</code></em></span></dt>
+<dd><p>Specifies a port number to be used by gfmd.</p></dd>
+<dt><span class="term"><code class="option">-s</code> <em class="parameter"><code>syslog-facility</code></em></span></dt>
+<dd><p>Specifies a syslog facility to report errors encountered by gfmd.
+By default,
+local0 is used.</p></dd>
+<dt><span class="term"><code class="option">-v</code></span></dt>
+<dd><p>Makes gfmd output verbose log message on authentication.
+This is useful, when one has to resolve an issue about GSI authenticaion.
+</p></dd>
+<dt><span class="term"><code class="option">-?</code></span></dt>
+<dd><p>Displays a list of command options.</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="FILES">
+<a name="files"></a><h2>FILES</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="filename">%%SYSCONFDIR%%/gfmd.conf</code></span></dt>
+<dd><p>configuration file</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="see-also"></a><h2>SEE ALSO</h2>
+<p>
+<span class="citerefentry"><span class="refentrytitle">gfarm2.conf</span>(5)</span>
+</p>
+</div>
+</div></body>
+</html>

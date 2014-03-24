@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<!-- $Id: gfarm_strings_free_deeply.3.docbook 8403 2013-07-26 05:56:08Z m-kasahr $ -->
+
+<refentry id="gfarm-strings-free-deeply.3">
+
+<refentryinfo><date>1 May 2002</date></refentryinfo>
+
+<refmeta>
+<refentrytitle>gfarm_strings_free_deeply</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>Gfarm</refmiscinfo>
+</refmeta>
+
+<refnamediv id="name">
+<refname>gfarm_strings_free_deeply</refname>
+<refpurpose>free an array of strings</refpurpose>
+</refnamediv>
+<refsynopsisdiv id="synopsis">
+<funcsynopsis>
+<funcsynopsisinfo format="linespecific">
+#include &lt;gfarm/gfarm.h&gt;
+</funcsynopsisinfo>
+
+<funcprototype>
+  <funcdef><function moreinfo="none"><returnvalue>void </returnvalue>gfarm_strings_free_deeply</function></funcdef>
+    <paramdef>int <parameter moreinfo="none">n</parameter></paramdef>
+    <paramdef>char ** <parameter moreinfo="none">strings</parameter></paramdef>
+</funcprototype>
+
+
+</funcsynopsis>
+</refsynopsisdiv>
+
+<!-- body begins here -->
+
+<refsect1 id="description"><title>DESCRIPTION</title>
+<para><function moreinfo="none">gfarm_string_free_deeply()</function> frees the memory space of an array of
+strings <parameter moreinfo="none">strings</parameter> with the size <parameter moreinfo="none">n</parameter>.  This also frees every
+string in the array.</para>
+</refsect1>
+</refentry>
+

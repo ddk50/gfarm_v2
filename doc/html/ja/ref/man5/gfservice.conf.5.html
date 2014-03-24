@@ -1,0 +1,325 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfservice.conf</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfservice.conf">
+<a name="gfservice.conf.5"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfservice.conf — gfservice の設定ファイル</p>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+<span class="command"><strong>gfservice</strong></span> は、設定をファイルから読み込みます。
+(<span class="command"><strong>gfservice-agent</strong></span> は設定ファイルを読みません。)
+</p>
+<p>
+設定ファイルはそれ自体が、Bourne シェルスクリプトになっています。
+ファイルは、<span class="command"><strong>gfservice</strong></span> によって
+<span class="emphasis"><em>スクリプトとして評価されます。</em></span>
+以下に、設定ファイルの記述例を示します。
+</p>
+<div class="literallayout"><p><br>
+	# gfmd サーバー<br>
+	gfmd1=db1.example.com<br>
+	gfmd2=db2.example.com<br>
+</p></div>
+<p>
+Bourne シェルと同様に、「#」で始まる行や空行は無視されます。
+それ以外の行では、シェル変数を宣言します。
+この例では、変数 <em class="replaceable"><code>gfmd1</code></em> を
+<em class="replaceable"><code>db1.example.com</code></em> という値にセットし、
+変数 <em class="replaceable"><code>gfmd2</code></em> には
+<em class="replaceable"><code>db12.example.com</code></em> という値をそれぞれセット
+しています。
+「=」の前後に空白文字を置くことはできないので、注意して下さい。
+</p>
+<p>
+変数 <em class="replaceable"><code>gfmd1</code></em> と <em class="replaceable"><code>gfmd2</code></em>
+は「ホスト ID」として使用します。
+<span class="command"><strong>gfservice</strong></span> では、ホストを指定する際にホスト名ではなく、
+ホスト IDを使用します。
+</p>
+<div class="literallayout"><p><br>
+	<span class="command"><strong>gfservice <em class="replaceable"><code>start-gfmd</code></em> <em class="replaceable"><code>gfmd2</code></em></strong></span><br>
+</p></div>
+<p>
+上記のコマンドを実行すると、<span class="command"><strong>gfservice</strong></span> はサーバー
+<em class="replaceable"><code>gfmd2</code></em> 、つまり metadb2.example.com 上の gfmd
+を起動します。
+ホスト ID の末尾の数は 1 から、連続して割り当てなくてはなりません。
+</p>
+<p>
+gfsd サーバーとクライアントホストを指定するには、ホスト ID 
+「gfs<em class="replaceable"><code>n</code></em>」と「client<em class="replaceable"><code>n</code></em>」
+をそれぞれ使用します。
+</p>
+<div class="literallayout"><p><br>
+	# gfsd サーバー<br>
+	gfsd1=fs1.example.com<br>
+<br>
+	# クライアント<br>
+	client1=pc1.example.com<br>
+	client2=pc2.example.com<br>
+	client3=pc2.example.com<br>
+</p></div>
+<p>
+ホスト ID 変数に加え、<span class="command"><strong>gfservice</strong></span> はホスト ID に関連する
+変数をいくつか認識します。
+</p>
+<div class="literallayout"><p><br>
+	# gfmd1 に関する設定<br>
+	gfmd1_CONFIG_GFARM_OPTIONS="-X -A $LOGNAME"<br>
+	gfmd1_SSH="ssh -i $HOME/.ssh/id_rsa_gfservice"<br>
+	gfmd1_SUDO=/usr/local/bin/sudo<br>
+</p></div>
+<p>
+この例で示しているように、空白文字を含む値をセットするには、引用符を使用
+します。
+<code class="varname">$VARNAME</code> は、シェル変数もしくは環境変数 
+<code class="varname">VARNAME</code> の値に展開されます。
+</p>
+</div>
+<div class="refsect1" title="VARIABLES ABOUT GFMD">
+<a name="gfmd-variables"></a><h2>VARIABLES ABOUT GFMD</h2>
+<p>
+変数「gfmd<em class="replaceable"><code>n</code></em>」(gfmd1, gfmd2, ...) は、gfmd
+サーバーを定義するために用います。
+名前が「gfmd<em class="replaceable"><code>n</code></em>_」で始まる変数 (たとえば
+<em class="replaceable"><code>gfmd1_SSH</code></em>) は、対応する
+「gfmd<em class="replaceable"><code>n</code></em>」サーバーの設定パラメタをセットするため
+に用います。
+<span class="command"><strong>gfservice</strong></span> が現在のところ認識する変数は、以下の通りです。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em></code></span></dt>
+<dd>
+<p>
+gfmd サーバーを登録します。
+変数の値は、サーバーホストのホスト名 (もしくは IP アドレス) を表します。
+<span class="command"><strong>gfservice</strong></span> は、この値を SSH 接続先ホストとしてしか
+使用しないので注意して下さい。
+Gfarm システム内で使用されるホスト名を指定するには、代わりに 
+<code class="varname">gfmd<em class="replaceable"><code>n</code></em>_CONFIG_GFARM_OPTOINS</code>
+という変数の中で、<code class="option">-h</code> オプションを使用して下さい。
+</p>
+<div class="literallayout"><p><br>
+	gfmd1=md1-ctl.example.org<br>
+	gfmd1_CONFIG_GFARM_OPTIONS="-h md1.example.org"<br>
+</p></div>
+</dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_GFBINDIR</code></span></dt>
+<dd><p>
+gfmd サーバー上で <span class="command"><strong>gfservice-agent</strong></span> コマンドが
+インストールされているディレクトリへのパスを指定します。
+この変数が宣言されていると <span class="command"><strong>gfservice</strong></span> は、
+「<span class="command"><strong><code class="varname">$gfmd<em class="replaceable"><code>n</code></em>_GFBINDIR</code>/gfservice-agent</strong></span>」を実行します。
+宣言されていない場合は、「<span class="command"><strong>gfservice-agent</strong></span>」を実行します。
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_CONFIG_GFARM_OPTIONS</code></span></dt>
+<dd><p>
+<span class="command"><strong>config-gfarm</strong></span> コマンドのオプションを指定します。
+デフォルト値は、空文字列 (オプションなし) です。
+<span class="command"><strong>gfservice</strong></span> は <span class="command"><strong>config-gfarm</strong></span> サブコマンド
+およびその他多くのサブコマンドを実行する際に、この変数を参照します。
+<span class="command"><strong>config-gfarm</strong></span> が完了した後であっても、この変数の宣言を
+削除したり、編集したりはしないで下さい。
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE</code></span></dt>
+<dd><p>
+リモートホスト上の gfmd をプライベートモードで動作させる場合は、この
+変数に「true」をセットします。
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_AUTH_TYPE</code></span></dt>
+<dd><p>
+認証タイプ ("sharedsecret", "gsi", "gsi_auth" のいずれか) を指定します。
+この変数が定義されていない場合は、gfmd1 上で
+<span class="command"><strong>config-gfarm</strong></span> を実行したときの
+<code class="varname">AUTH_TYPE</code> の値が採用されます。
+(変数 <code class="varname">gfmd1_CONFIG_GFARM_OPTIONS</code> の値によって、この
+ときの <code class="varname">AUTH_TYPE</code> の値は変わるので、注意して下さい。)
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_CLUSTER_NAME</code></span></dt>
+<dd><p>
+gfmd サーバのクラスタ名を指定します。
+デフォルトは「」(空文字列) で、これはこのサーバがデフォルトのクラスタに
+属することを意味します。
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_SSH</code></span></dt>
+<dd><p>
+SSH クライアントコマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> が gfmd サーバーに接続するために
+SSH クライアントコマンドを実行する際、この変数が利用されます。
+デフォルトは「ssh」です。
+</p></dd>
+<dt><span class="term"><code class="varname">gfmd<em class="replaceable"><code>n</code></em>_SUDO</code></span></dt>
+<dd><p>
+Sudo コマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> が SSH を介して gfmd サーバー上で Sudo
+コマンドを実行する際、この変数が利用されます。
+デフォルトは「sudo」です。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="VARIABLES ABOUT GFSD">
+<a name="gfsd-variables"></a><h2>VARIABLES ABOUT GFSD</h2>
+<p>
+変数「gfsd<em class="replaceable"><code>n</code></em>」(gfsd1, gfsd2, ...) は、gfsd
+サーバーを定義するために用います。
+名前が「gfsd<em class="replaceable"><code>n</code></em>_」で始まる変数 (たとえば
+<em class="replaceable"><code>gfsd1_SSH</code></em>) は、対応する
+「gfsd<em class="replaceable"><code>n</code></em>」サーバーの設定パラメタをセットするため
+に用います。
+<span class="command"><strong>gfservice</strong></span> が現在のところ認識する変数は、以下の通りです。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em></code></span></dt>
+<dd>
+<p>
+gfsd サーバーを登録します。
+変数の値は、サーバーホストのホスト名 (もしくは IP アドレス) を表します。
+<span class="command"><strong>gfservice</strong></span> は、この値を SSH 接続先ホストとしてしか
+使用しないので注意して下さい。
+Gfarm システム内で使用されるホスト名を指定するには、代わりに 
+<code class="varname">gfsd<em class="replaceable"><code>n</code></em>_CONFIG_GFSD_OPTOINS</code>
+という変数の中で、<code class="option">-h</code> オプションを使用して下さい。
+</p>
+<div class="literallayout"><p><br>
+	gfsd1=fs2-ctl.example.org<br>
+	gfsd1_CONFIG_GFSD_OPTIONS="-h fs2.example.org"<br>
+</p></div>
+</dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_GFBINDIR</code></span></dt>
+<dd><p>
+gfsd サーバー上で <span class="command"><strong>gfservice-agent</strong></span> コマンドが
+インストールされているディレクトリへのパスを指定します。
+この変数が宣言されていると <span class="command"><strong>gfservice</strong></span> は、
+「<span class="command"><strong><code class="varname">$gfsd<em class="replaceable"><code>n</code></em>_GFBINDIR</code>/gfservice-agent</strong></span>」を実行します。
+宣言されていない場合は、「<span class="command"><strong>gfservice-agent</strong></span>」を実行します。
+</p></dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_CONFIG_GFSD_OPTIONS</code></span></dt>
+<dd><p>
+<span class="command"><strong>config-gfsd</strong></span> コマンドのオプションを指定します。
+デフォルト値は、空文字列 (オプションなし) です。
+<span class="command"><strong>gfservice</strong></span> は <span class="command"><strong>config-gfsd</strong></span> サブコマンド
+およびその他多くのサブコマンドを実行する際に、この変数を参照します。
+<span class="command"><strong>config-gfsd</strong></span> が完了した後であっても、この変数の宣言を
+削除したり、編集したりはしないで下さい。
+</p></dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_PRIVATE_MODE</code></span></dt>
+<dd><p>
+リモートホスト上の gfsd をプライベートモードで動作させる場合は、この
+変数に「true」をセットします。
+</p></dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_AUTH_TYPE</code></span></dt>
+<dd><p>
+認証タイプ ("sharedsecret", "gsi", "gsi_auth" のいずれか) を指定します。
+この変数が定義されていない場合は、gfmd1 上で
+<span class="command"><strong>config-gfarm</strong></span> を実行したときの
+<code class="varname">AUTH_TYPE</code> の値が採用されます。
+(変数 <code class="varname">gfmd1_CONFIG_GFARM_OPTIONS</code> の値によって、この
+ときの <code class="varname">AUTH_TYPE</code> の値は変わるので、注意して下さい。)
+</p></dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_SSH</code></span></dt>
+<dd><p>
+SSH クライアントコマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> が gfsd サーバーに接続するために
+SSH クライアントコマンド実行する際、この変数が利用されます。
+デフォルトは「ssh」です。
+</p></dd>
+<dt><span class="term"><code class="varname">gfsd<em class="replaceable"><code>n</code></em>_SUDO</code></span></dt>
+<dd><p>
+Sudo コマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> が SSH を介して gfsd サーバー上で Sudo
+コマンドを実行する際、この変数が利用されます。
+デフォルトは「sudo」です。
+</p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="VARIABLES ABOUT CLIENT">
+<a name="client-variables"></a><h2>VARIABLES ABOUT CLIENT</h2>
+<p>
+変数「client<em class="replaceable"><code>n</code></em>」(client1, client2, ...) は、
+client サーバーを定義するために用います。
+名前が「client<em class="replaceable"><code>n</code></em>_」で始まる変数 (たとえば
+<em class="replaceable"><code>client1_SSH</code></em>) は、対応する
+「client<em class="replaceable"><code>n</code></em>」サーバーの設定パラメタをセットする
+ために用います。
+<span class="command"><strong>gfservice</strong></span> が現在のところ認識する変数は、以下の通りです。
+</p>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em></code></span></dt>
+<dd><p>
+クライアントホストを登録します。
+変数の値は、クライアントホストのホスト名 (もしくは IP アドレス) を
+表します。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_GFBINDIR</code></span></dt>
+<dd><p>
+クライアントホスト上で <span class="command"><strong>gfservice-agent</strong></span> コマンドが
+インストールされているディレクトリへのパスを指定します。
+この変数が宣言されていると <span class="command"><strong>gfservice</strong></span> は、
+「<span class="command"><strong><code class="varname">$client<em class="replaceable"><code>n</code></em>_GFBINDIR</code>/gfservice-agent</strong></span>」を実行します。
+宣言されていない場合は、「<span class="command"><strong>gfservice-agent</strong></span>」を実行します。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_MOUNT_GFARM2FS</code></span></dt>
+<dd><p>
+<span class="command"><strong>mount.gfarm2fs</strong></span> コマンドのパスおよび
+オプションを指定します。
+<span class="command"><strong>gfservice</strong></span> がクライアントホスト上で
+<span class="command"><strong>mount.gfarm2fs</strong></span> コマンドを実行してファイルシステムを
+マウントする際、この変数が利用されます。
+デフォルトは「%%BINDIR%%/mount.gfarm2fs」です。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_UMOUNT_GFARM2FS</code></span></dt>
+<dd><p>
+<span class="command"><strong>umount.gfarm2fs</strong></span> コマンドのパスおよび
+オプションを指定します。
+<span class="command"><strong>gfservice</strong></span> がクライアントホスト上で
+<span class="command"><strong>umount.gfarm2fs</strong></span> コマンドを実行してファイルシステムを
+アンマウントする際、この変数が利用されます。
+デフォルトは「%%BINDIR%%/umount.gfarm2fs」です。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_SSH</code></span></dt>
+<dd><p>
+SSH クライアントコマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> がクライアントホストに接続するために
+SSH クライアントコマンド実行する際、この変数が利用されます。
+デフォルトは「ssh」です。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_SUDO</code></span></dt>
+<dd><p>
+Sudo コマンドのパスおよびオプションを指定します。
+<span class="command"><strong>gfservice</strong></span> が SSH を介してクライアントホスト上で Sudo
+コマンドを実行する際、この変数が利用されます。
+デフォルトは「sudo」です。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_GFARM_CONF</code></span></dt>
+<dd><p>
+gfarm2.confファイルのパスを絶対パスで指定します。
+この値が設定されていない場合、<span class="command"><strong>gfservice</strong></span>はgfmd1の
+gfarm2.confファイルのパスと同じパスを使用します(gfarm2.confファイルの
+パスは「gfmd1_CONFIG_GFARM_OPTIONS」シェル変数の値を基に決定されます)。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_PRIVATE_MODE</code></span></dt>
+<dd><p>
+この変数に「true」をセットすると、<span class="command"><strong>gfservice</strong></span> が
+サブコマンド <span class="command"><strong>config-client</strong></span> を実行する際、クライアント
+ホスト側の処理は root 権限を持たずに行います。
+</p></dd>
+<dt><span class="term"><code class="varname">client<em class="replaceable"><code>n</code></em>_AUTH_TYPE</code></span></dt>
+<dd><p>
+認証タイプ ("sharedsecret", "gsi", "gsi_auth" のいずれか) を指定します。
+この変数が定義されていない場合は、gfmd1 上で
+<span class="command"><strong>config-gfarm</strong></span> を実行したときの
+<code class="varname">AUTH_TYPE</code> の値が採用されます。
+(変数 <code class="varname">gfmd1_CONFIG_GFARM_OPTIONS</code> の値によって、この
+ときの <code class="varname">AUTH_TYPE</code> の値は変わるので、注意して下さい。)
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfjournal</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfjournal">
+<a name="gfjournaladmin.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfjournal — display status of a journal file</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfjournal</code>  [<em class="replaceable"><code>options</code></em>]  <em class="replaceable"><code>journal-file</code></em> </p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>
+<span class="command"><strong>gfjournal</strong></span> reads a journal file and outputs status
+report about the file to standard out.
+By default, it outputs the status summary of the journal file, like
+this:
+</p>
+<div class="literallayout"><p><br>
+	records  seqnum(min/max)          record length(min/max/ave)<br>
+	     30           2/          31          24/    120/     37<br>
+</p></div>
+<p>
+With '-l' option, <span class="command"><strong>gfjournal</strong></span> also outputs all records
+in the journal file:
+</p>
+<div class="literallayout"><p><br>
+	seqnum    operation        length  argument<br>
+	        2 BEGIN                 24<br>
+	        3 MDHOST_ADD            56 name=gfmd1.example.com<br>
+	        4 END                   24<br>
+	        5 BEGIN                 24<br>
+	        6 USER_ADD              68 username=gfarmadm<br>
+	        7 END                   24<br>
+	(snip)<br>
+	records  seqnum(min/max)          record length(min/max/ave)<br>
+	     30             2/        31          24/    120/     37<br>
+</p></div>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-d</code></span></dt>
+<dd><p>
+Set log level to 'debug'.
+</p></dd>
+<dt><span class="term"><code class="option">-h</code></span></dt>
+<dd><p>
+Displays a list of command options.
+</p></dd>
+<dt><span class="term"><code class="option">-?</code></span></dt>
+<dd><p>Equivalent to <code class="option">-h</code>.</p></dd>
+<dt><span class="term"><code class="option">-l</code></span></dt>
+<dd><p>
+List all records in the journal file.
+</p></dd>
+<dt><span class="term"><code class="option">-m</code></span></dt>
+<dd><p>
+Display the maximum sequence number only.
+</p></dd>
+<dt><span class="term"><code class="option">-r</code></span></dt>
+<dd><p>
+Do not display status summary or a header line for a list of records.
+This option is effective only when it is specified with <code class="option">-l</code>
+option.
+</p></dd>
+<dt><span class="term"><code class="option">-v</code></span></dt>
+<dd><p>
+Prints verbose messages.
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

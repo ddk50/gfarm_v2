@@ -1,0 +1,193 @@
+'\" t
+.\"     Title: gfs_pio_create
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 27 Jun 2010
+.\"    Manual: Gfarm
+.\"    Source: Gfarm
+.\"  Language: English
+.\"
+.TH "GFS_PIO_CREATE" "3" "27 Jun 2010" "Gfarm" "Gfarm"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+gfs_pio_create \- Gfarmファイルシステムのファイルの作成
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <gfarm/gfarm\&.h>
+.fi
+.ft
+.HP \w'gfarm_error_t\ gfs_pio_create('u
+.BI "gfarm_error_t\ gfs_pio_create(const\ char\ *\ " "gfarm_url" ", int\ " "flags" ", gfarm_mode_t\ " "mode" ", GFS_File\ *\ " "gfp" ");"
+.SH "DESCRIPTION"
+.PP
+指定した
+\fIgfarm_url\fR
+に、モード
+\fImode\fR
+でファイルを新規作成し、
+\fIGFS_File\fR
+構造体を
+\fIgfp\fR
+の指す先に返します。
+.PP
+引数
+\fIflags\fR
+は、
+\fBgfs_pio_open()\fR
+の第二引数と同じ意味を持ちます。
+\fIGFARM_FILE_RDONLY\fR、
+\fIGFARM_FILE_WRONLY\fR、
+\fIGFARM_FILE_RDWR\fR
+のいずれか一つのフラグを必ず指定しなければならない点も同じです。
+.PP
+引数
+\fIflags\fR
+の値として
+\fIGFARM_FILE_TRUNC\fR
+が必要な場合は、 明示的に指定する必要がありますので、ご注意ください。
+.SH "RETURN VALUES"
+.PP
+\fBGFARM_ERR_NO_ERROR\fR
+.RS 4
+正常終了を示します。
+.RE
+.PP
+\fBGFARM_ERR_IS_A_DIRECTORY\fR
+.RS 4
+指定されたファイルはディレクトリです。
+.RE
+.PP
+\fBGFARM_ERR_IS_A_SYMBOLIC_LINK\fR
+.RS 4
+指定されたファイルはシンボリックリンクです。
+.RE
+.PP
+\fBGFARM_ERR_OPERATION_NOT_PERMITTED\fR
+.RS 4
+指定されたファイルはファイルではありません。
+.RE
+.PP
+\fBGFARM_ERR_NOT_A_DIRECTORY\fR
+.RS 4
+指定したパス名の親ディレクトリが、ディレクトリではありません。
+.RE
+.PP
+\fBGFARM_ERR_PERMISSION_DENIED\fR
+.RS 4
+指定されたファイルに対し、
+\fIflags\fR
+で指定されたモードでアクセスする権限がないか、その親ディレクトリへの 書き込み権限がありません。 あるいは、メタデータサーバへの認証に失敗しました。
+.RE
+.PP
+\fBGFARM_ERR_NO_MEMORY\fR
+.RS 4
+メモリ不足のため処理を中止しました。
+.RE
+.PP
+\fBGFARM_ERR_INVALID_ARGUMENT\fR
+.RS 4
+\fIflags\fR
+の指定が不正です。
+.RE
+.PP
+\fBGFARM_ERR_GFARM_URL_HOST_IS_MISSING\fR
+.RS 4
+\fIgfarm_url\fR
+で指定されたGfarm URLにおいて、 メタデータサーバが指定されていません。
+.RE
+.PP
+\fBGFARM_ERR_GFARM_URL_PORT_IS_MISSING\fR
+.RS 4
+\fIgfarm_url\fR
+で指定されたGfarm URLにおいて、 メタデータサーバのポート番号が指定されていません。
+.RE
+.PP
+\fBGFARM_ERR_UNKNOWN_HOST\fR
+.RS 4
+指定されたメタデータサーバのアドレス解決ができません。
+.RE
+.PP
+\fBGFARM_ERR_TOO_MANY_OPEN_FILES\fR
+.RS 4
+プロセスにおけるオープン可能なファイル数の限界に達しました。
+.RE
+.PP
+\fBGFARM_ERR_TOO_MANY_OPEN_FILES_IN_SYSTEM\fR
+.RS 4
+システムにおけるオープンできるファイル数の限界に達しました。
+.RE
+.PP
+\fBGFARM_ERR_NETWORK_IS_UNREACHABLE\fR
+.RS 4
+メタデータサーバに到達できません。
+.RE
+.PP
+\fBGFARM_ERR_OPERATION_TIMED_OUT\fR
+.RS 4
+メタデータサーバへの接続がタイムアウトをおこしました。
+.RE
+.PP
+\fBGFARM_ERR_PROTOCOL\fR
+.RS 4
+メタデータサーバとの通信にプロトコルエラーが発生しました。
+.RE
+.PP
+\fBGFARM_ERR_BROKEN_PIPE\fR
+.RS 4
+メタデータサーバとの通信が切断しました。
+.RE
+.PP
+\fBGFARM_ERR_PROTOCOL_NOT_SUPPORTED\fR
+.RS 4
+指定された認証プロトコルはサポートしていません。
+.RE
+.PP
+\fBGFARM_ERR_AUTHENTICATION\fR
+.RS 4
+メタデータサーバに対する認証に失敗しました。
+.RE
+.PP
+その他
+.RS 4
+上記以外のエラーが生じたことを示します。
+\fBgfarm_error_string\fR(3)
+によりエラーの原因を文字列に変換することができます。
+.RE
+.SH "SEE ALSO"
+.PP
+
+\fBgfs_pio_close\fR(3),
+\fBgfs_pio_create\fR(3),
+\fBgfs_pio_eof\fR(3),
+\fBgfs_pio_error\fR(3),
+\fBgfs_pio_flush\fR(3),
+\fBgfs_pio_getc\fR(3),
+\fBgfs_pio_getline\fR(3),
+\fBgfs_pio_open\fR(3),
+\fBgfs_pio_putc\fR(3),
+\fBgfs_pio_putline\fR(3),
+\fBgfs_pio_puts\fR(3),
+\fBgfs_pio_read\fR(3),
+\fBgfs_pio_seek\fR(3),
+\fBgfs_pio_ungetc\fR(3),
+\fBgfs_pio_write\fR(3)

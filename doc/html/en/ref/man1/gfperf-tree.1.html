@@ -1,0 +1,49 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gfperf-tree</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="gfperf-tree">
+<a name="gfperf-tree.1"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<a name="name"></a><h2>Name</h2>
+<p>gfperf-tree — Gfarm measure directory tree performance</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<a name="synopsis"></a><h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">gfperf-tree</code>  [-t, --testdir <em class="replaceable"><code>test directory</code></em>] [-w, --width <em class="replaceable"><code>number of directories</code></em>] [-d, --depth <em class="replaceable"><code>depth of directories</code></em>] [-u, --unit <em class="replaceable"><code>output unit</code></em>]</p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="description"></a><h2>DESCRIPTION</h2>
+<p>This command creates a directory tree in <em class="parameter"><code>test directory</code></em>. And measures performance creating directory tree and removing it.
+The created directory tree has <em class="parameter"><code>number of directories</code></em> in each subdirectories. Total depth of the tree is <em class="parameter"><code> depth of directories</code></em>
+</p>
+<p>Output unit is ops (operation per second) or usec (micro second).
+</p>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="options"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><code class="option">-t, --testdir</code> <em class="parameter"><code>test directory</code></em></span></dt>
+<dd><p>
+Directory tree is created in <em class="parameter"><code>test directory</code></em>.
+If gfarm url (that begins with gfarm:///) is specified, measured by gfarm functions. If file url (that begins with file:///) is specified, measured by posix functions.
+The default is gfarm:///tmp .
+</p></dd>
+<dt><span class="term"><code class="option">-w, --width</code> <em class="parameter"><code>number of directories</code></em></span></dt>
+<dd><p>
+Specify number of directories in each subdirectories.
+</p></dd>
+<dt><span class="term"><code class="option">-d, --depth</code> <em class="parameter"><code>depth of directories</code></em></span></dt>
+<dd><p>
+Total depth of directory tree.
+</p></dd>
+<dt><span class="term"><code class="option">-u, --uinit</code> <em class="parameter"><code>output unit</code></em></span></dt>
+<dd><p>Specify ops (operations per second) or usec (micro second).
+The default is ops.
+</p></dd>
+</dl></div>
+</div>
+</div></body>
+</html>

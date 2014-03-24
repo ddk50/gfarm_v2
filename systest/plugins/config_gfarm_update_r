@@ -1,0 +1,53 @@
+#
+# Dependencies of this sub-command
+#
+config_gfarm_update_r_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: systest::gfarm_v2::config_gfarm_update_r
+#
+subcmd_config_gfarm_update_r()
+{
+	log_debug "subcmd_config_gfarm_update_r"
+
+	check_argc $# 0
+	check_hostid gfmd $HOSTID
+	exec_remote_host_agent $HOSTID root systest::gfarm_v2::config_gfarm_update_r "$@"
+	[ $? -ne 0 ] && log_error "gfservice systest::gfarm_v2::config_gfarm_update_r failed"
+
+	log_debug "end subcmd_config_gfarm_update_r"
+}
+
+#
+# Dependencies of this sub-command agent
+#
+config_gfarm_update_r_agent_depends()
+{
+	echo ""
+}
+
+#
+# Sub-command: systest::gfarm_v2::config_gfarm_update_r
+# execute config-gfarm-update -r
+#
+subcmd_config_gfarm_update_r_agent()
+{
+	log_debug "subcmd_config_gfarm_update_r_agent"
+
+	if [ "X$CONFIG_PREFIX" = X ]; then
+		log_debug "subcmd_config_gfarm_update_r_agent: execute" \
+			config-gfarm-update -r --update
+		config-gfarm-update -r --update
+		[ $? -ne 0 ] && log_error "config-gfarm-update command failed"
+	else
+		log_debug "subcmd_config_gfarm_update_r_agent: execute" \
+			config-gfarm-update --prefix $CONFIG_PREFIX -r --update
+		config-gfarm-update --prefix $CONFIG_PREFIX -r --update
+		[ $? -ne 0 ] && log_error "config-gfarm-update command failed"
+	fi
+
+	log_debug "end subcmd_config_gfarm_update_r_agent"
+}

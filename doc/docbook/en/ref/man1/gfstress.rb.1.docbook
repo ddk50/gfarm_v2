@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.1.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+
+<refentry id="gfstress.rb.1">
+
+<refentryinfo><date>7 Mar 2013</date></refentryinfo>
+
+<refmeta>
+<refentrytitle>gfstress.rb</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo>Gfarm</refmiscinfo>
+</refmeta>
+<refnamediv id="name">
+<refname>gfstress.rb</refname>
+<refpurpose>Gfarm stress test</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="synopsis">
+<cmdsynopsis sepchar=" ">
+  <command moreinfo="none">gfstress.rb</command>
+    <arg choice="opt" rep="norepeat">-t, --testdir <replaceable>test directory</replaceable></arg>
+    <arg choice="opt" rep="norepeat">-m, --gfarm2fs <replaceable>gfarm2fs mount point</replaceable></arg>
+    <arg choice="opt" rep="norepeat">-n, --number <replaceable>number of pseudo users</replaceable></arg>
+    <arg choice="opt" rep="norepeat">-T, --timeout <replaceable>timeout(seconds)</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<!-- body begins here -->
+
+<refsect1 id="description"><title>DESCRIPTION</title>
+<para>This comannd executes gfperf-metadata, gfperf-tree, gfperf-read, gfperf-write, gfperf-replica in parallel to make gfarm system high load average.
+gfperf-read, gfperf-write, gfperf-replica are executed for each gfsd servers.
+</para>
+<para>
+This command runs until an error occured by default.
+If you need to stop, press Ctrl-C or send TERM signal.
+If you want set timeout, -T option is usable.
+</para>
+<para>
+Number of pseudo users means multiplex set of gfperf-metadata, gfperf-tree, gfperf-read, gfperf-write, gfperf-replica. Same as multiplex execution of this command.
+</para>
+<para>
+If gfarm2fs mount point is specified, more gfperf-metadata, gfperf-tree, gfperf-read, gfeprf-write commands that use gfarm2fs are executed.
+</para>
+</refsect1>
+
+<refsect1 id="options"><title>OPTIONS</title>
+<variablelist>
+
+<varlistentry>
+<term><option>-t, --testdir</option> <parameter moreinfo="none">test_directory</parameter></term>
+<listitem>
+<para>
+This directory is used for high load average test.
+The default is gfarm:///stress .
+All files and directories are removed at the end of testing.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-m, --gfarm2fs</option> <parameter moreinfo="none">gfarm2fs_mountpoint</parameter></term>
+<listitem>
+<para>
+Specify gfarm2fs mount point
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-n, --number</option> <parameter moreinfo="none">number_of_pseudo_users</parameter></term>
+<listitem>
+<para>
+Specify number of pseudo users.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-T, --timeout</option> <parameter moreinfo="none">seconds</parameter></term>
+<listitem>
+<para>
+Specify timeout.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</refsect1>
+
+</refentry>

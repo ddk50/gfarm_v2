@@ -1,0 +1,16 @@
+#
+# Check gfsd on given host is registered to gfarm
+#
+check_gfsd_registered()
+{
+	TARGET_HOST=`$GFSERVICE get-config-gfsd-param $1 GFSD_HOSTNAME`
+	[ X$TARGET_HOST = X ] && return 1
+
+	for HOST in `$GFSERVICE gfcmd $2 gfhost`; do
+		if [ X$HOST = X$TARGET_HOST ]; then
+			return 0
+		fi
+	done
+
+	return 1
+}
