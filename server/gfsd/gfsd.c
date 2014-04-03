@@ -28,6 +28,7 @@
 #include <time.h>
 #include <pwd.h>
 #include <libgen.h>
+#include <sqlite3.h>
 
 #if defined(SCM_RIGHTS) && \
 		(!defined(sun) || (!defined(__svr4__) && !defined(__SVR4)))
@@ -119,6 +120,11 @@ int debug_mode = 0;
 pid_t master_gfsd_pid;
 pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
+
+#define ATTACH_GFSD_DATABASE ":memory:"
+#define READ_HISTGRAM_GRANULARITY (1ULL * 1024 * 1024)
+//char *gfsd_db_errmsg = NULL;
+sqlite3 *gfsd_db = NULL;
 
 struct gfm_connection *gfm_server;
 char *canonical_self_name;
@@ -225,6 +231,10 @@ cleanup(int sighandler)
 	if (!sighandler) {
 		/* It's not safe to do the following operation */
 		gflog_notice(GFARM_MSG_1000451, "disconnected");
+	}
+
+	if (gfsd_db) {
+		gfp_free_histgram(gfsd_db);
 	}
 }
 
@@ -1956,6 +1966,10 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	} else {
 		local_fd = file_table_get(fd);
 	}
+
+	fe = file_table_entry(fd);
+	gfp_update_reads_histgram(gfsd_db, client, fe->ino, offset, 
+							  size, READ_HISTGRAM_GRANULARITY);
 
 #if 0 /* XXX FIXME: pread(2) on NetBSD-3.0_BETA is broken */
 	if ((rv = pread(local_fd, buffer, iosize, offset)) == -1)
@@ -3718,6 +3732,8 @@ server(int client_fd, char *client_name, struct sockaddr *client_addr)
 			    "specified, but fails: %s", gfarm_error_string(e));
 	}
 
+	gfp_record_client(gfsd_db, client, client_addr);
+
 	for (;;) {
 		e = gfp_xdr_recv_async_header(client, 0, 0,
 		    &msg_type, &xid, &size);
@@ -4957,6 +4973,8 @@ main(int argc, char **argv)
 	    fcntl(accepting.tcp_sock, F_GETFL, NULL) | O_NONBLOCK) == -1)
 		gflog_warning_errno(GFARM_MSG_1000599,
 		    "accepting TCP socket O_NONBLOCK");
+
+	gfp_create_histgram(&gfsd_db, ATTACH_GFSD_DATABASE);
 
 	for (;;) {
 		FD_ZERO(&requests);

@@ -12,6 +12,7 @@
 #include <gfarm/gflog.h>
 #include <gfarm/error.h>
 #include <gfarm/gfarm_misc.h>
+#include <sqlite3.h>
 
 #include "gfutil.h" /* gflog_fatal() */
 
@@ -45,6 +46,9 @@ struct gfp_xdr {
 
 	/* XXX currently used by client only, but should be used by servers */
 	struct gfp_xdr_async_server *async;
+
+	gfarm_uint32_t client_addr;
+	
 };
 
 /*
@@ -1662,5 +1666,126 @@ gfp_xdr_sendbuffer_overwrite_at(struct gfp_xdr *conn,
 	const void *data, int len, int pos)
 {
 	gfarm_iobuffer_overwrite_at(conn->sendbuffer, data, len, pos);
+}
+
+/* For bayesian Cooperative Cache */
+void
+gfp_record_client(sqlite3 *db, struct gfp_xdr *conn, 
+	struct sockaddr *client_addr)
+{
+	struct sockaddr_in *sin = (struct sockaddr_in *)client_addr;
+	gfarm_uint32_t client_ip = (gfarm_uint32_t)sin->sin_addr.s_addr;
+	char *errmsg = NULL;
+	int rc;
+	char sql[255];
+	char *_sql = "insert or ignore into clients(cliaddr) values(%d)";
+	
+	snprintf(sql, sizeof(sql), _sql, client_ip);
+	
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);	
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1003399,
+			"Could not record a client into the db %s (client ip: %d)",
+			errmsg, client_ip);
+		sqlite3_free(errmsg);
+	} else 
+		gflog_debug(GFARM_MSG_1003399,
+			"insert a client (%d) into the\n", client_ip);
+
+	conn->client_addr = client_ip;	
+	
+	return;
+}
+
+void
+gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn, 
+	gfarm_int64_t ino, gfarm_int64_t offset, 
+	size_t size, gfarm_uint64_t granularity)
+{
+	char *errmsg = NULL;
+	gfarm_uint64_t i;
+	gfarm_uint64_t count = 0;
+	int rc;
+	char sql[255];
+	char *_sql = 
+		"INSERT OR REPLACE INTO reads(client_id, inum, pagenum, count)"
+		"      VALUES (%u, %lu, %lu, "
+		"            COALESCE((SELECT count FROM reads"
+		"                 WHERE client_id=%u AND inum=%llu AND pagenum=%llu),"
+		"0) + 1)";	
+
+	for (i = offset ; i < ((offset + size) / granularity) + 1 ; i++) {		
+		snprintf(sql, sizeof(sql), _sql, 
+				 conn->client_addr, ino, offset / granularity, 
+				 conn->client_addr, ino, offset / granularity);
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_error(GFARM_MSG_1000510,
+						"Could not update reads histgram: %s", errmsg);
+			sqlite3_free(errmsg);
+		} else
+			count++;
+	}
+
+	gflog_debug(GFARM_MSG_1002518,
+		  "%lu pages were counted\n", count);
+}
+
+void
+gfp_create_histgram(sqlite3 **db, const char *dbname)
+{
+	int rc;
+	sqlite3 *db_p;
+	
+	/* 
+	 * for bayesian cache 
+	 */
+	rc = sqlite3_open(dbname, &db_p);
+	if (rc) {
+		sqlite3_close(db_p);
+		gflog_fatal_errno(GFARM_MSG_1000599, "Could not open database");
+	} else {
+		char *errmsg = NULL;
+		char delete_clients[] = "drop table clients";
+		char delete_inums[] = "drop table inums";
+		char create_clients[] = 
+			"create table clients ("
+			"                 id      INTEGER NOT NULL primary key AUTOINCREMENT,"
+			"                 cliaddr INTEGER NOT NULL, "
+			"                 UNIQUE(id, cliaddr) ON CONFLICT REPLACE)";
+
+		char create_reads[] =
+			"create table reads ("
+			"                 id         INTEGER NOT NULL primary key AUTOINCREMENT,"
+			"                 client_id  INTEGER NOT NULL,"
+			"                 inum       UINT8 NOT NULL,"
+			"                 pagenum    UINT8 NOT NULL,"
+		    "                 count      INTEGER NOT NULL,"
+			"                 UNIQUE(id) ON CONFLICT REPLACE)";
+		
+		rc = sqlite3_exec(db_p, delete_clients, 0, 0, &errmsg);
+		rc = sqlite3_exec(db_p, delete_inums, 0, 0, &errmsg);
+
+		rc = sqlite3_exec(db_p, create_clients, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_fatal_errno(GFARM_MSG_1000599,
+				  "Could not create a table for recording connected clients: %s",
+				  errmsg);
+		}
+		
+		rc = sqlite3_exec(db_p, create_reads, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_fatal_errno(GFARM_MSG_1000599,
+				   "Could not create a table for recording connected clients: %s",
+				   errmsg);
+		}
+	}
+
+	*db = db_p;
+}
+
+void gfp_free_histgram(sqlite3 *db)
+{
+	sqlite3_free(db);
 }
 
