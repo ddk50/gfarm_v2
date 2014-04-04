@@ -174,6 +174,7 @@ void gfp_xdr_sendbuffer_overwrite_at(struct gfp_xdr *, const void *, int, int);
 
 /* for bayesian cache */
 void gfp_record_client(sqlite3 *, struct gfp_xdr *, struct sockaddr *);
+void gfp_update_histgram_entries(sqlite3 *, struct gfp_xdr *, gfarm_int64_t, gfarm_int64_t);
 void gfp_update_reads_histgram(sqlite3 *, struct gfp_xdr *, gfarm_int64_t, 
 	gfarm_int64_t, size_t, gfarm_uint64_t);
 void gfp_create_histgram(sqlite3 **, const char *);

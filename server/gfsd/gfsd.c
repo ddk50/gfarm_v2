@@ -1969,8 +1969,8 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 
 	fe = file_table_entry(fd);
 	gfp_update_reads_histgram(gfsd_db, client, fe->ino, offset, 
-							  size, READ_HISTGRAM_GRANULARITY);
-
+							  size, READ_HISTGRAM_GRANULARITY);	
+	
 #if 0 /* XXX FIXME: pread(2) on NetBSD-3.0_BETA is broken */
 	if ((rv = pread(local_fd, buffer, iosize, offset)) == -1)
 #else

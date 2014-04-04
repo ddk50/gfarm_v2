@@ -1698,6 +1698,29 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 }
 
 void
+gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn, 
+	gfarm_int64_t ino, gfarm_int64_t pagenum)
+{
+	int rc;
+	char *errmsg = NULL;
+	char sql[255];
+	char *_sql = 
+		"INSERT INTO entries (inum, pagenum)"
+		"SELECT %lu, %lu"
+		"FROM dual"
+		"WHERE NOT EXISTS (SELECT id FROM entries WHERE inum = %lu AND pagenum = %lu)";
+
+	snprintf(sql, sizeof(sql), _sql, ino, pagenum, ino, pagenum);
+	
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000510,
+					"Could not update histgram entries: %s", errmsg);
+		sqlite3_free(errmsg);
+	}	
+}
+
+void
 gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn, 
 	gfarm_int64_t ino, gfarm_int64_t offset, 
 	size_t size, gfarm_uint64_t granularity)
@@ -1708,16 +1731,13 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 	int rc;
 	char sql[255];
 	char *_sql = 
-		"INSERT OR REPLACE INTO reads(client_id, inum, pagenum, count)"
-		"      VALUES (%u, %lu, %lu, "
-		"            COALESCE((SELECT count FROM reads"
-		"                 WHERE client_id=%u AND inum=%llu AND pagenum=%llu),"
-		"0) + 1)";	
+		"INSERT INTO reads(client_id, inum, pagenum)"
+		"      VALUES (%u, %lu, %lu)";
 
-	for (i = offset ; i < ((offset + size) / granularity) + 1 ; i++) {		
+	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
+		gfp_update_histgram_entries(db, conn, ino, i);
 		snprintf(sql, sizeof(sql), _sql, 
-				 conn->client_addr, ino, offset / granularity, 
-				 conn->client_addr, ino, offset / granularity);
+				 conn->client_addr, ino, i);
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
 			gflog_error(GFARM_MSG_1000510,
@@ -1746,13 +1766,18 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 		gflog_fatal_errno(GFARM_MSG_1000599, "Could not open database");
 	} else {
 		char *errmsg = NULL;
-		char delete_clients[] = "drop table clients";
-		char delete_inums[] = "drop table inums";
 		char create_clients[] = 
 			"create table clients ("
 			"                 id      INTEGER NOT NULL primary key AUTOINCREMENT,"
 			"                 cliaddr INTEGER NOT NULL, "
 			"                 UNIQUE(id, cliaddr) ON CONFLICT REPLACE)";
+
+		char create_histgram_entries[] =
+			"create table entries ("
+			"                 id         INTEGER NOT NULL primary key AUTOINCREMENT,"
+			"                 inum       UINT8 NOT NULL,"
+			"                 pagenum    UINT8 NOT NULL,"
+			"                 UNIQUE(id))";
 
 		char create_reads[] =
 			"create table reads ("
@@ -1760,13 +1785,16 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 			"                 client_id  INTEGER NOT NULL,"
 			"                 inum       UINT8 NOT NULL,"
 			"                 pagenum    UINT8 NOT NULL,"
-		    "                 count      INTEGER NOT NULL,"
 			"                 UNIQUE(id) ON CONFLICT REPLACE)";
 		
-		rc = sqlite3_exec(db_p, delete_clients, 0, 0, &errmsg);
-		rc = sqlite3_exec(db_p, delete_inums, 0, 0, &errmsg);
-
 		rc = sqlite3_exec(db_p, create_clients, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_fatal_errno(GFARM_MSG_1000599,
+				  "Could not create a table for recording connected clients: %s",
+				  errmsg);
+		}
+
+		rc = sqlite3_exec(db_p, create_histgram_entries, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
 			gflog_fatal_errno(GFARM_MSG_1000599,
 				  "Could not create a table for recording connected clients: %s",
