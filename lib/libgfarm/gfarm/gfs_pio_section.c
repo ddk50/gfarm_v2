@@ -393,6 +393,13 @@ gfs_pio_open_section(GFS_File gf, struct gfs_connection *gfs_server)
 	gfarm_error_t e;
 	int nretry = 1;
 	int is_local = gfs_client_connection_is_local(gfs_server);
+	
+	
+	/* 
+	 * For Baysian Cache: Always prefer to connect remote section 
+	 * Kazushi Addition
+	 */
+	is_local = 0;
 
 retry:
 	if ((e = is_local ?
@@ -951,6 +958,12 @@ gfs_pio_set_view_section(GFS_File gf, const char *section,
 	is_local_host = gfarm_canonical_hostname_is_local(gf->gfm_server,
 	    vc->canonical_hostname);
 
+	/* 
+	 * For Baysian Cache: Always prefer to connect remote section 
+	 * Kazushi Addition
+	 */
+	is_local_host = 0;
+
 	gf->ops = &gfs_pio_view_section_ops;
 	gf->view_context = vc;
 	gf->view_flags = flags;
@@ -990,7 +1003,7 @@ gfs_pio_set_view_section(GFS_File gf, const char *section,
 		}
 		is_local_host = 1;
 	}
-
+	
 	if (is_local_host)
 		e = gfs_pio_open_local_section(gf, flags);
 	else

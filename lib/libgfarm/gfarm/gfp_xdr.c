@@ -1710,9 +1710,10 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 	char sql[255];
 	char *_sql = 
 		"INSERT INTO entries (inum, pagenum)"
-		"SELECT %lu, %lu"
-		"FROM dual"
-		"WHERE NOT EXISTS (SELECT id FROM entries WHERE inum = %lu AND pagenum = %lu)";
+		"       SELECT %lu, %lu"
+		"              FROM dual"
+		"                   WHERE NOT EXISTS "
+		"      (SELECT id FROM entries WHERE inum = %lu AND pagenum = %lu)";
 
 	snprintf(sql, sizeof(sql), _sql, ino, pagenum, ino, pagenum);
 	
@@ -1727,7 +1728,7 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 void
 gfp_show_client_hitrates(struct gfp_xdr *conn)
 {
-	gflog_info(GFARM_MSG_UNFIXED, "############## <IP:%d> CACHE HIT RATE %lf (read: %lu, hit: %lu) ###########",
+	gflog_info(GFARM_MSG_1004204, "############## <IP:%d> CACHE HIT RATE %lf (read: %lu, hit: %lu) ###########",
 			   conn->client_addr, (double)conn->total_cache_hit / (double)conn->total_read, 
 		       conn->total_read, conn->total_cache_hit);
 }
@@ -1735,7 +1736,7 @@ gfp_show_client_hitrates(struct gfp_xdr *conn)
 void
 gfp_show_msg(struct gfp_xdr *conn, const char *msg)
 {
-	gflog_info(GFARM_MSG_UNFIXED, "%s", msg);
+	gflog_info(GFARM_MSG_1004205, "%s", msg);
 }
 
 
@@ -1803,7 +1804,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	cache.entries                = GFARM_MALLOC_ARRAY(cache.entries, arysize);
 	cache.allocated_entries_size = arysize;
 
-	gflog_debug(GFARM_MSG_UNFIXED, 
+	gflog_debug(GFARM_MSG_1004206, 
 				"update lru list: offset = %lu, size = %lu", offset, size);
 
 	snprintf(sql, sizeof(sql), _sql2, conn->client_addr, arysize);
@@ -1825,10 +1826,11 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 				j = cache.valid_num_of_entry;
 			}
 		}
-		gflog_info(GFARM_MSG_UNFIXED,
-				   "BBBBBBBBBBBBBBBBBBBBBBBBBBB");
 		conn->total_read++;
 	}
+
+	gflog_debug(GFARM_MSG_UNFIXED, "READ hits: %lu / reads: %lu", 
+				conn->total_cache_hit, conn->total_read);
 
 not_increment_cache_hit:
 	free(cache.entries);
@@ -1852,7 +1854,6 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 		"                     FROM reads where client_id = %u AND inum = %llu AND pagenum = %llu";
 
 	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
-		gfp_update_histgram_entries(db, conn, ino, i);
 		snprintf(sql, sizeof(sql), _sql, 
 				 conn->client_addr, ino, i, conn->client_addr, ino, i);
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
@@ -1863,9 +1864,6 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 		} else
 			count++;
 	}
-
-	gflog_debug(GFARM_MSG_UNFIXED,
-		  "%lu pages were counted\n", count);
 }
 
 gfarm_error_t

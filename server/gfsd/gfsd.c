@@ -1923,7 +1923,7 @@ gfs_server_close(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	gfarm_int32_t fd;
 	static const char diag[] = "GFS_PROTO_CLOSE";
 
-	gflog_info(GFARM_MSG_UNFIXED, "############## CLOSEEEEEEEEEEEEEEEEEEEEEEE ###########");
+	gflog_info(GFARM_MSG_1004209, "############## CLOSEEEEEEEE ###########");
 
 	gfp_show_client_hitrates(client);
 
@@ -1955,8 +1955,6 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	struct file_entry *fe;
 	gfarm_timerval_t t1, t2;
 
-	gflog_info(GFARM_MSG_UNFIXED, "############## REEEEEEEEEEEEEEEEAD ###########");
-
 	gfs_server_get_request(client, size, "pread",
 	    "iil", &fd, &iosize, &offset);
 
@@ -1973,13 +1971,12 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 		local_fd = file_table_get(fd);
 	}
 
+	fe = file_table_entry(fd);
+	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
+		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, (600 * 1024 * 1024));
 
-	fe = file_table_entry(fd);	
 	gfp_update_reads_histgram(gfsd_db, client, fe->ino, 
         offset, size, READ_HISTGRAM_GRANULARITY);
-
-	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
-		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, (10 * 1024 * 1024));
 	
 #if 0 /* XXX FIXME: pread(2) on NetBSD-3.0_BETA is broken */
 	if ((rv = pread(local_fd, buffer, iosize, offset)) == -1)
