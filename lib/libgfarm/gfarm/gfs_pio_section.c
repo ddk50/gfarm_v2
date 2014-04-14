@@ -1003,6 +1003,12 @@ gfs_pio_set_view_section(GFS_File gf, const char *section,
 		}
 		is_local_host = 1;
 	}
+
+	/* 
+	 * For Baysian Cache: Always prefer to connect remote section 
+	 * Kazushi Addition
+	 */
+	is_local_host = 0;
 	
 	if (is_local_host)
 		e = gfs_pio_open_local_section(gf, flags);

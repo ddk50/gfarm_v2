@@ -121,9 +121,9 @@ pid_t master_gfsd_pid;
 pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
 
-#define ATTACH_GFSD_DATABASE ":memory:"
-#define READ_HISTGRAM_GRANULARITY (1ULL * 1024 * 1024)
-//char *gfsd_db_errmsg = NULL;
+#define ATTACH_GFSD_DATABASE        ":memory:"
+#define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
+#define ALLCLIENTS_CACHE_SIZE       (10ULL * 1024 * 1024 * 1024)
 sqlite3 *gfsd_db = NULL;
 
 struct gfm_connection *gfm_server;
@@ -1923,7 +1923,7 @@ gfs_server_close(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	gfarm_int32_t fd;
 	static const char diag[] = "GFS_PROTO_CLOSE";
 
-	gflog_info(GFARM_MSG_1004209, "############## CLOSEEEEEEEE ###########");
+	gflog_info(GFARM_MSG_1004209, "############## CLOSE ###########");
 
 	gfp_show_client_hitrates(client);
 
@@ -1973,7 +1973,7 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 
 	fe = file_table_entry(fd);
 	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
-		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, (10ULL * 1024 * 1024 * 1024));
+		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, ALLCLIENTS_CACHE_SIZE);
 
 	gfp_update_reads_histgram(gfsd_db, client, fe->ino, 
         offset, size, READ_HISTGRAM_GRANULARITY);
