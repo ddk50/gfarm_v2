@@ -1973,7 +1973,7 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 
 	fe = file_table_entry(fd);
 	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
-		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, (600 * 1024 * 1024));
+		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, (10ULL * 1024 * 1024 * 1024));
 
 	gfp_update_reads_histgram(gfsd_db, client, fe->ino, 
         offset, size, READ_HISTGRAM_GRANULARITY);

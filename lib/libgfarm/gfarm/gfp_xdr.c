@@ -1728,7 +1728,7 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 void
 gfp_show_client_hitrates(struct gfp_xdr *conn)
 {
-	gflog_info(GFARM_MSG_1004204, "############## <IP:%d> CACHE HIT RATE %lf (read: %lu, hit: %lu) ###########",
+	gflog_info(GFARM_MSG_1004204, "############## <IP:%d> CACHE HIT RATE %lf (hit: %lu / read: %lu) ###########",
 			   conn->client_addr, (double)conn->total_cache_hit / (double)conn->total_read, 
 		       conn->total_read, conn->total_cache_hit);
 }
@@ -1801,7 +1801,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	struct wrap_cache_entry cache;
 
 	memset(&cache, 0, sizeof(struct wrap_cache_entry));
-	cache.entries                = GFARM_MALLOC_ARRAY(cache.entries, arysize);
+	GFARM_MALLOC_ARRAY(cache.entries, arysize);
 	cache.allocated_entries_size = arysize;
 
 	gflog_debug(GFARM_MSG_1004206, 
@@ -1829,8 +1829,8 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 		conn->total_read++;
 	}
 
-	gflog_debug(GFARM_MSG_UNFIXED, "READ hits: %lu / reads: %lu", 
-				conn->total_cache_hit, conn->total_read);
+	gflog_debug(GFARM_MSG_UNFIXED, "<IP:%d> READ hits: %lu / reads: %lu", 
+				conn->client_addr, conn->total_cache_hit, conn->total_read);
 
 not_increment_cache_hit:
 	free(cache.entries);
