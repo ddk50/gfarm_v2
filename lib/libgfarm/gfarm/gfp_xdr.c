@@ -48,7 +48,9 @@ struct gfp_xdr {
 	struct gfp_xdr_async_server *async;
 
 	gfarm_uint32_t client_addr;
-	
+
+	gfarm_uint64_t total_cache_hit;
+	gfarm_uint64_t total_read;
 };
 
 /*
@@ -349,7 +351,7 @@ gfp_xdr_vsend_size_add(size_t *sizep, const char **formatp, va_list *app)
 			size += sizeof(nd);
 			continue;
 #else /* __KERNEL__ */
-			gflog_fatal(GFARM_MSG_UNFIXED, "floating format is not "
+			gflog_fatal(GFARM_MSG_1003686, "floating format is not "
 				"supported. '%s'", *formatp);
 			return (GFARM_ERR_PROTOCOL);  /* floating */
 #endif /* __KERNEL__ */
@@ -357,7 +359,7 @@ gfp_xdr_vsend_size_add(size_t *sizep, const char **formatp, va_list *app)
 			break;
 
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003687,
 			    "gfp_xdr_vsend_size_add: unimplemented format '%c'",
 			    *format);
 			break;
@@ -489,7 +491,7 @@ gfp_xdr_vsend(struct gfp_xdr *conn,
 			    &nd, sizeof(nd));
 			continue;
 #else /* __KERNEL__ */
-			gflog_fatal(GFARM_MSG_UNFIXED, "floating format is not "
+			gflog_fatal(GFARM_MSG_1003688, "floating format is not "
 				"supported. '%s'", *formatp);
 			return (GFARM_ERR_PROTOCOL);  /* floating */
 #endif /* __KERNEL__ */
@@ -497,7 +499,7 @@ gfp_xdr_vsend(struct gfp_xdr *conn,
 			break;
 
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003689,
 			    "gfp_xdr_vsend: unimplemented format '%c'",
 			    *format);
 			break;
@@ -561,7 +563,7 @@ gfp_xdr_vsend_ref_size_add(size_t *sizep, const char **formatp, va_list *app)
 			size += n;
 			continue;
 		case 'S':
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003690,
 			    "gfp_xdr_vsend_ref_size_add: unimplemented "
 			    "format 'S'");
 		case 'b':
@@ -578,7 +580,7 @@ gfp_xdr_vsend_ref_size_add(size_t *sizep, const char **formatp, va_list *app)
 			size += n;
 			continue;
 		case 'r':
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003691,
 			    "gfp_xdr_vsend_ref_size_add: unimplemented "
 			    "format 'r'");
 			continue;
@@ -588,7 +590,7 @@ gfp_xdr_vsend_ref_size_add(size_t *sizep, const char **formatp, va_list *app)
 			size += sizeof(nd);
 			continue;
 #else /* __KERNEL__ */
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003692,
 				"floating format is not "
 				"supported. '%s'", *formatp);
                         return (GFARM_ERR_PROTOCOL);  /* floating */
@@ -597,7 +599,7 @@ gfp_xdr_vsend_ref_size_add(size_t *sizep, const char **formatp, va_list *app)
 			break;
 
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003693,
 			    "gfp_xdr_vsend_ref_size_add: unimplemented "
 			    "format '%c'",
 			    *format);
@@ -701,7 +703,7 @@ gfp_xdr_vsend_ref(struct gfp_xdr *conn,
 			    s, n);
 			continue;
 		case 'S':
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003694,
 			    "gfp_xdr_vsend_ref: unimplemented format 'S'");
 			continue;
 		case 'b':
@@ -721,11 +723,11 @@ gfp_xdr_vsend_ref(struct gfp_xdr *conn,
 			    s, n);
 			continue;
 		case 'B':
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003695,
 			    "gfp_xdr_vsend_ref: unimplemented format 'B'");
 			continue;
 		case 'r':
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003696,
 			    "gfp_xdr_vsend_ref: unimplemented format 'r'");
 			continue;
 		case 'f':
@@ -739,7 +741,7 @@ gfp_xdr_vsend_ref(struct gfp_xdr *conn,
 			    &nd, sizeof(nd));
 			continue;
 #else
-			gflog_fatal(GFARM_MSG_UNFIXED, "floating format is not "
+			gflog_fatal(GFARM_MSG_1003697, "floating format is not "
 				"supported. '%s'", *formatp);
 			return (GFARM_ERR_PROTOCOL);  /* floating */
 #endif /* __KERNEL__ */
@@ -747,7 +749,7 @@ gfp_xdr_vsend_ref(struct gfp_xdr *conn,
 			break;
 
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003698,
 			    "gfp_xdr_vsend_ref: unimplemented format '%c'",
 			    *format);
 			break;
@@ -852,7 +854,7 @@ gfp_xdr_vrecv_free(int format_parsed, const char *format, va_list *app)
 			(void)dp;
 			continue;
 #else /* __KERNEL__ */
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003699,
 				"floating format is not supported. '%s'",
 				format);
 			return; /* floating */
@@ -1120,7 +1122,7 @@ gfp_xdr_vrecv_sized_x(struct gfp_xdr *conn, int just, int do_timeout,
 			format_parsed++;
 			continue;
 #else /* __KERNEL__ */
-			gflog_fatal(GFARM_MSG_UNFIXED, "floating format is not "
+			gflog_fatal(GFARM_MSG_1003700, "floating format is not "
 				"supported. '%s'", *formatp);
 			return (GFARM_ERR_PROTOCOL);  /* floating */
 #endif /* __KERNEL__ */
@@ -1128,7 +1130,7 @@ gfp_xdr_vrecv_sized_x(struct gfp_xdr *conn, int just, int do_timeout,
 			break;
 
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003701,
 			    "gfp_xdr_vrecv_sized_x: unimplemented format '%c'",
 			    *format);
 			break;
@@ -1359,7 +1361,7 @@ gfp_xdr_vrpc_send_begin(struct gfp_xdr *conn,
 	e = gfp_xdr_send(conn, "i", i);
 	if (e != GFARM_ERR_NO_ERROR) {
 		gfp_xdr_end_sendbuffer_pindown(conn);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003702,
 		    "sending command/errcode (%d) failed: %s",
 		    i, gfarm_error_string(e));
 		return (e);
@@ -1367,7 +1369,7 @@ gfp_xdr_vrpc_send_begin(struct gfp_xdr *conn,
 	e = gfp_xdr_vsend(conn, formatp, app);
 	if (e != GFARM_ERR_NO_ERROR) {
 		gfp_xdr_end_sendbuffer_pindown(conn);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003703,
 		    "sending parameter (%d) failed: %s",
 		    i, gfarm_error_string(e));
 		return (e);
@@ -1495,13 +1497,13 @@ gfp_xdr_vrpc_wrapped_result_sized(
 	if (wrapping_format != NULL) {
 		if ((e = gfp_xdr_recv_sized(conn, just, 1, sizep, &eof,
 		    "i", wrapping_errorp)) != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003704,
 			    "receiving wrapping response (%d) failed: %s",
 			    just, gfarm_error_string(e));
 			return (e);
 		}
 		if (eof) { /* rpc status missing */
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003705,
 			    "Unexpected EOF when receiving wrapping response");
 			return (GFARM_ERR_UNEXPECTED_EOF);
 		}
@@ -1509,7 +1511,7 @@ gfp_xdr_vrpc_wrapped_result_sized(
 			return (GFARM_ERR_NO_ERROR);
 		if ((e = gfp_xdr_vrecv_sized(conn, just, 1, sizep, &eof,
 		    &wrapping_format, wrapping_app)) != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003706,
 			    "receiving wrapping arguments: %s",
 			    gfarm_error_string(e));
 			return (e);
@@ -1550,7 +1552,7 @@ gfp_xdr_vrpc_wrapped_result_sized(
 		return (GFARM_ERR_UNEXPECTED_EOF);
 	}
 	if (**formatp != '\0') {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003707,
 		    "invalid format character: %c(%x)", **formatp, **formatp);
 		return (GFARM_ERRMSG_GFP_XDR_VRPC_INVALID_FORMAT_CHARACTER);
 	}
@@ -1684,15 +1686,17 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 	
 	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);	
 	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1003399,
+		gflog_error(GFARM_MSG_1000018,
 			"Could not record a client into the db %s (client ip: %d)",
 			errmsg, client_ip);
 		sqlite3_free(errmsg);
 	} else 
-		gflog_debug(GFARM_MSG_1003399,
-			"insert a client (%d) into the\n", client_ip);
-
-	conn->client_addr = client_ip;	
+		gflog_debug(GFARM_MSG_1000018,
+					"insert a client (%d) into the\n", client_ip);
+	
+	conn->client_addr     = client_ip;	
+	conn->total_cache_hit = 0;
+	conn->total_read      = 0;
 	
 	return;
 }
@@ -1714,10 +1718,121 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 	
 	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000510,
+		gflog_error(GFARM_MSG_1000018,
 					"Could not update histgram entries: %s", errmsg);
 		sqlite3_free(errmsg);
 	}	
+}
+
+void
+gfp_show_client_hitrates(struct gfp_xdr *conn)
+{
+	gflog_info(GFARM_MSG_UNFIXED, "############## <IP:%d> CACHE HIT RATE %lf (read: %lu, hit: %lu) ###########",
+			   conn->client_addr, (double)conn->total_cache_hit / (double)conn->total_read, 
+		       conn->total_read, conn->total_cache_hit);
+}
+
+void
+gfp_show_msg(struct gfp_xdr *conn, const char *msg)
+{
+	gflog_info(GFARM_MSG_UNFIXED, "%s", msg);
+}
+
+
+struct cache_entry {
+	gfarm_uint32_t client_id;
+	gfarm_uint64_t inum;
+	gfarm_uint64_t pagenum;
+	gfarm_uint32_t count;
+};
+
+struct wrap_cache_entry {
+	int valid_num_of_entry;
+	int allocated_entries_size;
+	struct cache_entry *entries;
+};
+
+static int
+callback_form_cache_entries(void *ptr, int argc, 
+	char **argv, char **azColName)
+{
+	int i;
+	int idx;
+	struct wrap_cache_entry *p = (struct wrap_cache_entry *)ptr;
+
+	if (p->allocated_entries_size < p->valid_num_of_entry) {
+		p->allocated_entries_size += 10;
+		p->entries = GFARM_REALLOC_ARRAY(p->entries, p->entries, p->allocated_entries_size);
+	}
+
+	p->valid_num_of_entry++;	
+	idx = p->valid_num_of_entry - 1;
+	
+	for (i = 0 ; i < argc ; i++) {
+		if (strcmp(azColName[i], "client_id") == 0) {
+			p->entries[idx].client_id = atoi(argv[i]);
+		} else if (strcmp(azColName[i], "inum") == 0) {
+			p->entries[idx].inum = atoll(argv[i]);
+		} else if (strcmp(azColName[i], "pagenum") == 0) {
+			p->entries[idx].pagenum = atoll(argv[i]);
+		} else if (strcmp(azColName[i], "count") == 0) {
+			p->entries[idx].count = atoll(argv[i]);
+		}
+	}
+	
+	return SQLITE_OK;
+}
+
+void
+gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
+	gfarm_int64_t ino, gfarm_int64_t offset, size_t size, gfarm_uint64_t granularity,
+	gfarm_uint64_t clientcachememsize)
+{
+	char *errmsg = NULL;
+	int rc;
+	char sql[255];
+	char *_sql1 = "SELECT * FROM clients";
+	char *_sql2 =
+		"SELECT client_id, inum, pagenum, count"
+		"      FROM reads where client_id = %u order by id desc limit %llu";
+	gfarm_uint64_t i, j;
+	size_t arysize = clientcachememsize / granularity;
+	struct wrap_cache_entry cache;
+
+	memset(&cache, 0, sizeof(struct wrap_cache_entry));
+	cache.entries                = GFARM_MALLOC_ARRAY(cache.entries, arysize);
+	cache.allocated_entries_size = arysize;
+
+	gflog_debug(GFARM_MSG_UNFIXED, 
+				"update lru list: offset = %lu, size = %lu", offset, size);
+
+	snprintf(sql, sizeof(sql), _sql2, conn->client_addr, arysize);
+	rc = sqlite3_exec(db, sql, callback_form_cache_entries, &cache, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+					"Could not obtain native lru: %s", errmsg);
+		sqlite3_free(errmsg);
+		free(cache.entries);
+		return;
+	}
+
+	for (i = offset / granularity ; i < ((offset + size) / granularity) + 1 ; i++) {
+		for (j = 0 ; j < cache.valid_num_of_entry ; j++) {
+			if ((cache.entries[j].inum == ino) &&
+				(cache.entries[j].pagenum == i)) {
+				/* Cache hit!!! */
+				conn->total_cache_hit++;
+				j = cache.valid_num_of_entry;
+			}
+		}
+		gflog_info(GFARM_MSG_UNFIXED,
+				   "BBBBBBBBBBBBBBBBBBBBBBBBBBB");
+		conn->total_read++;
+	}
+
+not_increment_cache_hit:
+	free(cache.entries);
+	return;
 }
 
 void
@@ -1729,26 +1844,74 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 	gfarm_uint64_t i;
 	gfarm_uint64_t count = 0;
 	int rc;
-	char sql[255];
+	char sql[1024];
 	char *_sql = 
-		"INSERT INTO reads(client_id, inum, pagenum)"
-		"      VALUES (%u, %lu, %lu)";
+		"INSERT into reads (entry_id, client_id, inum, pagenum, count)"
+		"       SELECT coalesce(entry_id, LAST_INSERT_ROWID()) , coalesce(client_id, %u), coalesce(inum, %u),"
+		"              coalesce(pagenum, %llu), coalesce(max(count) + 1, 1)"
+		"                     FROM reads where client_id = %u AND inum = %llu AND pagenum = %llu";
 
 	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
 		gfp_update_histgram_entries(db, conn, ino, i);
 		snprintf(sql, sizeof(sql), _sql, 
-				 conn->client_addr, ino, i);
+				 conn->client_addr, ino, i, conn->client_addr, ino, i);
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
-			gflog_error(GFARM_MSG_1000510,
+			gflog_error(GFARM_MSG_1000018,
 						"Could not update reads histgram: %s", errmsg);
 			sqlite3_free(errmsg);
 		} else
 			count++;
 	}
 
-	gflog_debug(GFARM_MSG_1002518,
+	gflog_debug(GFARM_MSG_UNFIXED,
 		  "%lu pages were counted\n", count);
+}
+
+gfarm_error_t
+gfp_client_insert_or_increment_read_count(sqlite3 *db, struct gfp_xdr *conn)
+{
+	int rc;
+	char *errmsg = NULL;
+	char sql[1024];
+	char *_sql = 
+		"INSERT into clients (cliaddr, total_reads, total_hits) "
+		"   SELECT coalesce(cliaddr, %u), coalesce(max(total_reads) + 1, 0), coalesce(total_hits, 0) "
+		"      FROM clients where cliaddr = %u";
+
+	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000510,
+					"Could not increment total read count: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_UNEXPECTED_EOF;
+	}
+
+	return GFARM_ERR_NO_ERROR;
+}
+
+gfarm_error_t
+gfp_client_insert_or_increment_total_hit(sqlite3 *db, struct gfp_xdr *conn)
+{
+	int rc;
+	char *errmsg = NULL;
+	char sql[1024];
+	char *_sql =
+		"INSERT into clients (cliaddr, total_reads, total_hits) "
+		"    SELECT coalesce(cliaddr, %u), coalesce(total_reads, 0), coalesce(max(total_hits) + 1, 0) "
+		"       FROM clients where cliaddr = %u";
+
+	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000510,
+					"Could not increment total hit: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_UNEXPECTED_EOF;
+	}
+
+	return GFARM_ERR_NO_ERROR;	
 }
 
 void
@@ -1768,24 +1931,21 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 		char *errmsg = NULL;
 		char create_clients[] = 
 			"create table clients ("
-			"                 id      INTEGER NOT NULL primary key AUTOINCREMENT,"
-			"                 cliaddr INTEGER NOT NULL, "
-			"                 UNIQUE(id, cliaddr) ON CONFLICT REPLACE)";
+			"                 id            INTEGER NOT NULL primary key AUTOINCREMENT,"
+			"                 cliaddr       INTEGER NOT NULL, "
+			"                 total_reads   INTEGER NOT NULL, "
+			"                 total_hits    INTEGER NOT NULL, "
+			"                 UNIQUE(cliaddr) ON CONFLICT REPLACE)";
 
-		char create_histgram_entries[] =
-			"create table entries ("
-			"                 id         INTEGER NOT NULL primary key AUTOINCREMENT,"
-			"                 inum       UINT8 NOT NULL,"
-			"                 pagenum    UINT8 NOT NULL,"
-			"                 UNIQUE(id))";
-
-		char create_reads[] =
+		char create_histgram_reads[] =
 			"create table reads ("
-			"                 id         INTEGER NOT NULL primary key AUTOINCREMENT,"
-			"                 client_id  INTEGER NOT NULL,"
-			"                 inum       UINT8 NOT NULL,"
-			"                 pagenum    UINT8 NOT NULL,"
-			"                 UNIQUE(id) ON CONFLICT REPLACE)";
+			"                  id         INTEGER NOT NULL primary key AUTOINCREMENT,"
+			"                  entry_id   INTEGER NOT NULL,"
+			"                  client_id  INTEGER NOT NULL,"
+			"                  inum       UINT8 NOT NULL,"
+			"                  pagenum    UINT8 NOT NULL,"
+			"                  count      INTEGER NOT NULL,"
+			"                  UNIQUE(entry_id) ON CONFLICT REPLACE)";
 		
 		rc = sqlite3_exec(db_p, create_clients, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
@@ -1793,18 +1953,11 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 				  "Could not create a table for recording connected clients: %s",
 				  errmsg);
 		}
-
-		rc = sqlite3_exec(db_p, create_histgram_entries, 0, 0, &errmsg);
-		if (rc != SQLITE_OK) {
-			gflog_fatal_errno(GFARM_MSG_1000599,
-				  "Could not create a table for recording connected clients: %s",
-				  errmsg);
-		}
 		
-		rc = sqlite3_exec(db_p, create_reads, 0, 0, &errmsg);
+		rc = sqlite3_exec(db_p, create_histgram_reads, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
 			gflog_fatal_errno(GFARM_MSG_1000599,
-				   "Could not create a table for recording connected clients: %s",
+				   "Could not create a table for recording read histgrams: %s",
 				   errmsg);
 		}
 	}

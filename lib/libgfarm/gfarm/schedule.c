@@ -1314,7 +1314,7 @@ search_idle_connect_and_get_rtt_callback(void *closure)
 		if (getsockopt(gfs_client_connection_fd(c->gfs_server),
 			IPPROTO_TCP, TCP_INFO,  &info, &len) < 0) {
 			e = gfarm_errno_to_error(errno);
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003885,
 			    "search_idle_connect_and_get_rtt_callback: "
 			    "getsockopt: %s",
 			    gfarm_error_string(e));
@@ -1334,7 +1334,7 @@ search_idle_connect_and_get_rtt_callback(void *closure)
 		c->h->flags |= HOST_STATE_FLAG_AUTH_SUCCEED;
 		search_idle_record(c); /* completed */
 	} else {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003886,
 		    "search_idle_connect_and_get_rtt_callback: "
 		    "gfs_client_connect_result_multiplexed: %s",
 		    gfarm_error_string(e));
@@ -1960,7 +1960,7 @@ select_hosts_by_path_rpc(struct gfm_connection **gfm_serverp, void *closure)
 
 	if ((e = gfm_client_connection_and_process_acquire_by_path(si->path,
 	    gfm_serverp)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003887,
 		    "gfm_client_connection_and_process_acquire_by_path "
 		    "path=%s: %s",
 		    si->path, gfarm_error_string(e));
@@ -1970,7 +1970,7 @@ select_hosts_by_path_rpc(struct gfm_connection **gfm_serverp, void *closure)
 	if ((e = select_hosts(*gfm_serverp, si->acyclic, si->write_mode,
 	    si->ninfos, si->infos, si->nohostsp, si->ohosts, si->oports))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003888,
 		    "select_hosts: %s",
 		    gfarm_error_string(e));
 	gfm_client_connection_unlock(*gfm_serverp);

@@ -122,7 +122,7 @@ fsngroup_schedule_replication(
 	assert(repattr != NULL && srcs != NULL);
 
 	if (debug_mode)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004148,
 		    "%s: replicate inode %lld:%lld to fsngroup '%s'.",
 		    diag, (long long)inode_get_number(inode),
 		    (long long)inode_get_gen(inode), repattr);
@@ -131,12 +131,12 @@ fsngroup_schedule_replication(
 
 	e = gfarm_repattr_parse(repattr, &reps, &nreps);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004149,
 		    "%s: %s", diag, gfarm_error_string(e));
 		return (e);
 	}
 	if (nreps == 0) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004150,
 		    "%s: can't parse a repattr: '%s'.", diag, repattr);
 		/* fall through */
 		e = GFARM_ERR_NO_ERROR;
@@ -148,7 +148,7 @@ fsngroup_schedule_replication(
 
 		e = fsngroup_get_hosts(group, &n_scope, &scope);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_notice(GFARM_MSG_UNFIXED,
+			gflog_notice(GFARM_MSG_1004151,
 			    "%s: fsngroup_get_hosts(%s): %s",
 			    diag, group, gfarm_error_string(e));
 			if (save_e == GFARM_ERR_NO_ERROR ||
@@ -211,7 +211,7 @@ gfm_server_fsngroup_get_all(
 		giant_unlock();
 
 		if (e != GFARM_ERR_NO_ERROR)
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004152,
 			    "%s: get_fsngroup_tuples(): %s",
 			    diag, gfarm_error_string(e));
 	}
@@ -224,7 +224,7 @@ gfm_server_fsngroup_get_all(
 			e = gfp_xdr_send(client, "ss",
 				t[i].hostname, t[i].fsngroupname);
 			if (e != GFARM_ERR_NO_ERROR) {
-				gflog_warning(GFARM_MSG_UNFIXED,
+				gflog_warning(GFARM_MSG_1004153,
 				    "%s@%s: %s: gfp_xdr_send() failed: %s",
 				    peer_get_username(peer),
 				    peer_get_hostname(peer),
@@ -299,13 +299,13 @@ gfm_server_fsngroup_get_by_hostname(
 			giant_unlock();
 
 			if (h == NULL) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1004154,
 					"host \"%s\" does not exist.",
 					hostname);
 				e = GFARM_ERR_NO_SUCH_OBJECT;
 			}
 		} else {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004155,
 				"an invalid hostname parameter (nul).");
 			e = GFARM_ERR_INVALID_ARGUMENT;
 		}
@@ -365,11 +365,11 @@ gfm_server_fsngroup_modify(
 		giant_lock();
 
 		if (!from_client || user == NULL || !user_is_admin(user)) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004156,
 			    "operation is not permitted");
 			e = GFARM_ERR_OPERATION_NOT_PERMITTED;
 		} else if ((h = host_lookup(hostname)) == NULL) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004157,
 				"host does not exists");
 			e = GFARM_ERR_NO_SUCH_OBJECT;
 		} else if ((e = host_fsngroup_modify(h, fsngroupname, diag)) !=
@@ -377,7 +377,7 @@ gfm_server_fsngroup_modify(
 			;
 		} else if ((e = db_fsngroup_modify(hostname, fsngroupname)) !=
 		    GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004158,
 				"db_fsngroup_modify failed: %s",
 				gfarm_error_string(e));
 			/* XXX - need to revert the change in memory? */

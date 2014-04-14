@@ -113,7 +113,7 @@ sync_protocol_get_thrpool(void)
 int
 gfm_server_protocol_type_extension_default(gfarm_int32_t request)
 {
-	gflog_warning(GFARM_MSG_UNFIXED, "unknown request: %d", request);
+	gflog_warning(GFARM_MSG_1003898, "unknown request: %d", request);
 	return (PROTO_UNKNOWN);
 }
 
@@ -1145,7 +1145,7 @@ protocol_main(void *arg)
 		    &msg_type, &xid, &size);
 		if (e != GFARM_ERR_NO_ERROR) {
 			if (e != GFARM_ERR_UNEXPECTED_EOF)
-				gflog_notice(GFARM_MSG_UNFIXED,
+				gflog_notice(GFARM_MSG_1003899,
 				    "receiving rpc header from a client: %s",
 				    gfarm_error_string(e));
 			giant_lock();
@@ -1154,7 +1154,7 @@ protocol_main(void *arg)
 			return (NULL);
 		}
 		if (msg_type != GFP_XDR_TYPE_REQUEST) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003900,
 			    "receiving unexpected rpc header type: %d",
 			    (int)msg_type);
 			giant_lock();
@@ -1249,7 +1249,7 @@ resuming_thread(void *arg)
 		 * set cs->cause, if it's first error at a main part
 		 * of a COMPOUND block
 		 */
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003901,
 		    "resumed action failed in a COMPOUND block: %s",
 		    gfarm_error_string(e));
 		if (cs->cause == GFARM_ERR_NO_ERROR && !cs->skip)
@@ -1265,7 +1265,7 @@ resuming_thread(void *arg)
 	} else { /* maybe inside COMPOUND, maybe not */
 		e = gfp_xdr_flush(peer_get_conn(peer));
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED, "protocol flush: %s",
+			gflog_warning(GFARM_MSG_1003902, "protocol flush: %s",
 			    gfarm_error_string(e));
 			peer_record_protocol_error(peer);
 

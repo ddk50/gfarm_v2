@@ -357,7 +357,7 @@ abstract_host_receiver_lock(struct abstract_host *host, struct peer *peer0,
 			break;
 		}
 		/* may happen at gfsd restart? */
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003935,
 		    "waiting for abstract_host_receiver_lock: "
 		    "maybe %s on %s restarted?",
 		    peer_get_service_name(peer0),
@@ -842,7 +842,7 @@ async_client_vsend_wrapped_request(struct abstract_host *host,
 
 	if ((e = async_client_sender_lock(host, peer0, &peer, command,
 	    diag)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003936,
 		    "%s", gfarm_error_string(e));
 		return (e);
 	}
@@ -893,13 +893,13 @@ async_client_send_raw_request(struct abstract_host *host,
 	struct gfp_xdr *server;
 
 	if (debug_mode)
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003937,
 		    "%s: <%s> channel sending a raw request",
 		    abstract_host_get_name(host), diag);
 
 	if ((e = async_client_sender_lock(host, peer0, &peer, command,
 	    diag)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s", gfarm_error_string(e));
+		gflog_debug(GFARM_MSG_1003938, "%s", gfarm_error_string(e));
 		return (e);
 	}
 

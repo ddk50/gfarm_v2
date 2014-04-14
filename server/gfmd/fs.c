@@ -827,47 +827,47 @@ gfm_server_fhopen(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 	giant_lock();
 
 	if (peer_get_parent(peer) == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003989,
 		    "%s: not from slave gfmd", diag);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
 	}
 	if (!from_client) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: not from client", diag);
+		gflog_debug(GFARM_MSG_1003990, "%s: not from client", diag);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
 	}
 	if ((process = peer_get_process(peer)) == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: no process", diag);
+		gflog_debug(GFARM_MSG_1003991, "%s: no process", diag);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
 	}
 	if (process_get_user(process) == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: no process", diag);
+		gflog_debug(GFARM_MSG_1003992, "%s: no process", diag);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
 	}
 	if (flag != GFARM_FILE_LOOKUP) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: not lookup", diag);
+		gflog_debug(GFARM_MSG_1003993, "%s: not lookup", diag);
 		return (GFARM_ERR_INVALID_ARGUMENT);
 	}
 	
 	if ((inode = inode_lookup(inum)) == NULL) {
 		e = GFARM_ERR_NO_SUCH_FILE_OR_DIRECTORY;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003994,
 		    "%s: inode %lld:%lld: not found",
 		    diag, (long long)inum, (long long)igen);
 	} else if (inode_get_gen(inode) != igen) {
 		e = GFARM_ERR_NO_SUCH_FILE_OR_DIRECTORY;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003995,
 		    "%s: inode %lld:%lld: generation not found: %lld",
 		    diag, (long long)inum, (long long)igen,
 		    (long long)inode_get_gen(inode));
 	} else if (!inode_is_dir(inode)) {
 		e = GFARM_ERR_NOT_A_DIRECTORY;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003996,
 		    "%s: inode %lld:%lld: not dir: %d",
 		    diag, (long long)inum, (long long)igen,
 		    inode_get_mode(inode));
 	} else if ((e = process_open_file(process, inode, flag, 0, peer, NULL,
 	    &fd)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: process_open_file(): %s",
+		gflog_debug(GFARM_MSG_1003997, "%s: process_open_file(): %s",
 		    diag, gfarm_error_string(e));
 	} else {
 		peer_fdpair_set_current(peer, fd);
@@ -1278,7 +1278,7 @@ gfm_server_fgetattrplus(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 		e_rpc = GFARM_ERR_NO_MEMORY;
 	} else if ((e_rpc = wait_db_update_info(peer, DBUPDATE_XMLATTR, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003998,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -1864,7 +1864,7 @@ GFM_PROTO_SCHEDULE_FILE_receive_request(
 		cp->req_error = GFARM_ERR_NO_ERROR;
 
 	if (cp->req_error != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED, "%s: %s failed: %s",
+		gflog_error(GFARM_MSG_1003999, "%s: %s failed: %s",
 			diag, 
 			"GFM_PROTO_SCHEDULE_FILE_receive_request()",
 			gfarm_error_string(cp->req_error));
@@ -1908,7 +1908,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 			rep_error = wait_db_update_info(peer, DBUPDATE_HOST,
 			    diag);
 			if (rep_error != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004000,
 				    "%s: failed to wait for the backend DB"
 				    "to be updated: %s",
 				    diag, gfarm_error_string(rep_error));
@@ -1924,7 +1924,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 			if (!cp->from_client &&
 				peer_get_host(peer) == NULL) {
 				rep_error = GFARM_ERR_OPERATION_NOT_PERMITTED;
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004001,
 					"%s: %s failed: %s",
 					diag,
 					"peer_get_host()",
@@ -1935,7 +1935,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 			process = peer_get_process(peer);
 			if (process == NULL) {
 				rep_error = GFARM_ERR_OPERATION_NOT_PERMITTED;
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004002,
 					"%s: %s failed: %s",
 					diag,
 					"peer_get_process()",
@@ -1945,7 +1945,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 
 			rep_error = peer_fdpair_get_current(peer, &fd);
 			if (rep_error != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004003,
 					"%s: %s failed: %s",
 					diag,
 					"peer_fdpair_get_current()",
@@ -1956,7 +1956,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 			rep_error = process_schedule_file(process, peer, fd,
 				&cp->nhosts, &cp->hosts);
 			if (rep_error != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004004,
 					"%s: %s failed: %s",
 					diag,
 					"process_schedule_file()",
@@ -1980,7 +1980,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 		ret = gfm_server_relay_put_reply_dynarg(peer, sizep, diag,
 		    rep_error, "");
 		if (ret != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004005,
 				"%s: %s failed: %s",
 				diag,
 				"gfm_server_relay_put_reply_dynarg()",
@@ -1997,7 +1997,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 		ret = gfm_server_relay_put_reply_arg_dynarg(peer, sizep, diag,
 		    "i", cp->nhosts);
 		if (ret != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004006,
 				"%s: %s failed: %s",
 				diag,
 				"gfm_server_relay_put_reply_arg_dynarg()",
@@ -2010,7 +2010,7 @@ GFM_PROTO_SCHEDULE_FILE_send_reply(
 			ret = host_schedule_reply_arg_dynarg(cp->hosts[i],
 			    peer, sizep, diag);
 			if (ret != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004007,
 					"%s: %s failed: %s",
 					diag,
 					"host_schedule_reply_arg_dynarg()",
@@ -2045,7 +2045,7 @@ gfm_server_schedule_file(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 	    GFM_PROTO_SCHEDULE_FILE_send_reply,
 	    GFM_PROTO_SCHEDULE_FILE, &c, diag);
 	if (e != GFARM_ERR_NO_ERROR) { 
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: %s",
+		gflog_debug(GFARM_MSG_1004008, "%s: %s",
 			diag, gfarm_error_string(e));
 	} else {
 		e = c.rep_error;
@@ -2875,7 +2875,7 @@ gfm_server_getdirents(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_FS_DIRENT, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004009,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 		/* Continue processing. */
@@ -2971,7 +2971,7 @@ gfm_server_getdirentsplus(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 	e_rpc = wait_db_update_info(peer,
 	    DBUPDATE_FS_DIRENT | DBUPDATE_USER | DBUPDATE_GROUP, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004010,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 		/* Continue processing. */
@@ -3101,7 +3101,7 @@ gfm_server_getdirentsplusxattr(struct peer *peer, gfp_xdr_xid_t xid,
 	} else if ((e_rpc = wait_db_update_info(peer, DBUPDATE_FS_DIRENT |
 	    DBUPDATE_USER | DBUPDATE_GROUP | DBUPDATE_XMLATTR, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004011,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 		/* Continue processing. */
@@ -3977,7 +3977,7 @@ fhclose_write_resume(struct peer *peer, void *closure, int *suspendedp)
 		    "%s: peer_get_host() failed", diag);
 		e = GFARM_ERR_OPERATION_NOT_PERMITTED;
 	} else if (!inode_is_file(arg->inode)) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1004012,
 		    "%s: inode %lld:%lld: not a file",
 		    diag, (long long)inode_get_number(arg->inode),
 		    (long long)arg->old_gen);
@@ -4003,7 +4003,7 @@ fhclose_write_resume(struct peer *peer, void *closure, int *suspendedp)
 	if (e == GFARM_ERR_NO_ERROR && gfarm_ctxp->file_trace &&
 	    (flags & GFM_PROTO_CLOSE_WRITE_GENERATION_UPDATE_NEEDED) != 0 &&
 	    trace_log != NULL) {
-		gflog_trace(GFARM_MSG_UNFIXED, "%s", trace_log);
+		gflog_trace(GFARM_MSG_1004013, "%s", trace_log);
 		free(trace_log);
 	}
 
@@ -4054,7 +4054,7 @@ gfm_server_fhclose_write(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 			     "inode_lookup() failed");
 			e = GFARM_ERR_OPERATION_NOT_PERMITTED;
 		} else if (!inode_is_file(inode)) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004014,
 			    "%s: inode %lld:%lld: not a file",
 			    diag, (long long)inum, (long long)old_gen);
 			e = GFARM_ERR_STALE_FILE_HANDLE;
@@ -4090,7 +4090,7 @@ gfm_server_fhclose_write(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 		if (e == GFARM_ERR_NO_ERROR && gfarm_ctxp->file_trace &&
 		    (flags & GFM_PROTO_CLOSE_WRITE_GENERATION_UPDATE_NEEDED)
 		    != 0 && trace_log != NULL) {
-			gflog_trace(GFARM_MSG_UNFIXED, "%s", trace_log);
+			gflog_trace(GFARM_MSG_1004015, "%s", trace_log);
 			free(trace_log);
 		}
 	}
@@ -4141,7 +4141,7 @@ gfm_server_generation_updated(
 			    diag, gfarm_error_string(e));
 		} else if ((e = process_get_file_inode(process, fd, &inode))
 			   != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004016,
 			    "%s: process_get_file_inode() failed: %s",
 			    diag, gfarm_error_string(e));
 		} else if ((e = process_new_generation_done(process, peer, fd,
@@ -4151,7 +4151,7 @@ gfm_server_generation_updated(
 			    diag, host_name(spool_host), fd,
 			    gfarm_error_string(result), gfarm_error_string(e));
 		} else if (result != GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004017,
 			    "%s: inode %lld:%lld on host %s, fd %d: "
 			    "new generation rename: %s\n",
 			    diag,
@@ -4201,19 +4201,19 @@ gfm_server_generation_updated_by_cookie(
 			e = GFARM_ERR_OPERATION_NOT_PERMITTED;
 		} else if (!peer_remove_pending_new_generation_by_cookie(
 		    peer, cookie, &inode)) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004018,
 			    "%s: unknown cookie %lld from %s",
 			    diag, (long long)cookie, host_name(spool_host));
 			e = GFARM_ERR_BAD_COOKIE;
 		} else if ((e = inode_new_generation_by_cookie_finish(
 		    inode, cookie, peer, result)) != GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004019,
 			    "%s: host %s, cookie %lld: "
 			    "new generation wakeup(%s): %s\n",
 			    diag, host_name(spool_host), (long long)cookie,
 			    gfarm_error_string(result), gfarm_error_string(e));
 		} else if (result != GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004020,
 			    "%s: inode %lld:%lld on host %s, cookie %lld: "
 			    "new generation rename: %s\n",
 			    diag,
@@ -4487,7 +4487,7 @@ gfm_server_replica_list_by_name(struct peer *peer, gfp_xdr_xid_t xid,
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_FS | DBUPDATE_HOST, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004021,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -4816,7 +4816,7 @@ gfm_server_replica_info_get_reply(enum request_reply_mode mode,
 		e_rpc = wait_db_update_info(peer, DBUPDATE_FS | DBUPDATE_HOST,
 		    diag);
 		if (e_rpc != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004022,
 			    "%s: failed to wait for the backend DB to be "
 			    "updated: %s",
 			    diag, gfarm_error_string(e_rpc));
@@ -4882,7 +4882,7 @@ gfm_server_replica_info_get(struct peer *peer, gfp_xdr_xid_t xid,
 	    gfm_server_replica_info_get_reply,
 	    GFM_PROTO_REPLICA_INFO_GET, &closure, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: %s",
+		gflog_debug(GFARM_MSG_1004023, "%s: %s",
 		    diag, gfarm_error_string(e));
 	} else
 		e = replica_info_closure_get_error(&closure);
@@ -5444,7 +5444,7 @@ gfm_server_replica_get_my_entries_common(
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_FS, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004024,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 		/* Continue processing. */
@@ -5583,7 +5583,7 @@ gfm_server_replica_create_file_in_lost_found(struct peer *peer,
 		}
 		giant_unlock();
 		if (e_rpc == GFARM_ERR_NO_ERROR) {
-			gflog_notice(GFARM_MSG_UNFIXED,
+			gflog_notice(GFARM_MSG_1004025,
 			    "inode %lld:%lld on %s -> %lld:%lld: "
 			    "moved to lost+found",
 			    (long long)inum_old, (long long)gen_old,

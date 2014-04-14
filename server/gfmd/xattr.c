@@ -221,22 +221,22 @@ xattr_check_repattr(
 	char *repattr = NULL, *repattr2;
 
 	if (!is_string(*valuep, *sizep)) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004136,
 		    "gfarm.replicainfo is not a string");
 		return (GFARM_ERR_INVALID_ARGUMENT);
 	}
 	if ((e = gfarm_repattr_reduce(*valuep, &reps, &nreps))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004137,
 		    "gfarm_repattr_reduce() failed: %s",
 		    gfarm_error_string(e));
 	} else if (nreps == 0 || reps == NULL) {
 		e = GFARM_ERR_INVALID_ARGUMENT;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004138,
 		    "invalid repattr: %s", (char *)(*valuep));
 	} else if ((e = gfarm_repattr_stringify(reps, nreps, &repattr))
 		   != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004139,
 		    "gfarm_repattr_stringify() failed: %s",
 		    gfarm_error_string(e));
 	} else {
@@ -390,7 +390,7 @@ xattr_set(int xmlMode, struct inode *inode,
 		    inode, attrname, valuep, sizep,
 		    &have_replica_spec, &change_replica_spec);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1004140,
 			    "xattr_check_replica_spec(): %s",
 			    gfarm_error_string(e));
 			return (e);
@@ -1530,7 +1530,7 @@ gfm_server_findxmlattr(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 #ifdef ENABLE_XMLATTR
 	if ((e_rpc = wait_db_update_info(peer, DBUPDATE_XMLATTR, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004141,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	} else if ((ctxp = gfs_xmlattr_ctx_alloc(nalloc)) == NULL) {

@@ -622,7 +622,7 @@ gfm_server_user_info_get_all(
 
 	e = wait_db_update_info(peer, DBUPDATE_USER, diag);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003903,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e));
 		return (e);
@@ -734,7 +734,7 @@ gfm_server_user_info_get_by_names(
 		e = GFARM_ERR_NO_MEMORY;
 	} else if ((e = wait_db_update_info(peer, DBUPDATE_USER, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003904,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e));
 	}

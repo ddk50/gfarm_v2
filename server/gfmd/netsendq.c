@@ -327,13 +327,13 @@ netsendq_new(struct netsendq_manager *manager, struct abstract_host *abhost,
 
 	GFARM_MALLOC(qhost);
 	if (qhost == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: no memory for %d bytes",
+		gflog_debug(GFARM_MSG_1003939, "%s: no memory for %d bytes",
 		    diag, (int)sizeof(*qhost));
 		return (GFARM_ERR_NO_MEMORY);
 	}
 	GFARM_MALLOC_ARRAY(qhost->workqs, manager->num_types);
 	if (qhost->workqs == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: no memory for %d*%d bytes",
+		gflog_debug(GFARM_MSG_1003940, "%s: no memory for %d*%d bytes",
 		    diag, manager->num_types, (int)sizeof(*qhost->workqs));
 		return (GFARM_ERR_NO_MEMORY);
 	}
@@ -697,7 +697,7 @@ netsendq_manager_new(int num_types, const struct netsendq_type *const *types,
 	
 	GFARM_MALLOC(manager);
 	if (manager == NULL)
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003941,
 		    "%s: no memory for struct netsendq_manager", diag);
 
 	gfarm_mutex_init(&manager->hostq_mutex, diag, "hostq_mutex");
@@ -710,7 +710,7 @@ netsendq_manager_new(int num_types, const struct netsendq_type *const *types,
 
 	for (i = 0; i < num_types; i++) {
 		if (types[i]->type_index != i)
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003942,
 			    "%s: netsendq_type is not correctly initialized, "
 			    "types[%d]->type_index = %d, but must be %d",
 			    diag, i, types[i]->type_index, i);
@@ -720,7 +720,7 @@ netsendq_manager_new(int num_types, const struct netsendq_type *const *types,
 
 	thrpool = thrpool_new(thread_pool_size, thread_pool_queue_len, diag);
 	if (thrpool == NULL)
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003943,
 		    "%s: filesystem node thread pool size:%d, "
 		    "queue length:%d: no memory",
 		    diag, thread_pool_size, thread_pool_queue_len);
@@ -728,13 +728,13 @@ netsendq_manager_new(int num_types, const struct netsendq_type *const *types,
 
 	e = create_detached_thread(netsendq_send_manager, manager);
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003944,
 		    "%s: create_detached_thread(netsendq_send_manager): %s",
 		    diag, gfarm_error_string(e));
 
 	e = create_detached_thread(netsendq_finalizer, manager);
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003945,
 		    "%s: create_detached_thread(netsendq_finalizer): %s",
 		    diag, gfarm_error_string(e));
 

@@ -93,7 +93,7 @@ gfarm_get_hostname_by_url0(const char **pathp,
 	port = strtoul(p, &ep, 10);
 	if (p == ep || (*ep != '\0' && *ep != '/')) {
 		free(hostname);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003820,
 		    "Port invalid in url (%s): %s", *pathp,
 		    gfarm_error_string(GFARM_ERR_GFARM_URL_PORT_IS_INVALID));
 		return (GFARM_ERR_GFARM_URL_PORT_IS_INVALID);
@@ -181,7 +181,7 @@ gfarm_url_parse_metadb(const char **pathp,
 	    !gfarm_filesystem_in_failover_process(fs)) {
 		if ((e = gfm_client_connection_failover_pre_connect(
 		    hostname, port, user)) != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003821,
 			    "gfm_client_connection_failover_acquired: %s",
 			    gfarm_error_string(e));
 			goto end;
@@ -191,7 +191,7 @@ gfarm_url_parse_metadb(const char **pathp,
 	if ((e = gfm_client_connection_and_process_acquire(
 		    hostname, port, user, &gfm_server))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003822,
 		    "gfm_client_connection_and_process_acquire: %s",
 		    gfarm_error_string(e));
 	} else
@@ -737,7 +737,7 @@ gfm_inode_or_name_op0(const char *url, int flags,
 		}
 		if ((e = gfm_client_context_alloc(gfm_server, &ctx)) !=
 		    GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003823,
 			    "gfm_client_context_alloc: %s",
 			    gfarm_error_string(e));
 			break;
@@ -791,7 +791,7 @@ gfm_inode_or_name_op0(const char *url, int flags,
 			    on_error_pos);
 			if ((e2 = gfm_client_compound_on_error_result(
 			    gfm_server, ctx)) != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003824,
 				    "compound_on_error result failed: %s",
 				    gfarm_error_string(e2));
 				return (e2);
@@ -907,7 +907,7 @@ inode_or_name_op_exit(struct gfm_connection *gfm_server, gfarm_error_t e,
 	if (e != GFARM_ERR_NO_ERROR) {
 		/* do not release connection when no error occurred. */
 		(void)inode_or_name_op_post_failover(gfm_server, closure);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003825,
 		    "gfm_inode_or_name_op: %s",
 		    gfarm_error_string(e));
 	}
@@ -1016,7 +1016,7 @@ close_fd2_locked(struct gfm_connection *conn, int fd1, int fd2)
 
 	if ((e = gfm_client_context_alloc(conn, &ctx)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003826,
 		    "gfm_client_context_alloc: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -1355,7 +1355,7 @@ gfm_name2_op0(const char *src, const char *dst, int flags,
 			}
 			if ((e = gfm_client_context_alloc(sconn, &sctx))
 			    != GFARM_ERR_NO_ERROR) {
-				gflog_warning(GFARM_MSG_UNFIXED,
+				gflog_warning(GFARM_MSG_1003827,
 				    "gfm_client_context_alloc: %s",
 				    gfarm_error_string(e));
 				break;
@@ -1375,7 +1375,7 @@ gfm_name2_op0(const char *src, const char *dst, int flags,
 			}
 			if ((e = gfm_client_context_alloc(dconn, &dctx))
 			     != GFARM_ERR_NO_ERROR) {
-				gflog_warning(GFARM_MSG_UNFIXED,
+				gflog_warning(GFARM_MSG_1003828,
 				    "gfm_client_context_alloc: %s",
 				    gfarm_error_string(e));
 				*is_dst_errp = 1;
@@ -1650,7 +1650,7 @@ on_error_result:
 			    s_on_error_pos);
 			if ((e3 = gfm_client_compound_on_error_result(
 			    sconn, sctx)) != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003829,
 				    "compound_on_error result failed: %s",
 				    gfarm_error_string(e3));
 				e = e3;
@@ -1672,7 +1672,7 @@ on_error_result:
 				if ((e3 = gfm_client_compound_on_error_result(
 				    dconn, same_mds ? sctx : dctx))
 				    != GFARM_ERR_NO_ERROR) {
-					gflog_debug(GFARM_MSG_UNFIXED,
+					gflog_debug(GFARM_MSG_1003830,
 					    "compound_on_error result failed: "
 					    "%s", gfarm_error_string(e3));
 					e = e3;
@@ -1758,19 +1758,19 @@ on_error_result:
 	if (same_mds) {
 		/* ignore result */
 		if ((e2 = close_fd2(sconn, sfd, dfd)) != GFARM_ERR_NO_ERROR)
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003831,
 			    "close_fd2: %s",
 			    gfarm_error_string(e2));
 	} else {
 		/* ignore result */
 		if ((e2 = close_fd2(sconn, sfd, GFARM_DESCRIPTOR_INVALID)) !=
 		    GFARM_ERR_NO_ERROR)
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003832,
 			    "close_fd2: %s",
 			    gfarm_error_string(e2));
 		if ((e2 = close_fd2(dconn, dfd, GFARM_DESCRIPTOR_INVALID)) !=
 		    GFARM_ERR_NO_ERROR)
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003833,
 			    "close_fd2: %s",
 			    gfarm_error_string(e2));
 	}
@@ -1843,7 +1843,7 @@ name2_op_exit(struct gfm_connection *gfm_serverp, gfarm_error_t e,
 	if (e != GFARM_ERR_NO_ERROR) {
 		/* do not release connection when no error occurred. */
 		(void)name2_op_post_failover(gfm_serverp, closure);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003834,
 		    "gfm_name2_op: %s", gfarm_error_string(e));
 	}
 }

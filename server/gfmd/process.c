@@ -180,7 +180,7 @@ process_alloc(struct user *user,
 		rv = gfarm_id_alloc_at(process_id_table, *pidp, &vp);
 		if (rv != 0) {
 			free(filetab);
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003952,
 			    "gfarm_id_alloc_at(%d) failed: %s",
 			    (int)*pidp, strerror(rv));
 			return (gfarm_errno_to_error(rv));
@@ -339,7 +339,7 @@ process_get_slave_file_opening(struct process *process, int fd,
 	struct file_opening **fop)
 {
 	if (!FD_IS_SLAVE_ONLY(fd)) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003953,
 		    "opening slave fd: %d", fd);
 		return (GFARM_ERR_BAD_FILE_DESCRIPTOR);
 	}
@@ -355,14 +355,14 @@ process_record_replica_spec(struct process *process, int fd,
 	char *repattr_str = (repattr == NULL) ? "" : repattr;
 
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003954,
 		    "process_record_replica_spec(%ld,%d,%d,'%s'): %s",
 		    (long)process->pid, fd, desired_number, repattr_str,
 		    gfarm_error_string(e));
 		return (e);
 	}
 	if (!inode_is_file(fo->inode)) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003955,
 		    "process_record_replica_spec(%ld,%d,%d,'%s'): not a file",
 		    (long)process->pid, fd, desired_number, repattr_str);
 		return (GFARM_ERR_BAD_FILE_DESCRIPTOR);
@@ -490,7 +490,7 @@ process_get_dir_key(struct process *process, struct peer *peer,
 	else
 		e = process_get_file_opening(process, fd, &fo);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003956,
 		    "process_get_file_opening(%d) failed: %s",
 		    fd, gfarm_error_string(e));
 		return (e);
@@ -898,7 +898,7 @@ process_close_file(struct process *process, struct peer *peer, int fd,
 	else
 		e = process_get_file_opening(process, fd, &fo);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003957,
 		    "process_get_file_opening(%d) failed: %s",
 		    fd, gfarm_error_string(e));
 		return (e);
@@ -1402,7 +1402,7 @@ gfm_server_process_alloc(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 	if (relay != NULL && e == GFARM_ERR_NO_ERROR) {
 		assert(from_client);
 		if ((user = peer_get_user(peer)) == NULL) {
-			gflog_debug(GFARM_MSG_UNFIXED, "%s: unknown user %s",
+			gflog_debug(GFARM_MSG_1003958, "%s: unknown user %s",
 			    diag, peer_get_username(peer));
 			e = GFARM_ERR_OPERATION_NOT_PERMITTED;
 		} else if ((e = process_alloc(user, keytype, keylen, sharedkey,
@@ -1410,7 +1410,7 @@ gfm_server_process_alloc(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 			peer_set_process(peer, process);
 		}
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003959,
 			    "process %d alloc faild: %s",
 			    (int)pid, gfarm_error_string(e2));
 		}
@@ -1512,7 +1512,7 @@ gfm_server_process_set(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 		/* do not relay RPC to master gfmd */
 		giant_lock();
 		if ((user = user_lookup(username)) == NULL) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003960,
 			    "%s: user '%s' not found", diag, username);
 			e = GFARM_ERR_NO_SUCH_USER;
 		} else if (peer_get_process(peer) != NULL) {
@@ -1538,7 +1538,7 @@ gfm_server_process_set(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 #ifdef SLAVE_GFMD_LOCAL_PROCESSING
 	if (relay != NULL && e == GFARM_ERR_NO_ERROR) {
 		if ((user = user_lookup(username)) == NULL) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003961,
 			    "%s: user '%s' not found", diag, username);
 			e = GFARM_ERR_NO_SUCH_USER;
 		} else if ((e = process_does_match(pid, user, keytype,
@@ -1554,7 +1554,7 @@ gfm_server_process_set(struct peer *peer, gfp_xdr_xid_t xid, size_t *sizep,
 				peer_set_user(peer, user);
 		}
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003962,
 			    "process %d (user %s) set faild: %s",
 			    (int)pid, username, gfarm_error_string(e));
 		}

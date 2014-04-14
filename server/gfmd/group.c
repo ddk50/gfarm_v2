@@ -545,7 +545,7 @@ gfm_server_group_info_get_all(
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_GROUP, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003905,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -651,7 +651,7 @@ gfm_server_group_info_get_by_names(
 		e = GFARM_ERR_NO_MEMORY;
 	} else if ((e = wait_db_update_info(peer, DBUPDATE_GROUP, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003906,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e));
 	}
@@ -935,7 +935,7 @@ gfm_server_group_info_set(struct peer *peer, gfp_xdr_xid_t xid,
 	    gfm_server_group_info_set_request, gfm_server_group_info_set_reply,
 	    GFM_PROTO_GROUP_INFO_SET, &closure, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: %s",
+		gflog_debug(GFARM_MSG_1003907, "%s: %s",
 		    diag, gfarm_error_string(e));
 	} else
 		e = group_info_closure_get_error(&closure);
@@ -1043,7 +1043,7 @@ gfm_server_group_info_modify(struct peer *peer, gfp_xdr_xid_t xid,
 	    gfm_server_group_info_modify_reply,
 	    GFM_PROTO_GROUP_INFO_MODIFY, &closure, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: %s",
+		gflog_debug(GFARM_MSG_1003908, "%s: %s",
 		    diag, gfarm_error_string(e));
 	} else
 		e = group_info_closure_get_error(&closure);

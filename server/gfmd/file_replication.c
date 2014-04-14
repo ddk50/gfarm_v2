@@ -343,7 +343,7 @@ gfm_async_server_replication_result(struct host *dst,
 		 * couldn't call file_replication_finishedq_enqueue() here,
 		 * because `fr' is unknown.
 		 */
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003948,
 		    "%s: dst:%s: %s",
 		    diag, host_name(dst), gfarm_error_string(e));
 		return (e);
@@ -361,7 +361,7 @@ gfm_async_server_replication_result(struct host *dst,
 		 * couldn't call file_replication_finishedq_enqueue() here,
 		 * because `fr' is unknown.
 		 */
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003949,
 		    "%s: orphan replication (%s, %lld:%lld): "
 		    "handle=%lld s=%d d=%d size:%lld: "
 		    "maybe the connection had a problem?",
@@ -437,7 +437,7 @@ gfs_client_replication_request_free(void *p, void *arg)
 
 	file_replication_finishedq_enqueue(fr,
 	    GFARM_ERR_NO_ERROR, GFARM_ERR_CONNECTION_ABORTED);
-	gflog_debug(GFARM_MSG_UNFIXED,
+	gflog_debug(GFARM_MSG_1003950,
 	    "%s: (%s, %lld:%lld): connection aborted",
 	    diag, abstract_host_get_name(dst), (long long)ino, (long long)gen);
 }
@@ -464,7 +464,7 @@ gfs_client_replication_request_request(void *closure)
 	if (e != GFARM_ERR_NO_ERROR) {
 		/* accessing `fr' is only allowed if e != GFARM_ERR_NO_ERROR */
 		file_replication_finishedq_enqueue(fr, GFARM_ERR_NO_ERROR, e);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003951,
 		    "%s: %s->(%s, %lld:%lld): aborted: %s", diag,
 		    host_name(fr->src), host_name(dst),
 		    (long long)inode_get_number(fr->inode),

@@ -453,7 +453,7 @@ gfmdc_client_vsend_request_sync_result(void *p, void *arg, size_t size)
 
 	if ((e = ri->result_op(mh, peer, size, GFARM_ERR_NO_ERROR,
 	    ri->closure, ri->diag)) != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+		gflog_error(GFARM_MSG_1004044, "%s : %s",
 		    mdhost_get_name(mh), gfarm_error_string(e));
 	gfmdc_client_send_request_sync_notify(ri, e);
 	return (e);
@@ -469,7 +469,7 @@ gfmdc_client_vsend_request_sync_disconnect(void *p, void *arg)
 
 	/* FIXME better to set the reason of disconnection */
 	e = GFARM_ERR_CONNECTION_ABORTED;
-	gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+	gflog_error(GFARM_MSG_1004045, "%s : %s",
 	    mh != NULL ? mdhost_get_name(mh) : "", gfarm_error_string(e));
 	(void)ri->result_op(mh, peer, 0, e, ri->closure, ri->diag);
 	gfmdc_client_send_request_sync_notify(ri, e);
@@ -502,7 +502,7 @@ gfmdc_client_vsend_request_sync(struct mdhost *mh, struct peer *peer,
 #endif
 	    command, format, app);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004046,
 		    "%s : %s", mdhost_get_name(mh), gfarm_error_string(e));
 		goto end;
 	}
@@ -515,7 +515,7 @@ gfmdc_client_vsend_request_sync(struct mdhost *mh, struct peer *peer,
 	gfarm_mutex_unlock(&ri.mutex, diag, REQUEST_WAIT_INFO_MUTEX);
 	e = ri.error;
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004047,
 		    "%s : %s", mdhost_get_name(mh), gfarm_error_string(e));
 end:
 	gfarm_mutex_destroy(&ri.mutex, diag, REQUEST_WAIT_INFO_MUTEX);
@@ -582,7 +582,7 @@ gfmdc_client_vsend_request_async_disconnect(void *p, void *arg)
 
 	/* FIXME better to set the reason of disconnection */
 	e = GFARM_ERR_CONNECTION_ABORTED;
-	gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+	gflog_error(GFARM_MSG_1004048, "%s : %s",
 	    mh != NULL ? mdhost_get_name(mh) : "", gfarm_error_string(e));
 	(void)ri->result_op(mh, peer, 0, e, ri->closure, ri->diag);
 	free(ri);
@@ -601,7 +601,7 @@ gfmdc_client_vsend_request_async(struct mdhost *mh, struct peer *peer,
 	GFARM_MALLOC(ri);
 	if (ri == NULL) {
 		e = GFARM_ERR_NO_MEMORY;
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004049,
 		    "%s", gfarm_error_string(e));
 		return (e);
 	}
@@ -619,7 +619,7 @@ gfmdc_client_vsend_request_async(struct mdhost *mh, struct peer *peer,
 #endif
 	    command, format, app);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004050,
 		    "%s : %s", mdhost_get_name(mh), gfarm_error_string(e));
 	}
 	return (e);
@@ -941,7 +941,7 @@ gfmdc_client_remote_peer_alloc_result(struct mdhost *mh, struct peer *peer,
 		return (e);
 	if ((e = gfmdc_client_recv_result(peer, mh, size, diag, ""))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+		gflog_error(GFARM_MSG_1004051, "%s : %s",
 		    mdhost_get_name(mh), gfarm_error_string(e));
 	return (e);
 }
@@ -957,7 +957,7 @@ gfmdc_client_remote_peer_alloc(struct peer *peer)
 	gfarm_int32_t proto_transport = GFARM_PROTO_TRANSPORT_IP_TCP;
 
 	if ((e = peer_get_port(peer, &port)) != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004052,
 		    "%s: %s", diag, gfarm_error_string(e));
 		return (e);
 	}
@@ -968,7 +968,7 @@ gfmdc_client_remote_peer_alloc(struct peer *peer)
 	    peer_get_private_peer_id(peer), peer_get_auth_id_type(peer),
 	    peer_get_username(peer), peer_get_hostname(peer),
 	    proto_family, proto_transport, port)) != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004053,
 		    "%s: %s", diag, gfarm_error_string(e));
 	return (e);
 }
@@ -1021,7 +1021,7 @@ gfmdc_ensure_remote_peer(struct peer *peer, struct peer **mhpeerp)
 		mah = mdhost_to_abstract_host(mdhost_lookup_master());
 		e = abstract_host_sender_lock(mah, NULL, &my_mhpeer, diag);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004054,
 			    "%s (abstract_host_sender_lock): %s",
 			    diag, gfarm_error_string(e));
 			return (e);
@@ -1032,14 +1032,14 @@ gfmdc_ensure_remote_peer(struct peer *peer, struct peer **mhpeerp)
 		abstract_host_sender_unlock(mah, my_mhpeer, diag);
 
 		if (retry_count >= GFMDC_REMOTE_PEER_ALLOC_MAX_RETRY_COUNT) {
-			gflog_error(GFARM_MSG_UNFIXED, "%s: retry overtime",
+			gflog_error(GFARM_MSG_1004055, "%s: retry overtime",
 			    diag);
 			return (e);
 		}
 
 		e = gfmdc_client_remote_peer_alloc(peer);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004056,
 			    "%s (gfmdc_client_remote_peer_alloc): %s",
 			    diag, gfarm_error_string(e));
 			return (e);
@@ -1070,7 +1070,7 @@ gfmdc_client_remote_peer_free_result(struct mdhost *mh, struct peer *peer,
 		return (e);
 	if ((e = gfmdc_client_recv_result(peer, mh, size, diag, ""))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+		gflog_error(GFARM_MSG_1004057, "%s : %s",
 		    mdhost_get_name(mh), gfarm_error_string(e));
 	return (e);
 }
@@ -1088,7 +1088,7 @@ gfmdc_client_remote_peer_free(gfarm_uint64_t peer_id)
 	    gfmdc_client_remote_peer_free_result, NULL, diag,
 	    GFM_PROTO_REMOTE_PEER_FREE, "l", peer_id))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004058,
 		    "%s: %s", diag, gfarm_error_string(e));
 	return (e);
 }
@@ -1136,7 +1136,7 @@ gfmdc_client_remote_peer_disconnect_result(struct mdhost *mh,
 		return (e);
 	if ((e = gfmdc_client_recv_result(peer, mh, size, diag, ""))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED, "%s : %s",
+		gflog_error(GFARM_MSG_1004059, "%s : %s",
 		    mdhost_get_name(mh), gfarm_error_string(e));
 	return (e);
 }
@@ -1152,7 +1152,7 @@ gfmdc_client_remote_peer_disconnect(struct mdhost *mh, struct peer *peer,
 	    gfmdc_client_remote_peer_disconnect_result, NULL, diag,
 	    GFM_PROTO_REMOTE_PEER_DISCONNECT, "l", remote_peer_id))
 	    != GFARM_ERR_NO_ERROR)
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004060,
 		    "%s: %s", diag, gfarm_error_string(e));
 	return (e);
 }
@@ -1174,7 +1174,7 @@ gfmdc_server_remote_peer_disconnect(struct mdhost *mh, struct peer *peer,
 		if (gfs_peer == NULL)
 			break;  /* 'gfsd_peer' has already been disposed. */
 		if (peer_get_peer_type(gfs_peer) != peer_type_back_channel) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004061,
 			    "received peer-disconnect reqeust with an invalid "
 			    "peer id: %lld", (long long)peer_id);
 			e = GFARM_ERR_INVALID_REMOTE_PEER;
@@ -1220,7 +1220,7 @@ gfmdc_server_remote_rpc(struct mdhost *mh, struct peer *peer,
 	static const char diag[] = "GFM_PROTO_REMOTE_RPC";
 
 	if (debug_mode) {
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1004062,
 		    "%s: <%s> start remote rpc receiving from %s",
 		    peer_get_hostname(peer), diag,
 		    peer_get_service_name(peer));
@@ -1374,7 +1374,7 @@ gfmdc_master_server_remote_gfs_rpc(struct mdhost *mh, struct peer *peer,
 	    "GFM_PROTO_REMOTE_GFS_RPC master (request from slave)";
 
 	if (debug_mode) {
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1004063,
 		    "%s: <%s> start remote rpc receiving from %s",
 		    peer_get_hostname(peer), diag,
 		    peer_get_service_name(peer));
@@ -1520,7 +1520,7 @@ gfmdc_slave_server_remote_gfs_rpc_result_thread(void *arg)
 		return (NULL);
 
 	if (debug_mode)
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1004064,
 		    "%s: <%s> sending reply: %d (%s)",
 		    peer_get_hostname(peer), diag, (int)closure->errcode,
 		    gfarm_error_string(closure->errcode));
@@ -1593,7 +1593,7 @@ gfmdc_slave_server_remote_gfs_rpc(struct mdhost *mh, struct peer *peer,
 	    "GFM_PROTO_REMOTE_GFS_RPC slave (request from master)";
 
 	if (debug_mode) {
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1004065,
 		    "%s: <%s> start remote rpc receiving from %s",
 		    peer_get_hostname(peer), diag,
 		    peer_get_service_name(peer));
@@ -1635,7 +1635,7 @@ gfmdc_slave_server_remote_gfs_rpc(struct mdhost *mh, struct peer *peer,
 			break;
 		} else if (data_size != 0) {
 			e = GFARM_ERR_PROTOCOL;
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004066,
 			    "%s: <%s> protocol redidual %u",
 			    peer_get_hostname(peer), diag, (int)data_size);
 		}
@@ -1780,7 +1780,7 @@ gfmdc_slave_client_remote_gfs_rpc_result(void *p, void *arg, size_t size)
 	    "GFM_PROTO_REMOTE_GFS_RPC slave (reply from master)";
 
 	if (debug_mode)
-		gflog_info(GFARM_MSG_UNFIXED, "%s: <%s> receiving reply",
+		gflog_info(GFARM_MSG_1004067, "%s: <%s> receiving reply",
 		    peer_get_hostname(peer), diag);
 
 	do {
@@ -1835,7 +1835,7 @@ gfmdc_slave_client_remote_gfs_rpc_result(void *p, void *arg, size_t size)
 			errcode = e;
 		} else if (data_size != 0) {
 			e = GFARM_ERR_PROTOCOL;
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004068,
 			    "%s: <%s> protocol redidual %u",
 			    peer_get_hostname(peer), diag, (int)data_size);
 		}
@@ -1898,7 +1898,7 @@ gfmdc_slave_client_remote_gfs_rpc_thread00(
 			break;
 
 		if (debug_mode)
-			gflog_info(GFARM_MSG_UNFIXED,
+			gflog_info(GFARM_MSG_1004069,
 			    "%s: <%s> sending requset",
 			    peer_get_hostname(mh_peer), diag);
 
@@ -1983,7 +1983,7 @@ gfmdc_slave_client_remote_gfs_rpc(struct peer *gfs_peer, void *closure,
 	    request, size, data);
 	if (wclosure == NULL) {
 		e = GFARM_ERR_NO_MEMORY;
-		gflog_error(GFARM_MSG_UNFIXED, "%s: %s", diag,
+		gflog_error(GFARM_MSG_1004070, "%s: %s", diag,
 		    gfarm_error_string(e));
 		return (e);
 	}
@@ -2047,7 +2047,7 @@ gfmdc_master_client_remote_gfs_rpc_result(void *p, void *arg, size_t size)
 	 */
 	if ((e = gfp_xdr_recv_sized(conn, 0, 1, &size, &eof, "i", &errcode))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004071,
 		    "%s: %s", diag, gfarm_error_string(e));
 	} else if (eof) {
 		e = GFARM_ERR_UNEXPECTED_EOF;
@@ -2093,7 +2093,7 @@ gfmdc_master_client_remote_gfs_rpc0(struct abstract_host *ah,
 	static const char wdiag[] =
 	    "GFM_PROTO_REMOTE_GFS_RPC master (request to slave)";
 
-	gflog_debug(GFARM_MSG_UNFIXED, "%s: sending request", wdiag);
+	gflog_debug(GFARM_MSG_1004072, "%s: sending request", wdiag);
 
 	/*
 	 * We dispose 'wclosure' in
@@ -2103,7 +2103,7 @@ gfmdc_master_client_remote_gfs_rpc0(struct abstract_host *ah,
 	wclosure = master_client_remote_gfs_rpc_closure_alloc(result_callback,
 	    disconnect_callback, closure);
 	if (wclosure == NULL) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: no memory", wdiag);
+		gflog_debug(GFARM_MSG_1004073, "%s: no memory", wdiag);
 		return (GFARM_ERR_NO_MEMORY);
 	}
 
@@ -2193,7 +2193,7 @@ gfmdc_client_fhopen_result(struct mdhost *mh, struct peer *peer,
 	if (e == GFARM_ERR_NO_ERROR) {
 		if ((e = gfmdc_client_recv_result(peer, peer_get_mdhost(peer),
 		     size, diag, "i", &mode)) != GFARM_ERR_NO_ERROR)
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004074,
 			    "%s: RPC error: %s", diag, gfarm_error_string(e));
 	}
 	(*c->callback)(c->closure, e, mode);
@@ -2220,7 +2220,7 @@ gfmdc_client_fhopen_request(struct peer *peer,
 	if ((e = gfmdc_client_send_request_async(mh, peer,
 	    gfmdc_client_fhopen_result, closure, diag, GFM_PROTO_FHOPEN,
 	    "lli", inum, igen, flag)) != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004075,
 		    "%s : %s", mdhost_get_name(mh), gfarm_error_string(e));
 		return (e);
 	}

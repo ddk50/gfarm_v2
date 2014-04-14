@@ -788,7 +788,7 @@ inode_schedule_replication_within_scope(
 	    host_is_disk_available_filter, &necessary_space,
 	    n_desired, &n_targets, &targets, &n_valid);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003963,
 		    "%s: inode %lld:%lld: cannot create replicas: "
 		    "desired=%d/scope=%d/existing=%d/being_removed=%d: %s",
 		    diag, (long long)inode_get_number(inode),
@@ -808,7 +808,7 @@ inode_schedule_replication_within_scope(
 	 */
 	if (shortage > n_targets &&
 	    *n_being_removedp >= shortage - n_targets) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003964,
 		    "%s: inode %lld:%lld: many replicas are being removed: "
 		    "desired=%d/scope=%d/existing=%d/being_removed=%d/"
 		    "target=%d",
@@ -838,7 +838,7 @@ inode_schedule_replication_within_scope(
 			    gfarm_error_string(e));
 		} else if (e != GFARM_ERR_NO_ERROR) {
 			gflog_reduced_warning(
-			    GFARM_MSG_UNFIXED, &rep_reqfailed_state,
+			    GFARM_MSG_1003965, &rep_reqfailed_state,
 			    "%s: %lld:%lld:%s@%s: replication failed:"
 			    " %s", diag,
 			    (long long)inode_get_number(inode),
@@ -862,7 +862,7 @@ inode_schedule_replication_within_scope(
 		return (GFARM_ERR_RESOURCE_TEMPORARILY_UNAVAILABLE);
 
 	if (shortage > n_success)
-		gflog_reduced_notice(GFARM_MSG_UNFIXED, &rep_fewer_state,
+		gflog_reduced_notice(GFARM_MSG_1003966, &rep_fewer_state,
 		    "%s: %lld:%lld:%s: fewer replicas, "
 		    "increase=%d/before=%d/desire=%d", diag,
 		    (long long)inode_get_number(inode),
@@ -870,7 +870,7 @@ inode_schedule_replication_within_scope(
 		    user_name(inode_get_user(inode)),
 		    n_success, n_valid, n_desired);
 	else
-		gflog_reduced_debug(GFARM_MSG_UNFIXED, &rep_fixed_state,
+		gflog_reduced_debug(GFARM_MSG_1003967, &rep_fixed_state,
 		    "%s: %lld:%lld:%s: will be fixed, increase=%d/desire=%d",
 		    diag, (long long)inode_get_number(inode),
 		    (long long)inode_get_gen(inode),
@@ -935,7 +935,7 @@ inode_schedule_replication(
 
 	if (repattr != NULL) {
 		if (debug_mode)
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003968,
 			    "%s: about to schedule "
 			    "repattr-based replication for inode "
 			    "%lld:%lld@%s.", diag,
@@ -962,7 +962,7 @@ inode_schedule_replication(
 			    inode, &n_existing2, &existing2,
 			    &n_being_removed2, &being_removed2);
 			if (e != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1003969,
 				    "%s: %lld:%lld:%s: replica_hosts: %s",
 				    diag,
 				    (long long)inode_get_number(inode),
@@ -1003,7 +1003,7 @@ inode_schedule_replication(
 					    existing3, n_existing3);
 					if (existing3 == NULL) {
 						gflog_debug(
-						    GFARM_MSG_UNFIXED,
+						    GFARM_MSG_1003970,
 						    "no memory");
 						return (GFARM_ERR_NO_MEMORY);
 					}
@@ -1032,7 +1032,7 @@ inode_schedule_replication(
 					    being_removed3, n_being_removed3);
 					if (being_removed3 == NULL) {
 						gflog_debug(
-						    GFARM_MSG_UNFIXED,
+						    GFARM_MSG_1003971,
 						    "no memory");
 						return (GFARM_ERR_NO_MEMORY);
 					}
@@ -1052,7 +1052,7 @@ inode_schedule_replication(
 				}
 			}
 
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003972,
 			    "%s: about to schedule "
 			    "ncopy-based replication for inode %lld:%lld@%s. "
 			    "number = %d (= %d - %d + %d)", diag,
@@ -1119,7 +1119,7 @@ make_replicas_except(struct inode *inode, struct host *spool_host,
 	}
 	GFARM_MALLOC_ARRAY(existing, n_existing);
 	if (existing == NULL) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003973,
 		    "%s: no memory to schedule replicas: existing %d hosts",
 		    diag, n_existing);
 		return (GFARM_ERR_NO_MEMORY);
@@ -1128,7 +1128,7 @@ make_replicas_except(struct inode *inode, struct host *spool_host,
 		GFARM_MALLOC_ARRAY(being_removed, n_being_removed);
 		if (being_removed == NULL) {
 			free(existing);
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003974,
 			    "%s: no memory to schedule replicas: "
 			    "being_removed %d hosts",
 			    diag, n_being_removed);
@@ -2227,7 +2227,7 @@ inode_new_generation_by_cookie_start(struct inode *inode,
 		 */
 		ia = inode_activity_alloc();
 		if (ia == NULL) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003975,
 			    "unable to track inode generation");
 			return (GFARM_ERR_NO_MEMORY);
 		}
@@ -2294,7 +2294,7 @@ inode_new_generation_by_fd_finish(struct inode *inode, struct peer *peer,
 
 	ia = inode->u.c.activity;
 	if (ia->u.f.event_type != EVENT_GEN_UPDATED) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003976,
 		    "%s: not pending generation update: %d",
 		    diag, ia->u.f.event_type);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
@@ -2329,7 +2329,7 @@ inode_new_generation_by_cookie_finish(
 
 	ia = inode->u.c.activity;
 	if (ia->u.f.event_type != EVENT_GEN_UPDATED_BY_COOKIE) {
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003977,
 		    "%s: not pending generation update by cookie: %d",
 		    diag, ia->u.f.event_type);
 		return (GFARM_ERR_OPERATION_NOT_PERMITTED);
@@ -3807,7 +3807,7 @@ inode_file_handle_update(struct inode *inode, gfarm_off_t size,
 {
 	if (!inode_has_replica(inode, spool_host)) {
 		/* this replica became obsolete during gfmd failover */
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003978,
 		    "inode_file_handle_update: inode %lld modification on %s "
 		     "is lost during gfmd failover",
 		    (long long)inode_get_number(inode), host_name(spool_host));
@@ -4402,7 +4402,7 @@ inode_replicated(struct file_replication *fr,
 			    src_errcode, dst_errcode);
 		if (size != inode_get_size(inode) ||
 		    file_replication_get_gen(fr) != inode_get_gen(inode))
-			gflog_notice(GFARM_MSG_UNFIXED,
+			gflog_notice(GFARM_MSG_1003979,
 			    "replication failed. invalid replica (inum=%lld): "
 			    "(gen=%lld, size=%lld) "
 			    "should be (gen=%lld, size=%lld)",
@@ -4525,7 +4525,7 @@ inode_dead_file_copy_added(gfarm_ino_t inum, gfarm_int64_t igen,
 	if (inode == NULL) {
 		inode = inode_alloc_num(inum);
 		if (inode == NULL) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003980,
 			    "cannot allocate inode %lld", (long long)inum);
 			return;
 		}
@@ -4669,7 +4669,7 @@ check_removable_replicas(
 
 		e = gfarm_repattr_parse(fo->u.f.repattr, &reps, &nreps);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003981,
 			    "gfarm_repattr_parse(%s): %s",
 			    fo->u.f.repattr, gfarm_error_string(e));
 			return (e);
@@ -4704,7 +4704,7 @@ check_removable_replicas(
 		e = fsngroup_get_hosts(fsng, &nhosts, &hosts);
 		if (e != GFARM_ERR_NO_ERROR) {
 			gfarm_repattr_free_all(nreps, reps);
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003982,
 			    "fsngroup_get_hosts(%s): %s",
 			    fsng, gfarm_error_string(e));
 			return (e);
@@ -4720,7 +4720,7 @@ check_removable_replicas(
 		if (e != GFARM_ERR_NO_ERROR) {
 			free(hosts);
 			gfarm_repattr_free_all(nreps, reps);
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003983,
 			    "inode_count_ncopy_with_grace: %s",
 			    gfarm_error_string(e));
 			return (e);
@@ -4768,7 +4768,7 @@ inode_remove_replica_internal(struct inode *inode, struct host *spool_host,
 			    protect_replicas, num_valid,
 			    copy, inode->u.c.s.f.copies);
 			if (e != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003984,
 				    "check_removable_replicas: %s",
 				    gfarm_error_string(e));
 				return (e);
@@ -4789,7 +4789,7 @@ inode_remove_replica_internal(struct inode *inode, struct host *spool_host,
 			} else if (FILE_COPY_IS_VALID(copy) &&
 				   num_incomplete > 0) {
 				/* the replica may be used for replication */
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003985,
 				    "remove_replica(%lld:%lld, %s): "
 				    "being replicated",
 				    (long long)inode->i_number, (long long)gen,
@@ -4815,7 +4815,7 @@ inode_remove_replica_internal(struct inode *inode, struct host *spool_host,
 			if (FILE_COPY_IS_VALID(copy)) {
 				e = remove_replica_metadata(inode, copy->host);
 				if (e != GFARM_ERR_NO_ERROR) {
-					gflog_error(GFARM_MSG_UNFIXED,
+					gflog_error(GFARM_MSG_1003986,
 					    "remove_replica_metadata("
 					    "%lld, %lld, %s): %s",
 					    (unsigned long long)inode->i_number,
@@ -5348,7 +5348,7 @@ file_copy_db_remove_orphan(void)
 		e = inode_remove_replica_internal(inode, spool_host,
 		    gen, NULL, 1, 1, NULL);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003987,
 			    "cannot remove a replica (%s, %lld:%lld): %s",
 			    entry->string, (long long)entry->inum,
 			    (long long)gen, gfarm_error_string(e));
@@ -5745,7 +5745,7 @@ file_copy_add_one(void *closure, gfarm_ino_t inum, char *hostname)
 		file_copy_defer_db_removal(inum, hostname);
 		return;
 	} else if (host == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003988,
 		    "file_copy_add_one(%s, %lld): no memory",
 		    hostname, (long long)inum);
 	} else if ((e = inode_add_replica_internal(inode, host,

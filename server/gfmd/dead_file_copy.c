@@ -275,7 +275,7 @@ dead_file_copy_mark_kept(struct dead_file_copy *dfc)
 
 	/* sanity check */
 	if (dfc->is_kept) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003946,
 		    "dead copy %lld:%lld host %s: already kept",
 		    (long long)dfc->inum, (long long)dfc->igen,
 		    abstract_host_get_name(dfc->qentry.abhost));
@@ -528,7 +528,7 @@ dead_file_copy_list_alloc(void)
 
 	GFARM_MALLOC(same_inode_list);
 	if (same_inode_list == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003947,
 		    "cannot allocate dead_file_copy_list");
 		return (NULL);
 	}

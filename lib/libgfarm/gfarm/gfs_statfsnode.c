@@ -36,7 +36,7 @@ gfs_statfsnode_by_path(const char *path, char *host, int port,
 retry:
 	if ((e = gfs_client_connection_and_process_acquire(&gfm_server,
 	    host, port, &gfs_server, NULL)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003876,
 		    "gfs_client_connection_acquire_by_host: %s",
 		    gfarm_error_string(e));
 		gfm_client_connection_free(gfm_server);
@@ -48,7 +48,7 @@ retry:
 		bfree, bavail, files, ffree, favail);
 	gfs_client_connection_free(gfs_server);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003877,
 		    "gfs_client_statfs: %s",
 		    gfarm_error_string(e));
 		if (gfs_client_is_connection_error(e) && nretry-- > 0)

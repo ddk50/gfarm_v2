@@ -204,7 +204,7 @@ host_lookup_at_loading(const char *hostname)
 		giant_unlock();
 	}
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003909,
 		    "%s: failed to enter a host %s", diag, hostname);
 		free(hi.hostname);
 		free(hi.architecture);
@@ -784,7 +784,7 @@ host_new(struct gfarm_host_info *hi, struct callout *callout)
 
 	GFARM_MALLOC(h);
 	if (h == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003910,
 		    "host %s: no memory", hi->hostname);
 		return (NULL);
 	}
@@ -792,7 +792,7 @@ host_new(struct gfarm_host_info *hi, struct callout *callout)
 	    diag);
 	if (e != GFARM_ERR_NO_ERROR) {
 		free(h);
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003911,
 		    "host %s: %s", hi->hostname, gfarm_error_string(e));
 		return (NULL);
 	}
@@ -1444,7 +1444,7 @@ gfm_server_host_info_get_all(
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_HOST, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003912,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 		return (e_rpc);
@@ -1456,7 +1456,7 @@ gfm_server_host_info_get_all(
 	} else {
 		e_ret = gfm_server_put_reply(peer, xid, sizep, diag, e_rpc,
 		    "");
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: gfm_server_put_reply: %s",
+		gflog_debug(GFARM_MSG_1003913, "%s: gfm_server_put_reply: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
 	return (e_ret);
@@ -1481,7 +1481,7 @@ gfm_server_host_info_get_by_architecture(
 
 	e_ret = gfm_server_get_request(peer, sizep, diag, "s", &architecture);
 	if (e_ret != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003914,
 		    "gfm_server_get_request() failed: %s",
 		    gfarm_error_string(e_ret));
 		return (e_ret);
@@ -1493,7 +1493,7 @@ gfm_server_host_info_get_by_architecture(
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_HOST, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003915,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -1504,7 +1504,7 @@ gfm_server_host_info_get_by_architecture(
 	} else {
 		e_ret = gfm_server_put_reply(peer, xid, sizep, diag, e_rpc,
 		    "");
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: gfm_server_put_reply: %s",
+		gflog_debug(GFARM_MSG_1003916, "%s: gfm_server_put_reply: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
 	return (e_ret);
@@ -1567,7 +1567,7 @@ gfm_server_host_info_get_by_names_common(
 		e = GFARM_ERR_NO_MEMORY;
 	} else if ((e = wait_db_update_info(peer, DBUPDATE_HOST, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1003917,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e));
 	}
@@ -1750,7 +1750,7 @@ host_fsngroup_modify(struct host *h, const char *fsngroupname,
 	char *g;
 
 	if (strlen(fsngroupname) > GFARM_CLUSTER_NAME_MAX) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003918,
 		    "%s: host %s: too long fsngroupname \"%s\"",
 		    diag, host_name(h), fsngroupname);
 		return (GFARM_ERR_INVALID_ARGUMENT);
@@ -1855,10 +1855,10 @@ host_info_remove_default(const char *hostname, const char *diag)
 	host_disconnect_request(host, NULL);
 
 	if ((e = db_begin(diag)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: db_begin: %s",
+		gflog_debug(GFARM_MSG_1003919, "%s: db_begin: %s",
 		    diag, gfarm_error_string(e));
 	} else if ((e = host_remove(hostname)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: host_remove: %s",
+		gflog_debug(GFARM_MSG_1003920, "%s: host_remove: %s",
 		    diag, gfarm_error_string(e));
 	} else if ((e2 = db_host_remove(hostname)) != GFARM_ERR_NO_ERROR) {
 		gflog_error(GFARM_MSG_1000272,
@@ -2087,7 +2087,7 @@ GFM_PROTO_SCHEDULE_HOST_DOMAIN_receive_request(
 	}
 
 	if (cp->req_error != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED, "%s: %s failed: %s",
+		gflog_error(GFARM_MSG_1003921, "%s: %s failed: %s",
 			diag, 
 			"GFM_PROTO_SCHEDULE_HOST_DOMAIN_receive_request()",
 			gfarm_error_string(cp->req_error));
@@ -2154,7 +2154,7 @@ GFM_PROTO_SCHEDULE_HOST_DOMAIN_send_reply(
 			rep_error = wait_db_update_info(
 				peer, DBUPDATE_HOST, diag);
 			if (rep_error != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1003922,
 					"%s: %s failed: %s",
 					diag,	
 					"wait_db_update_info()",
@@ -2183,7 +2183,7 @@ GFM_PROTO_SCHEDULE_HOST_DOMAIN_send_reply(
 		ret = gfm_server_relay_put_reply_dynarg(peer, sizep, diag,
 		    rep_error, "");
 		if (ret != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003923,
 				"%s: %s failed: %s",
 				diag,
 				"gfm_server_relay_put_reply_dynarg()",
@@ -2200,7 +2200,7 @@ GFM_PROTO_SCHEDULE_HOST_DOMAIN_send_reply(
 		ret = gfm_server_relay_put_reply_arg_dynarg(peer, sizep,
 		    diag, "i", cp->nhosts);
 		if (ret != GFARM_ERR_NO_ERROR) {
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1003924,
 				"%s: %s failed: %s",
 				diag,
 				"gfm_server_relay_put_reply_arg_dynarg()",
@@ -2213,7 +2213,7 @@ GFM_PROTO_SCHEDULE_HOST_DOMAIN_send_reply(
 			ret = host_schedule_reply_arg_dynarg(cp->hosts[i],
 			    peer, sizep, diag);
 			if (ret != GFARM_ERR_NO_ERROR) {
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1003925,
 					"%s: %s failed: %s",
 					diag,
 					"host_schedule_reply_arg_dynarg()",
@@ -2256,7 +2256,7 @@ gfm_server_schedule_host_domain(
 		diag);
 	GFM_PROTO_SCHEDULE_HOST_DOMAIN_context_finalize(&c);
 	if (e != GFARM_ERR_NO_ERROR) { 
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: %s",
+		gflog_debug(GFARM_MSG_1003926, "%s: %s",
 			diag, gfarm_error_string(e));
 	}
 	return (e);

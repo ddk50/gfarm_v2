@@ -126,7 +126,7 @@ schedule_hosts_domain_all_rpc(struct gfm_connection **gfm_serverp,
 
 	if ((e = gfm_client_connection_and_process_acquire_by_path(
 	    si->path, gfm_serverp)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003817,
 		    "gfm_client_connection_and_process_acquire_by_path: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -134,7 +134,7 @@ schedule_hosts_domain_all_rpc(struct gfm_connection **gfm_serverp,
 	gfm_client_connection_lock(*gfm_serverp);
 	if ((e = gfm_client_schedule_host_domain(*gfm_serverp, si->domain,
 	    si->nhostsp, si->infosp)) != GFARM_ERR_NO_ERROR)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003818,
 		    "gfm_client_schedule_host_domain: %s",
 		    gfarm_error_string(e));
 	gfm_client_connection_unlock(*gfm_serverp);
@@ -156,7 +156,7 @@ schedule_hosts_domain_all_exit(struct gfm_connection *gfm_server,
 {
 	(void)schedule_hosts_domain_all_post_failover(gfm_server, closure);
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003819,
 		    "gfarm_schedule_hosts_domain_all: %s",
 		    gfarm_error_string(e));
 }

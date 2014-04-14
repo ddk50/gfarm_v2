@@ -550,7 +550,7 @@ gfsk_client_connection_alloc_and_auth(struct gfarm_eventqueue *q,
 	if ((err = gfsk_gfsd_connect(canonical_hostname, peer_addr,
 		source_ip, user, &sock, kevpp, fd))) {
 		err = -err;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003791,
 			"gfsk_gfsd_connect error :%s", strerror(err));
 		free(gfs_server->hostname);
 		free(gfs_server);
@@ -665,7 +665,7 @@ retry:
 	if (!created) {
 		*gfs_serverp = gfp_cached_connection_get_data(cache_entry);
 		if (!*gfs_serverp) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003792,
 				"gfs_client_connection_acquire:"
 				"%s not connected", canonical_hostname);
 			gfp_cached_or_uncached_connection_free(
@@ -716,7 +716,7 @@ retry:
 	if (!created) {
 		*gfs_serverp = gfp_cached_connection_get_data(cache_entry);
 		if (!*gfs_serverp) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003793,
 				"gfs_client_connection_acquire:"
 				"%s not connected", canonical_hostname);
 			gfp_cached_or_uncached_connection_free(
@@ -756,7 +756,7 @@ gfs_client_check_failovercount_or_reset_process(
 
 	if (gfs_server->failover_count == fc)
 		return (GFARM_ERR_NO_ERROR);
-	gflog_debug(GFARM_MSG_UNFIXED,
+	gflog_debug(GFARM_MSG_1003794,
 	    "detected gfmd connection failover before acquring "
 	    "gfsd connection");
 	/*
@@ -775,7 +775,7 @@ gfs_client_check_failovercount_or_reset_process(
 	    != GFARM_ERR_NO_ERROR) {
 		gfs_server->failover_count = old_fc;
 		gfs_client_connection_free(gfs_server);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003795,
 		    "gfarm_client_process_reset: %s",
 		    gfarm_error_string(e));
 	}
@@ -800,7 +800,7 @@ retry:
 	if ((e = gfs_client_connection_acquire_by_host(*gfm_serverp,
 	    canonical_hostname, port, &gfs_server, source_ip))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003796,
 		    "gfs_client_connection_acquire_by_host: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -810,13 +810,13 @@ retry:
 		e = gfs_client_check_failovercount_or_reset_process(
 		    gfs_server, gfm_server);
 		if (gfs_client_is_connection_error(e) && nretry_reset-- > 0) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003797,
 			    "retry process reset");
 			goto retry;
 		}
 	} else if ((e = gfarm_client_process_set(gfs_server, gfm_server))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003798,
 		    "gfarm_client_process_set: %s",
 		    gfarm_error_string(e));
 		gfs_client_connection_free(gfs_server);
@@ -835,7 +835,7 @@ retry:
 			gfmd_user = strdup(gfm_client_username(gfm_server));
 			if (gfmd_host == NULL || gfmd_user == NULL) {
 				e = GFARM_ERR_NO_MEMORY;
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003799,
 				    "%s", gfarm_error_string(e));
 				free(gfmd_host);
 				free(gfmd_user);
@@ -843,7 +843,7 @@ retry:
 			}
 			if ((e = gfm_client_connection_failover(gfm_server))
 			    != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003800,
 				    "gfm_client_connection_failover: %s",
 				    gfarm_error_string(e));
 				free(gfmd_host);
@@ -855,7 +855,7 @@ retry:
 			free(gfmd_host);
 			free(gfmd_user);
 			if (e != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003801,
 				    "gfm_client_connection_and_process_acquire:"
 				    " %s",
 				    gfarm_error_string(e));
@@ -1045,7 +1045,7 @@ gfs_client_connect_kern_end(int events, int fd, void *kevp, void *closure)
 			e = gfp_xdr_new_socket(fd, &state->gfs_server->conn);
 			if (e != GFARM_ERR_NO_ERROR) {
 				close(fd);
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003802,
 				"gfp_xdr_new_socket() failed: %s",
 				gfarm_error_string(e));
 				state->error = e;
@@ -1465,7 +1465,7 @@ gfs_client_process_reset(struct gfs_connection *gfs_server,
 	e = gfs_client_rpc(gfs_server, 0, GFS_PROTO_PROCESS_RESET,
 		"ibli/", type, size, key, pid, gfs_server->failover_count);
 	if (e == GFARM_ERR_GFMD_FAILED_OVER) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003803,
 		    "ignore error: %s", gfarm_error_string(e));
 		e = GFARM_ERR_NO_ERROR;
 	}
@@ -1546,7 +1546,7 @@ gfs_client_open_local(struct gfs_connection *gfs_server, gfarm_int32_t fd,
 	/* both `dummy' and `local_fd` are passed by using host byte order. */
 #ifdef __KERNEL__
 	if ((rv = gfsk_localfd_set(local_fd, S_IFREG)) < 0) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003804,
 			"gfsk_localfd_set failed: %s",
 			gfarm_error_string(gfarm_errno_to_error(-rv)));
 		return (gfarm_errno_to_error(-rv));
@@ -1635,7 +1635,7 @@ gfs_client_write(struct gfs_connection *gfs_server,
 
 	if ((e = gfs_client_rpc(gfs_server, 0, GFS_PROTO_WRITE, "ib/ill",
 	    fd, size, buffer, &n, offp, total_sizep)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003805,
 			"gfs_client_rpc() failed: %s",
 			gfarm_error_string(e));
 		return (e);
@@ -1930,7 +1930,7 @@ gfs_client_ctx_rpc_request(struct gfs_connection *gfs_server,
 		gfs_client_purge_from_cache(gfs_server);
 	}
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003806,
 		    "gfs_client_ctx_request(%d) failed: %s",
 		    (int)command, gfarm_error_string(e));
 	}
@@ -1958,7 +1958,7 @@ gfs_client_ctx_rpc_result(struct gfs_connection *gfs_server,
 		gfs_client_purge_from_cache(gfs_server);
 	}
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003807,
 		    "gfs_client_ctx_result() failed: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -1968,7 +1968,7 @@ gfs_client_ctx_rpc_result(struct gfs_connection *gfs_server,
 		 * We just use gfarm_error_t as the errcode,
 		 * Note that GFARM_ERR_NO_ERROR == 0.
 		 */
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003808,
 		    "gfp_client_ctx_result() failed errcode=%d",
 		    errcode);
 		return (errcode);
@@ -2038,7 +2038,7 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 		e2 = gfarm_sockopt_set_option(fds[0].fd,
 		    "tcp_nodelay");
 		if (e2 != GFARM_ERR_NO_ERROR)
-			gflog_info(GFARM_MSG_UNFIXED, "%s: tcp_nodelay: %s",
+			gflog_info(GFARM_MSG_1003809, "%s: tcp_nodelay: %s",
 			    diag, gfarm_error_string(e2));
 
 		for (;;) {
@@ -2049,7 +2049,7 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 			    gfarm_ctxp->network_receive_timeout * 1000))
 			    == 0) {
 				e_remote = GFARM_ERR_OPERATION_TIMED_OUT;
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1003810,
 				    "%s: "
 				    "closing network connection due to "
 				    "no response within %d seconds "
@@ -2060,7 +2060,7 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 				if (errno == EINTR)
 					continue;
 				e_local = gfarm_errno_to_error(errno);
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1003811,
 				    "%s: poll: %s",
 				     diag, gfarm_error_string(e_local));
 				break;
@@ -2072,14 +2072,14 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 				    gfs_server, ctx, "b",
 				    (size_t)REPLICA_RECV_IOSIZE, &got, buffer);
 				if (e_remote != GFARM_ERR_NO_ERROR) {
-					gflog_error(GFARM_MSG_UNFIXED,
+					gflog_error(GFARM_MSG_1003812,
 					    "%s: GFS_PROTO_PREAD result: %s",
 					    diag, gfarm_error_string(e_remote));
 					break;
 				}
 				if (got > REPLICA_RECV_IOSIZE) {
 					e_remote = GFARM_ERR_PROTOCOL;
-					gflog_error(GFARM_MSG_UNFIXED,
+					gflog_error(GFARM_MSG_1003813,
 					    "%s: GFS_PROTO_PREAD request: "
 					    "%d bytes requested, %d bytes got",
 					    diag, (int)REPLICA_RECV_IOSIZE,
@@ -2118,7 +2118,7 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 				    GFS_PROTO_PREAD, "iil", remote_fd,
 				    (int)REPLICA_RECV_IOSIZE, offset);
 				if (e_remote != GFARM_ERR_NO_ERROR) {
-					gflog_error(GFARM_MSG_UNFIXED,
+					gflog_error(GFARM_MSG_1003814,
 					    "%s: GFS_PROTO_PREAD request: %s",
 					    diag, gfarm_error_string(e_remote));
 					break;
@@ -2138,12 +2138,12 @@ gfs_client_replica_recv(struct gfs_connection *gfs_server,
 	}
 	e2 = gfs_client_close(gfs_server, remote_fd);
 	if (e2 != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003815,
 		    "gfs_client_replica_recv: GFS_PROTO_CLOSE(%d): %s",
 		    remote_fd, gfarm_error_string(e2));
 	}
 #if 1
-	gflog_info(GFARM_MSG_UNFIXED, "%s: window size was %d", diag, window);
+	gflog_info(GFARM_MSG_1003816, "%s: window size was %d", diag, window);
 #endif
 
 	*e_localp = e_local;

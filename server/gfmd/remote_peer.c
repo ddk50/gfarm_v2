@@ -52,7 +52,7 @@ remote_peer_to_peer(struct remote_peer *remote_peer)
 static struct local_peer *
 remote_peer_downcast_to_local_peer(struct peer *peer)
 {
-	gflog_fatal(GFARM_MSG_UNFIXED,
+	gflog_fatal(GFARM_MSG_1003933,
 	    "downcasting remote_peer %p to local_peer", peer);
 	return (NULL);
 }
@@ -165,7 +165,7 @@ remote_peer_notice_disconnected(struct peer *peer,
 		parent_hostname = hostbuf;
 	}
 		
-	gflog_notice(GFARM_MSG_UNFIXED,
+	gflog_notice(GFARM_MSG_1003934,
 	    "(%s@%s@%s) disconnected",
 	    username, hostname, parent_hostname);
 }

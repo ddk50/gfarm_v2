@@ -168,7 +168,7 @@ gfs_fstat(GFS_File gf, struct gfs_stat *s)
 	gfs_profile(staticp->stat_time += gfarm_timerval_sub(&t2, &t1));
 
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003873,
 		    "gfm_client_compound_file_op_readonly() failed: %s",
 		    gfarm_error_string(e));
 	}

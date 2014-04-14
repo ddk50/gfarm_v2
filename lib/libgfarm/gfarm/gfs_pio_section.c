@@ -99,7 +99,7 @@ gfs_pio_view_section_close(GFS_File gf)
 			/* we have to read rest of the file in this case */
 #if 0
 			/* XXX - not supported for now */
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1003850,
 			    "writing without truncation isn't supported yet\n");
 #endif
 #if 0
@@ -267,7 +267,7 @@ gfs_pio_view_section_write(GFS_File gf,
 #endif
 
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003851,
 			"storage_write() failed: %s",
 			gfarm_error_string(e));
 	}
@@ -400,13 +400,13 @@ retry:
 	    gfs_pio_open_remote_section(gf, gfs_server)) == GFARM_ERR_NO_ERROR)
 		return (e);
 
-	gflog_debug(GFARM_MSG_UNFIXED,
+	gflog_debug(GFARM_MSG_1003852,
 	    "gfs_pio_open_%s_section: %s",
 	    is_local ? "local" : "remote", gfarm_error_string(e));
 
 	if (gfs_pio_should_failover(gf, e) && nretry-- > 0) {
 		if ((e = gfs_pio_failover(gf)) != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003853,
 			    "gfs_pio_failover: %s", gfarm_error_string(e));
 			return (e);
 		}
@@ -418,11 +418,11 @@ retry:
 			 * in gfarm_filesystem. so gfs_server did not fail
 			 * over.
 			 */
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003854,
 			    "reset_process");
 			if ((e = gfarm_client_process_reset(gfs_server,
 			    gf->gfm_server)) != GFARM_ERR_NO_ERROR) {
-				gflog_debug(GFARM_MSG_UNFIXED,
+				gflog_debug(GFARM_MSG_1003855,
 				    "gfarm_client_process_reset: %s",
 				    gfarm_error_string(e));
 				return (e);
@@ -460,7 +460,7 @@ retry:
 	gfs_profile(gfarm_gettimerval(&t2));
 
 	if ((e = gfs_pio_open_section(gf, gfs_server)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003856,
 		    "gfs_pio_open_section: %s",
 		    gfarm_error_string(e));
 		gfs_client_connection_free(gfs_server);
@@ -473,7 +473,7 @@ retry:
 
 	gfs_profile(
 		gfarm_gettimerval(&t3);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003857,
 		    "(connect_and_open) connection_acquire/process_set %f, "
 			   "open %f",
 			   gfarm_timerval_sub(&t2, &t1),
@@ -698,7 +698,7 @@ gfs_file_section_context_alloc(void)
 	GFARM_MALLOC(vc);
 	if (vc == NULL) {
 		e = GFARM_ERR_NO_MEMORY;
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003858,
 		    "allocation of file section context failed: %s",
 		    gfarm_error_string(e));
 		return (NULL);

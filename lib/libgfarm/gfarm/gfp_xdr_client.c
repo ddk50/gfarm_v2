@@ -164,7 +164,7 @@ gfp_xdr_vrpc_raw_result_begin(
 	e = gfp_xdr_recv_async_header(conn, just, do_timeout,
 	    &type, &xid, &size);
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003708,
 		    "client RPC result header: %s", gfarm_error_string(e));
 		gfp_xdr_client_request_free(async_server, xid);
 		return (e);
@@ -175,7 +175,7 @@ gfp_xdr_vrpc_raw_result_begin(
 	 */
 	if (type != GFP_XDR_TYPE_RESULT || xid != xidr->xid) {
 		/* XXX should be gflog_debug(), but for DEBUGGING */
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003709,
 		    "conn %p: "
 		    "client rpc type:%u / xid:%u, but expected:%d - mismatch",
 		    conn, (int)type, (int)xid, (int)xidr->xid);
@@ -222,7 +222,7 @@ gfp_xdr_vrpc_raw_result_begin(
 		return (GFARM_ERR_UNEXPECTED_EOF);
 	}
 	if (**formatp != '\0') {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003710,
 		    "invalid format character: %c(%x)", **formatp, **formatp);
 		return (GFARM_ERRMSG_GFP_XDR_VRPC_INVALID_FORMAT_CHARACTER);
 	}
@@ -263,11 +263,11 @@ gfp_xdr_rpc_raw_result_end_common(
 		return (GFARM_ERR_NO_ERROR);
 
 	if (warn)
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003711,
 		    "%s: client rpc residual:%u (%x)",
 		    diag, (int)size, (int)size);
 	if ((e = gfp_xdr_purge(conn, just, size)) != GFARM_ERR_NO_ERROR)
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003712,
 		    "%s: client rpc result: skipping: %s",
 		    diag, gfarm_error_string(e));
 	return (e);
@@ -304,7 +304,7 @@ gfp_xdr_rpc_raw_result_skip(
 		return (e);
 #ifdef RPC_DEBUG
 	/* for debugging */
-	gflog_info(GFARM_MSG_UNFIXED,
+	gflog_info(GFARM_MSG_1003713,
 	    "gfp_xdr_rpc_raw_result_skip: xid %d: skipped: %s",
 	    (int)xid, gfarm_error_string(errcode));
 #endif
@@ -346,7 +346,7 @@ gfp_xdr_vrpc(struct gfp_xdr *conn, int just, int do_timeout,
 	if (e == GFARM_ERR_NO_ERROR) {
 		e = gfp_xdr_flush(conn);
 	} else {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003714,
 		    "gfp_xdr_vrpc(%d) requestfailed: %s",
 		    (int)command, gfarm_error_string(e));
 		return (e);

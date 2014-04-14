@@ -1334,7 +1334,7 @@ gen_scheme_check_query(const char *tablename,
 	if (of == 0 && sz > 0)
 		tmp = (char *)malloc(sz);
 	if (tmp == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004159,
 			"Can't allocate an SQL query string "
 		"for table scheme check.");
 		return (NULL);
@@ -1394,13 +1394,13 @@ gfarm_pgsql_check_scheme(const char *tablename,
 	}
 
 	if (gfarm_pgsql_start(diag) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "pgsql restart failed");
+		gflog_debug(GFARM_MSG_1004160, "pgsql restart failed");
 		goto bailout;
 	}
 
 	res = PQexec(conn, sql);
 	if (res == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004161,
 			"A PostgreSQL qurey result is NULL: %s",
 			PQerrorMessage(conn));
 		goto bailout;
@@ -1427,10 +1427,10 @@ gfarm_pgsql_check_scheme(const char *tablename,
 		emsg = PQresultErrorMessage(res);
 		dbe = gfarm_pgsql_sql_error_to_gfarm_rdbms_error(res);
 		if (dbe != RDBMS_ERROR_ANY_OTHERS)
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004162,
 				"SQL realated error: %s", emsg);
 		else
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004163,
 				"Unexpected PostgreSQL error: %s", emsg);
 		break;
 	default:
@@ -1440,7 +1440,7 @@ gfarm_pgsql_check_scheme(const char *tablename,
 		 * PGRES_COPY_IN */
 		emsg = PQresultErrorMessage(res);
 		dbe = RDBMS_ERROR_ANY_OTHERS;
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004164,
 			"must not happen, unexpected query status: %s", emsg);
 		assert(0);
 		break;
@@ -1664,19 +1664,19 @@ gfarm_pgsql_host_check_scheme(void)
 
 		switch (dbe) {
 		case RDBMS_ERROR_INVALID_SCHEME:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1004165,
 				"The Host table scheme is not valid. "
 				"Running the config-gfarm-update might "
 				"solve this.");
 			break;
 		case RDBMS_ERROR_SQL_SYNTAX_ERROR:
-			gflog_error(GFARM_MSG_UNFIXED,
+			gflog_error(GFARM_MSG_1004166,
 				"Must not happen. "
 				"SQL syntax error(s) in query??");
 			assert(0);
 			break;
 		default:
-			gflog_fatal(GFARM_MSG_UNFIXED,
+			gflog_fatal(GFARM_MSG_1004167,
 				"Got an error while checking the Host "
 				"table scheme. Exit anyway to prevent "
 				"any filesystem metadata corruptions.");

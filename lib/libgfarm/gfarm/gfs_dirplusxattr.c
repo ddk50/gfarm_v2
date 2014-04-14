@@ -233,7 +233,7 @@ gfs_readdirplusxattr(GFS_DirPlusXAttr dir,
 		    NULL,
 		    dir);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003840,
 			    "gfm_client_compound_readonly_fd_op: %s",
 			    gfarm_error_string(e));
 			return (e);
@@ -302,7 +302,7 @@ gfs_closedirplusxattr(GFS_DirPlusXAttr dir)
 	gfarm_error_t e;
 
 	if ((e = gfm_close_fd(dir->gfm_server, dir->fd)) != GFARM_ERR_NO_ERROR)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003841,
 		    "gfm_close_fd: %s",
 		    gfarm_error_string(e));
 	gfm_client_connection_free(dir->gfm_server);

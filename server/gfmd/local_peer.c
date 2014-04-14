@@ -93,7 +93,7 @@ local_peer_downcast_to_local_peer(struct peer *peer)
 static struct remote_peer *
 local_peer_downcast_to_remote_peer(struct peer *peer)
 {
-	gflog_fatal(GFARM_MSG_UNFIXED,
+	gflog_fatal(GFARM_MSG_1003927,
 	    "downcasting local_peer %p to remote_peer", peer);
 	return (NULL);
 }
@@ -257,12 +257,12 @@ local_peer_shutdown_all(void)
 	if (!local_peer_initialized) {
 		gfarm_mutex_unlock(&local_peer_table_mutex,
 		    diag, local_peer_table_diag);
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003928,
 		    "peer module is not initialized yet, "
 		    "skip to shutdown connections");
 		return;
 	}
-	gflog_info(GFARM_MSG_UNFIXED,
+	gflog_info(GFARM_MSG_1003929,
 	    "shutting down all connections...");
 
 	for (i = 0; i < local_peer_table_size; i++) {
@@ -292,7 +292,7 @@ void
 local_peer_shutdown_all_wait(void)
 {
 	if (!local_peer_initialized) {
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003930,
 		    "peer module is not initialized yet, "
 		    "skip to wait for connection shutdown");
 		return;
@@ -315,7 +315,7 @@ local_peer_detach_all(void)
 	gfarm_mutex_lock(&local_peer_table_mutex, diag, local_peer_table_diag);
 
 	if (!local_peer_initialized) {
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1003931,
 		    "peer module is not initialized yet, "
 		    "skip to shutdown connections");
 		return;
@@ -411,7 +411,7 @@ local_peer_free(struct peer *peer)
 	if (remote_peer_allocated && !received_remote_peer_disconnect) {
 		if ((e = gfmdc_client_remote_peer_free(private_peer_id))
 		    != GFARM_ERR_NO_ERROR) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003932,
 			    "failed free remote peer: %s",
 			    gfarm_error_string(e));
 		}

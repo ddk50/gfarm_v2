@@ -301,7 +301,7 @@ gfs_client_status_schedule(struct host *host, int first_attempt)
 	GFARM_MALLOC(qe);
 	if (qe == NULL) {
 		callout_next = do_retry;
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004026,
 		    "%s: %s: no memory for queue entry",
 		    host_name(host), diag);
 	} else {
@@ -323,19 +323,19 @@ gfs_client_status_schedule(struct host *host, int first_attempt)
 			 * 4. the gfs_client_status_callout() thread in 1
 			 *    adds an entry to workq and readyq
 			 */
-			gflog_info(GFARM_MSG_UNFIXED,
+			gflog_info(GFARM_MSG_1004027,
 			    "%s: %s queueing conflict", host_name(host), diag);
 		} else {
 			/* increment refcount */
 			struct peer *peer = host_get_peer(host);
 
 			callout_next = stop_callout;
-			gflog_info(GFARM_MSG_UNFIXED,
+			gflog_info(GFARM_MSG_1004028,
 			    "%s: %s queueing: %s",
 			    host_name(host), diag, gfarm_error_string(e));
 			/* `qe' is be freed by gfs_client_status_finalize() */
 			if (peer == NULL) {
-				gflog_info(GFARM_MSG_UNFIXED,
+				gflog_info(GFARM_MSG_1004029,
 				    "%s: %s: already disconnected",
 				    host_name(host), diag);
 			} else {
@@ -395,7 +395,7 @@ gfm_async_server_reply_to_gfsd(void *arg)
 	netsendq_remove_entry(qhost, &qe->qentry, e);
 
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1004030,
 		    "%s: %s reply: %s",
 		    host_name(host), diag, gfarm_error_string(e));
 	return (NULL);
@@ -427,7 +427,7 @@ gfm_async_server_reply_to_gfsd_schedule(struct host *host,
 
 	GFARM_MALLOC(qe);
 	if (qe == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004031,
 		    "%s: %s: no memory for queue entry",
 		    host_name(host), diag);
 	} else {
@@ -440,7 +440,7 @@ gfm_async_server_reply_to_gfsd_schedule(struct host *host,
 		qe->diag = diag;
 		e = netsendq_add_entry(host_sendq(host), &qe->qentry, flags);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_info(GFARM_MSG_UNFIXED,
+			gflog_info(GFARM_MSG_1004032,
 			    "%s: %s queueing: %s",
 			    host_name(host), diag, gfarm_error_string(e));
 			if ((flags & NETSENDQ_ADD_FLAG_DETACH_ERROR_HANDLING)
@@ -592,7 +592,7 @@ async_back_channel_protocol_switch_slave(struct abstract_host *h,
 	static const char diag[] = "async_back_channel_protocol_switch_slave";
 
 	if (debug_mode)
-		gflog_info(GFARM_MSG_UNFIXED,
+		gflog_info(GFARM_MSG_1004033,
 		    "%s: <%s> back_channel start receiving request(%d)",
 		    peer_get_hostname(peer), diag, (int)request);
 
@@ -620,7 +620,7 @@ async_back_channel_protocol_switch_slave(struct abstract_host *h,
 			break;
 		} else if (data_size != 0) {
 			e = GFARM_ERR_PROTOCOL;
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004034,
 			    "%s: <%s> protocol redidual %u",
 			    peer_get_hostname(peer), diag, (int)data_size);
 		}
@@ -793,7 +793,7 @@ gfm_server_switch_back_channel_common(
 	    NULL /* or, use back_channel_send_manager thread pool? */,
 	    gfs_client_status_callout, host);
 	gfs_client_status_schedule(host, 1);
-	gflog_info(GFARM_MSG_UNFIXED,
+	gflog_info(GFARM_MSG_1004035,
 	    "back_channel(%s): started", host_name(host));
 
 	return (e2);
@@ -938,7 +938,7 @@ gfs_client_relay_result(void *p, void *arg, size_t size)
 			e = GFARM_ERR_UNEXPECTED_EOF;
 		} else if (data_size != 0) {
 			e = GFARM_ERR_PROTOCOL;
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1004036,
 			    "%s: <%s> protocol redidual %u",
 			    peer_get_hostname(peer), diag, (int)data_size);
 		}

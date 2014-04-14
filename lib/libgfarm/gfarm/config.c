@@ -2068,7 +2068,7 @@ parse_set_misc_float(char *p, float *vp)
 		return (GFARM_ERRMSG_INVALID_CHARACTER);
 	*vp = (float)v;
 #else /* __KERNEL__ */
-	gflog_warning(GFARM_MSG_UNFIXED, "floating %s is ignored", p);
+	gflog_warning(GFARM_MSG_1003682, "floating %s is ignored", p);
 #endif /* __KERNEL__ */
 	return (GFARM_ERR_NO_ERROR);
 }
@@ -3090,7 +3090,7 @@ void
 gfarm_config_set_default_ports(void)
 {
 	if (gfarm_ctxp->metadb_server_name == NULL)
-		gflog_fatal(GFARM_MSG_UNFIXED,
+		gflog_fatal(GFARM_MSG_1003683,
 		    "metadb_server_host isn't specified in "
 		    GFARM_CONFIG " file");
 

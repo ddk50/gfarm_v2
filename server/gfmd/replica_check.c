@@ -96,7 +96,7 @@ replica_check_fix(struct replication_info *info)
 	e = inode_replica_hosts(
 	    inode, &n_existing, &existing, &n_being_removed, &being_removed);
 	if (e != GFARM_ERR_NO_ERROR) { /* no memory */
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004131,
 		    "replica_check: %lld:%lld:%s: replica_hosts: %s",
 		    (long long)info->inum, (long long)info->gen,
 		    user_name(inode_get_user(inode)), gfarm_error_string(e));
@@ -362,11 +362,11 @@ replica_check_info()
 	replica_check_giant_unlock();
 
 	if (!gfarm_replica_check) {
-		RC_LOG_INFO(GFARM_MSG_UNFIXED, "replica_check is disabled");
+		RC_LOG_INFO(GFARM_MSG_1004132, "replica_check is disabled");
 		return;
 	}
 	if (time_start == 0 || table_size == 0) {
-		RC_LOG_INFO(GFARM_MSG_UNFIXED, "replica_check: standby");
+		RC_LOG_INFO(GFARM_MSG_1004133, "replica_check: standby");
 		return;
 	}
 
@@ -375,7 +375,7 @@ replica_check_info()
 	/* elapse / estimate_all = progress */
 	estimate = (long long)((float)elapse / progress - (float)elapse);
 
-	RC_LOG_INFO(GFARM_MSG_UNFIXED,
+	RC_LOG_INFO(GFARM_MSG_1004134,
 	    "replica_check: progress=%lld/%lld (%.2f%%),"
 	    " elapse:estimate=%lld:%lld sec.",
 	    (long long)inum, (long long)table_size, progress * 100,

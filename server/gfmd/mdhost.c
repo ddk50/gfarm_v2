@@ -482,7 +482,7 @@ mdhost_new(struct gfarm_metadb_server *ms)
 	static const char diag[] = "mdhost_new";
 
 	if ((m = malloc(sizeof(struct mdhost))) == NULL) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004037,
 		    "mdhost %s: no memory", gfarm_metadb_server_get_name(ms));
 		return (NULL);
 	}
@@ -490,7 +490,7 @@ mdhost_new(struct gfarm_metadb_server *ms)
 	e = abstract_host_init(&m->ah, &mdhost_ops, mdhost_send_manager, diag);
 	if (e != GFARM_ERR_NO_ERROR) {
 		free(m);
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004038,
 		    "mdhost %s: %s",
 		    gfarm_metadb_server_get_name(ms), gfarm_error_string(e));
 		return (NULL);
@@ -899,7 +899,7 @@ gfm_server_metadb_server_get(
 
 	e_ret = gfm_server_get_request(peer, sizep, diag, "s", &name);
 	if (e_ret != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1004039,
 		    "gfm_server_get_request() failed: %s",
 		    gfarm_error_string(e_ret));
 		goto end;
@@ -913,7 +913,7 @@ gfm_server_metadb_server_get(
 		e_rpc = GFARM_ERR_OPERATION_NOT_PERMITTED;
 	else if ((e_rpc = wait_db_update_info(peer, DBUPDATE_HOST, diag))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004040,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -961,7 +961,7 @@ gfm_server_metadb_server_get_all(
 
 	e_rpc = wait_db_update_info(peer, DBUPDATE_HOST, diag);
 	if (e_rpc != GFARM_ERR_NO_ERROR) {
-		gflog_error(GFARM_MSG_UNFIXED,
+		gflog_error(GFARM_MSG_1004041,
 		    "%s: failed to wait for the backend DB to be updated: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
@@ -972,7 +972,7 @@ gfm_server_metadb_server_get_all(
 	} else {
 		e_ret = gfm_server_put_reply(peer, xid, sizep, diag, e_rpc,
 		    "");
-		gflog_debug(GFARM_MSG_UNFIXED, "%s: gfm_server_put_reply: %s",
+		gflog_debug(GFARM_MSG_1004042, "%s: gfm_server_put_reply: %s",
 		    diag, gfarm_error_string(e_rpc));
 	}
 
@@ -1286,7 +1286,7 @@ gfm_server_metadb_server_modify(
 		if (isdm) {
 			e = mdhost_db_modify_default_master(mh, &ms, diag);
 			if (e != GFARM_ERR_NO_ERROR)
-				gflog_error(GFARM_MSG_UNFIXED,
+				gflog_error(GFARM_MSG_1004043,
 				    "mdhost_db_modify_default_master: %s",
 				    gfarm_error_string(e));
 		} else {

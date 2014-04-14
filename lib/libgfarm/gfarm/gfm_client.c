@@ -532,14 +532,14 @@ gfm_client_connection0(struct gfp_cached_connection *cache_entry,
 		r = poll(pfds, nfd, 1000);
 		if (r == -1) {
 			e = gfarm_errno_to_error(errno);
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003727,
 			    "poll: %s",
 			    gfarm_error_string(e));
 			break;
 		}
 		if (r == 0) {
 			e = GFARM_ERR_CONNECTION_REFUSED;
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003728,
 			    "poll: %s",
 			    gfarm_error_string(e));
 			break;
@@ -601,7 +601,7 @@ gfm_client_connection0(struct gfp_cached_connection *cache_entry,
 	    != GFARM_ERR_NO_ERROR) {
 		free(gfm_server);
 		close(sock);
-		gflog_warning(GFARM_MSG_UNFIXED,
+		gflog_warning(GFARM_MSG_1003729,
 		    "add filesystem failed: %s",
 		    gfarm_error_string(e));
 		goto end;
@@ -687,7 +687,7 @@ retry:
 	if (!created) {
 		*gfm_serverp = gfp_cached_connection_get_data(cache_entry);
 		if (!*gfm_serverp) {
-			gflog_warning(GFARM_MSG_UNFIXED,
+			gflog_warning(GFARM_MSG_1003730,
 				"gfm_client_connection_acquire:"
 				"gfm_client_connection_acquire NULL");
 			gfp_cached_or_uncached_connection_free(
@@ -797,7 +797,7 @@ gfm_client_connection_and_process_acquire(const char *hostname, int port,
 
 		/* possibly gfmd failover or temporary error */
 		sleep(sleep_interval);
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003731,
 		    "retry to connect");
 		sleep_interval *= 2;
 	}
@@ -958,11 +958,11 @@ gfm_client_xdr_send(struct gfm_connection *gfm_server, const char *format, ...)
 	check_connection_or_purge(gfm_server, e);
 
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003732,
 		    "gfp_xdr_send: %s",
 		    gfarm_error_string(e));
 	} else if (*format != '\0') {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003733,
 		    "invalid format character: %c(%x)",
 		    *format, *format);
 		e = GFARM_ERRMSG_GFP_XDR_SEND_INVALID_FORMAT_CHARACTER;
@@ -986,15 +986,15 @@ gfm_client_xdr_recv(struct gfm_connection *gfm_server,
 	check_connection_or_purge(gfm_server, e);
 
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003734,
 		    "gfp_xdr_vrecv_sized_x: %s",
 		    gfarm_error_string(e));
 	} else if (eof) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003735,
 		    "gfp_xdr_vrecv_sized_x: unexpected EOF");
 		e = GFARM_ERR_UNEXPECTED_EOF;
 	} else if (*format != '\0') {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003736,
 		    "invalid format character: %c(%x)", *format, *format);
 		e = GFARM_ERRMSG_GFP_XDR_RECV_INVALID_FORMAT_CHARACTER;
 	}
@@ -1262,7 +1262,7 @@ gfm_client_rpc_result_end_epilogue(struct gfm_connection *gfm_server,
 	check_connection_or_purge(gfm_server, e);
 
 	if (e != GFARM_ERR_NO_ERROR)
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003737,
 		    "gfp_xdr_vrpc*_result_end() failed: %s",
 		    gfarm_error_string(e));
 	return (e);
@@ -1342,7 +1342,7 @@ gfm_client_rpc_request_and_result_begin(
 	    command, &format, &ap);
 	
 	if (e != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003738,
 		    "gfm_client_rpc_raw_request_begin() failed: %s",
 		    gfarm_error_string(e));
 		va_end(ap);
@@ -1350,7 +1350,7 @@ gfm_client_rpc_request_and_result_begin(
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, *xidrp, size_pos,
 	    command)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003739,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		va_end(ap);
@@ -1358,7 +1358,7 @@ gfm_client_rpc_request_and_result_begin(
 	}
 	if (*format != '/' && *format != '\0') {
 #if 1
-		gflog_fatal(GFARM_MSG_UNFIXED, "%s",
+		gflog_fatal(GFARM_MSG_1003740, "%s",
 		    gfarm_error_string(GFARM_ERRMSG_GFP_XDR_VRPC_MISSING_RESULT_IN_FORMAT_STRING));
 #endif
 		return (GFARM_ERRMSG_GFP_XDR_VRPC_MISSING_RESULT_IN_FORMAT_STRING);
@@ -1436,7 +1436,7 @@ gfm_client_get_nhosts(struct gfm_connection *gfm_server,
 		    &hosts[i].ncpu, &hosts[i].port, &hosts[i].flags,
 		    &naliases);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003741,
 			    "gfm_client_xdr_recv() failed: %s",
 			    gfarm_error_string(e));
 			return (e);
@@ -1559,7 +1559,7 @@ gfm_client_host_info_get_by_names_common(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos, op)
 	    ) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003742,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		goto out; /* XXX xid memory leak */
@@ -1586,7 +1586,7 @@ gfm_client_host_info_get_by_names_common(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003743,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		goto out; /* XXX hosts memory leak */
@@ -1666,7 +1666,7 @@ gfm_client_fsngroup_get_all(struct gfm_connection *gfm_server,
 	if ((e = gfm_client_rpc_request_and_result_begin(gfm_server,
 	    &xidr, &size, GFM_PROTO_FSNGROUP_GET_ALL, "/i", &nhosts))
 	    != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003744,
 			"%s: gfm_client_rpc() failed: %s",
 			diag, gfarm_error_string(e));
 		goto bailout;
@@ -1676,7 +1676,7 @@ gfm_client_fsngroup_get_all(struct gfm_connection *gfm_server,
 	if (nhosts > 0) {
 		GFARM_MALLOC_ARRAY(ret, (size_t)nhosts);
 		if (ret == NULL) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003745,
 				"%s: can't allocate fsngroup_info(s).", diag);
 			e = GFARM_ERR_NO_MEMORY;
 			goto rpc_cleanup;
@@ -1687,7 +1687,7 @@ gfm_client_fsngroup_get_all(struct gfm_connection *gfm_server,
 				&(ret[i].hostname), &(ret[i].fsngroupname));
 			if (e != GFARM_ERR_NO_ERROR) {
 				if (e != GFARM_ERR_NO_ERROR)
-					gflog_debug(GFARM_MSG_UNFIXED,
+					gflog_debug(GFARM_MSG_1003746,
 						"%s: gfm_client_xdr_recv() "
 						"failed: %s",
 						diag, gfarm_error_string(e));
@@ -1732,7 +1732,7 @@ gfm_client_fsngroup_get_by_hostname(struct gfm_connection *gfm_server,
 	if ((e = gfm_client_rpc(gfm_server,
 			GFM_PROTO_FSNGROUP_GET_BY_HOSTNAME, "s/s",
 			hostname, &ret)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003747,
 			"%s: gfm_client_rpc() failed: %s",
 			diag, gfarm_error_string(e));
 	}
@@ -1756,7 +1756,7 @@ gfm_client_fsngroup_modify(struct gfm_connection *gfm_server,
 			GFM_PROTO_FSNGROUP_MODIFY, "ss/",
 			info->hostname,
 			info->fsngroupname)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003748,
 			"%s: gfm_client_rpc() failed: %s",
 			diag, gfarm_error_string(e));
 	}
@@ -1858,7 +1858,7 @@ gfm_client_user_info_get_by_names(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos,
 	    GFM_PROTO_USER_INFO_GET_BY_NAMES)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003749,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -1883,7 +1883,7 @@ gfm_client_user_info_get_by_names(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003750,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX users memory leak */
@@ -2042,7 +2042,7 @@ gfm_client_group_info_get_by_names(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos,
 	    GFM_PROTO_GROUP_INFO_GET_BY_NAMES)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003751,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -2066,7 +2066,7 @@ gfm_client_group_info_get_by_names(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003752,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX groups memory leak */
@@ -2101,7 +2101,7 @@ gfm_client_group_info_send_common(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos, op)
 	    ) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003753,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -2163,7 +2163,7 @@ gfm_client_group_info_users_op_common(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos, op)
 	    ) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003754,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -2184,7 +2184,7 @@ gfm_client_group_info_users_op_common(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003755,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX users memory leak */
@@ -2242,7 +2242,7 @@ gfm_client_group_names_get_by_users(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_request_end(gfm_server, xidr, size_pos,
 	    GFM_PROTO_GROUP_NAMES_GET_BY_USERS)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003756,
 		    "gfm_client_rpc_raw_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -2280,7 +2280,7 @@ gfm_client_group_names_get_by_users(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003757,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX assignments[].groupnames memory leak */
@@ -2303,7 +2303,7 @@ gfm_client_compound_begin_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx,
 	    GFM_PROTO_COMPOUND_BEGIN, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_BEGIN>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003758, "<GFM_PROTO_COMPOUND_BEGIN>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2318,7 +2318,7 @@ gfm_client_compound_begin_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_BEGIN>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003759, "<GFM_PROTO_COMPOUND_BEGIN>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2334,7 +2334,7 @@ gfm_client_compound_end_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx, GFM_PROTO_COMPOUND_END,
 	    "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_END>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003760, "<GFM_PROTO_COMPOUND_END>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2349,7 +2349,7 @@ gfm_client_compound_end_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_END>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003761, "<GFM_PROTO_COMPOUND_END>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2365,7 +2365,7 @@ gfm_client_compound_on_error_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx,
 	    GFM_PROTO_COMPOUND_ON_ERROR, "i", error);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_ON_ERROR>(%s):%p:%d request: %s", gfarm_error_string(error), gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003762, "<GFM_PROTO_COMPOUND_ON_ERROR>(%s):%p:%d request: %s", gfarm_error_string(error), gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2380,7 +2380,7 @@ gfm_client_compound_on_error_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_COMPOUND_ON_ERROR>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003763, "<GFM_PROTO_COMPOUND_ON_ERROR>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2394,7 +2394,7 @@ gfm_client_get_fd_request(struct gfm_connection *gfm_server,
 #else
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx, GFM_PROTO_GET_FD, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_GET_FD>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003764, "<GFM_PROTO_GET_FD>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2409,7 +2409,7 @@ gfm_client_get_fd_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "i", fdp);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_GET_FD>:%p:%d result=>%d: %s", gfm_server->conn, xid, e == GFARM_ERR_NO_ERROR ? *fdp : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003765, "<GFM_PROTO_GET_FD>:%p:%d result=>%d: %s", gfm_server->conn, xid, e == GFARM_ERR_NO_ERROR ? *fdp : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2489,7 +2489,7 @@ gfm_client_open_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx, GFM_PROTO_OPEN,
 	    "Si", name, namelen, flags);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_OPEN>(%.*s, 0x%x):%p:%d request: %s", (int)namelen, name, flags, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003766, "<GFM_PROTO_OPEN>(%.*s, 0x%x):%p:%d request: %s", (int)namelen, name, flags, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2507,7 +2507,7 @@ gfm_client_open_result(struct gfm_connection *gfm_server,
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "lli",
 	    inump, genp, modep);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_OPEN>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003767, "<GFM_PROTO_OPEN>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2523,7 +2523,7 @@ gfm_client_open_root_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx,
 	    GFM_PROTO_OPEN_ROOT, "i", flags);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_OPEN_ROOT>(0x%x):%p:%d request: %s", flags, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003768, "<GFM_PROTO_OPEN_ROOT>(0x%x):%p:%d request: %s", flags, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2538,7 +2538,7 @@ gfm_client_open_root_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_OPEN_ROOT>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003769, "<GFM_PROTO_OPEN_ROOT>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2583,7 +2583,7 @@ gfm_client_verify_type_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx, GFM_PROTO_VERIFY_TYPE,
 	    "i", type);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_VERIFY_TYPE>(%d):%p:%d request: %s", type, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003770, "<GFM_PROTO_VERIFY_TYPE>(%d):%p:%d request: %s", type, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2598,7 +2598,7 @@ gfm_client_verify_type_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_VERIFY_TYPE>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003771, "<GFM_PROTO_VERIFY_TYPE>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2615,7 +2615,7 @@ gfm_client_verify_type_not_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx,
 	    GFM_PROTO_VERIFY_TYPE_NOT, "i", type);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_VERIFY_TYPE_NOT>(%d):%p:%d request: %s", type, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003772, "<GFM_PROTO_VERIFY_TYPE_NOT>(%d):%p:%d request: %s", type, gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2630,7 +2630,7 @@ gfm_client_verify_type_not_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_VERIFY_TYPE_NOT>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003773, "<GFM_PROTO_VERIFY_TYPE_NOT>:%p:%d result: %s", gfm_server->conn, xid, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -2712,7 +2712,7 @@ gfm_client_fgetattrplus_request(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_request_end(gfm_server, ctx, size_pos,
 	    GFM_PROTO_FGETATTRPLUS)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003774,
 		    "gfm_client_rpc_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -2774,7 +2774,7 @@ gfm_client_fgetattrplus_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003775,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -2927,7 +2927,7 @@ gfm_client_get_schedule_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003776,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -2983,7 +2983,7 @@ gfm_client_schedule_host_domain(struct gfm_connection *gfm_server,
 
 	if ((e = gfp_xdr_context_alloc(gfm_server->conn, &ctx)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED, "gfp_xdr_context_alloc: %s",
+		gflog_debug(GFARM_MSG_1003777, "gfp_xdr_context_alloc: %s",
 		    gfarm_error_string(e));
 		return (e);
 	}
@@ -3101,7 +3101,7 @@ gfm_client_readlink_request(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	e = gfm_client_rpc_request(gfm_server, ctx,
 	    GFM_PROTO_READLINK, "");
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_READLINK>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003778, "<GFM_PROTO_READLINK>:%p:%d request: %s", gfm_server->conn, e == GFARM_ERR_NO_ERROR ? gfp_xdr_client_last_xid(ctx) : 0, gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -3116,7 +3116,7 @@ gfm_client_readlink_result(struct gfm_connection *gfm_server,
 	gfarm_error_t e;
 	gfarm_uint32_t xid = gfp_xdr_client_first_xid(ctx);
 	e = gfm_client_rpc_result(gfm_server, ctx, "s", linkp);
-	gflog_info(GFARM_MSG_UNFIXED, "<GFM_PROTO_READLINK>:%p:%d result=>%s: %s", gfm_server->conn, xid, e == GFARM_ERR_NO_ERROR ? *linkp : "N/A", gfarm_error_string(e));
+	gflog_info(GFARM_MSG_1003779, "<GFM_PROTO_READLINK>:%p:%d result=>%s: %s", gfm_server->conn, xid, e == GFARM_ERR_NO_ERROR ? *linkp : "N/A", gfarm_error_string(e));
 	return (e);
 #endif
 }
@@ -3184,7 +3184,7 @@ gfm_client_getdirents_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003780,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -3249,7 +3249,7 @@ gfm_client_getdirentsplus_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003781,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -3278,7 +3278,7 @@ gfm_client_getdirentsplusxattr_request(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_request_end(gfm_server, ctx, size_pos,
 	    GFM_PROTO_GETDIRENTSPLUSXATTR)) != GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003782,
 		    "gfm_client_rpc_request_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX xid memory leak */
@@ -3370,7 +3370,7 @@ gfm_client_getdirentsplusxattr_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003783,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -3628,7 +3628,7 @@ gfm_client_findxmlattr_result(struct gfm_connection *gfm_server,
 error:
 	if ((e2 = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003784,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e2));
 		return (e2); /* XXX memory leak */
@@ -4022,7 +4022,7 @@ gfm_client_replica_list_by_name_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003785,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -4078,7 +4078,7 @@ gfm_client_replica_list_by_host_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003786,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -4176,7 +4176,7 @@ gfm_client_replica_info_get_result(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_result_end(gfm_server, ctx, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003787,
 		    "get_client_rpc_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e);
@@ -4336,7 +4336,7 @@ gfm_client_replica_get_my_entries(struct gfm_connection *gfm_server,
 	}
 	if ((e = gfm_client_rpc_raw_result_end(gfm_server, xidr, size)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_debug(GFARM_MSG_UNFIXED,
+		gflog_debug(GFARM_MSG_1003788,
 		    "get_client_rpc_raw_result_end() failed: %s",
 		    gfarm_error_string(e));
 		return (e); /* XXX memory leak */
@@ -4448,7 +4448,7 @@ gfm_client_compound_fd_op(struct gfm_connection *gfm_server, gfarm_int32_t fd,
 	gfm_client_connection_lock(gfm_server);
 	if ((e = gfp_xdr_context_alloc(gfm_server->conn, &ctx)) !=
 	    GFARM_ERR_NO_ERROR) {
-		gflog_warning(GFARM_MSG_UNFIXED, "gfp_xdr_context_alloc: %s",
+		gflog_warning(GFARM_MSG_1003789, "gfp_xdr_context_alloc: %s",
 		    gfarm_error_string(e));
 		return (e);
 	}
@@ -4513,7 +4513,7 @@ gfm_client_metadb_server_get_n(struct gfm_connection *gfm_server,
 		    &ms->name, &ms->port, &ms->clustername, &ms->flags,
 		    &ms->tflags);
 		if (e != GFARM_ERR_NO_ERROR) {
-			gflog_debug(GFARM_MSG_UNFIXED,
+			gflog_debug(GFARM_MSG_1003790,
 			    "gfm_client_xdr_recv() failed: %s",
 			    gfarm_error_string(e));
 			return (e);

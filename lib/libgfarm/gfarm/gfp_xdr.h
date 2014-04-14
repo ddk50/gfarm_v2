@@ -177,8 +177,14 @@ void gfp_record_client(sqlite3 *, struct gfp_xdr *, struct sockaddr *);
 void gfp_update_histgram_entries(sqlite3 *, struct gfp_xdr *, gfarm_int64_t, gfarm_int64_t);
 void gfp_update_reads_histgram(sqlite3 *, struct gfp_xdr *, gfarm_int64_t, 
 	gfarm_int64_t, size_t, gfarm_uint64_t);
+void gfp_show_client_hitrates(struct gfp_xdr *);
 void gfp_create_histgram(sqlite3 **, const char *);
 void gfp_free_histgram(sqlite3 *);
+
+void gfp_count_client_cachehits_by_naive_lru(sqlite3 *, struct gfp_xdr *,
+	gfarm_int64_t, gfarm_int64_t, size_t, gfarm_uint64_t, gfarm_uint64_t);
+
+void gfp_show_msg(struct gfp_xdr *, const char *);
 
 /* gfp_xdr_client.c */
 
