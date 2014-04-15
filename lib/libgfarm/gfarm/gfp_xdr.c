@@ -1764,17 +1764,22 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 }
 
 gfarm_error_t
-gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, 
-	gfarm_uint32_t total_cache_hit, gfarm_uint32_t total_read)
+gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 {	
 	int rc;
 	char *errmsg = NULL;
-	char sql[255];
+	char sql[1024];
 	char *_sql = 
-		"UPDATE clients SET total_reads = %u, total_hits = %u where cliaddr = %u";
+		"INSERT into clients (cliaddr, total_reads, total_hits)"
+		"       SELECT coalesce(cliaddr, %u), "
+		"              coalesce(max(total_reads) + %u, %u), "
+		"              coalesce(max(total_hits) + %u, %u)"
+		"                      FROM clients where cliaddr = %u";
 
-	snprintf(sql, sizeof(sql), _sql, total_read, 
-			 total_cache_hit, conn->client_addr);
+	snprintf(sql, sizeof(sql), _sql, conn->client_addr, 
+			 conn->total_read, conn->total_read,
+			 conn->total_cache_hit, conn->total_cache_hit,
+			 conn->client_addr);
 	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
