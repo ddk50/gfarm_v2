@@ -135,7 +135,8 @@ enum gfarm_errcode {
 		GFARM_ERR_INVALID_REMOTE_PEER,
 		GFARM_ERR_RPC_REQUEST_IGNORED,
 
-		GFARM_ERR_NUMBER
+		GFARM_ERR_NUMBER,
+		GFARM_ERR_SQL
 };
 
 /* enum gfarm_errcode | enum gfarm_errmsg | enum gfarm_errstat */

@@ -1923,8 +1923,6 @@ gfs_server_close(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	gfarm_int32_t fd;
 	static const char diag[] = "GFS_PROTO_CLOSE";
 
-	gflog_info(GFARM_MSG_1004209, "############## CLOSE ###########");
-
 	gfp_show_client_hitrates(client);
 
 	gfs_server_get_request(client, size, diag, "i", &fd);

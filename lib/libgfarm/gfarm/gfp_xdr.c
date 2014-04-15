@@ -49,8 +49,9 @@ struct gfp_xdr {
 
 	gfarm_uint32_t client_addr;
 
-	gfarm_uint64_t total_cache_hit;
-	gfarm_uint64_t total_read;
+	gfarm_uint32_t total_cache_hit;
+	gfarm_uint32_t total_read;
+	double latest_cache_hitrate;
 };
 
 /*
@@ -1671,6 +1672,43 @@ gfp_xdr_sendbuffer_overwrite_at(struct gfp_xdr *conn,
 }
 
 /* For bayesian Cooperative Cache */
+#define SQL_CALLBACK_WRAPPER_STRUCTURE(tag)		\
+struct wrap_ ## tag ## _entry {					\
+	int valid_num_of_entry;						\
+	int allocated_entries_size;					\
+	struct tag##_entry *entries;				\
+}
+
+#define STRUCT_SQL_CALLBACK_WRAPPER(tag) \
+	struct wrap_ ## tag ## _entry
+
+#define SQL_CALLBACK_WRAPPER_GARD_ARYSIZE(_wp, increment_size)			\
+	do {																\
+		if ((_wp)->allocated_entries_size < (_wp)->valid_num_of_entry) { \
+			(_wp)->allocated_entries_size += (increment_size);			\
+			(_wp)->entries = GFARM_REALLOC_ARRAY((_wp)->entries, (_wp)->entries, \
+												 (_wp)->allocated_entries_size); \
+		}																\
+	} while (0)
+
+#define P_GET_SQL_WRAPPER_CURRENT_ARY_LEN(p) \
+	((p)->valid_num_of_entry)
+
+#define P_INCREMENT_SQL_WRAPPER_ARY_LEN(p) \
+	((p)->valid_num_of_entry++)
+
+#define P_SQL_WRAPPER_ENTRY(p) \
+	((p)->entries)
+
+#define GET_SQL_WRAPPER_CURRENT_ARY_LEN(val) \
+	((val).valid_num_of_entry)
+
+#define INCREMENT_SQL_WRAPPER_ARY_LEN(val) \
+	((val).valid_num_of_entry++)
+
+#define SQL_WRAPPER_ENTRY(val) \
+	((val).entries)
+
 void
 gfp_record_client(sqlite3 *db, struct gfp_xdr *conn, 
 	struct sockaddr *client_addr)
@@ -1725,12 +1763,107 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 	}	
 }
 
+gfarm_error_t
+gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, 
+	gfarm_uint32_t total_cache_hit, gfarm_uint32_t total_read)
+{	
+	int rc;
+	char *errmsg = NULL;
+	char sql[255];
+	char *_sql = 
+		"UPDATE clients SET total_reads = %u, total_hits = %u where cliaddr = %u";
+
+	snprintf(sql, sizeof(sql), _sql, total_read, 
+			 total_cache_hit, conn->client_addr);
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+		   "Could not update cache hit rate and total read: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_SQL;
+	}
+	
+	return GFARM_ERR_NO_ERROR;
+}
+
+struct conn_entry {
+	gfarm_uint32_t cliaddr;
+	gfarm_uint32_t total_reads;
+	gfarm_uint32_t total_hits;
+};
+SQL_CALLBACK_WRAPPER_STRUCTURE(conn);
+
+static int
+callback_form_conn_entries(void *ptr, int argc, 
+	char **argv, char **azColName)
+{
+	int i;
+	int idx;
+	STRUCT_SQL_CALLBACK_WRAPPER(conn) *p = (STRUCT_SQL_CALLBACK_WRAPPER(conn)*)ptr;
+	
+	SQL_CALLBACK_WRAPPER_GARD_ARYSIZE(p, 10);
+	
+	P_INCREMENT_SQL_WRAPPER_ARY_LEN(p);
+	idx = P_GET_SQL_WRAPPER_CURRENT_ARY_LEN(p) - 1;
+
+	for (i = 0 ; i < argc ; i++) {
+		if (strcmp(azColName[i], "cliaddr") == 0) {
+			P_SQL_WRAPPER_ENTRY(p)[idx].cliaddr = atoi(argv[i]);
+		} else if (strcmp(azColName[i], "total_reads") == 0) {
+			P_SQL_WRAPPER_ENTRY(p)[idx].total_reads = atoll(argv[i]);
+		} else if (strcmp(azColName[i], "total_hits") == 0) {
+			P_SQL_WRAPPER_ENTRY(p)[idx].total_hits = atoll(argv[i]);
+		}
+	}	
+
+	return SQLITE_OK;
+}
+
+gfarm_error_t
+gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, 
+	gfarm_uint32_t *total_reads, gfarm_uint32_t *total_hits, gfarm_uint32_t cliaddr)
+{
+	int rc;
+	int i;
+	char *errmsg = NULL;
+	char sql[255];
+	char *_sql = 
+		"SELECT cliaddr, total_reads, total_hits where cliaddr = %u";
+	STRUCT_SQL_CALLBACK_WRAPPER(conn) clients;
+
+	snprintf(sql, sizeof(sql), _sql, cliaddr);
+	rc = sqlite3_exec(db, sql, callback_form_conn_entries, &clients, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+					"Could not obtain clients list: %s", errmsg);
+		sqlite3_free(errmsg);
+		free(clients.entries);
+		return GFARM_ERR_SQL;
+	}
+
+	if (GET_SQL_WRAPPER_CURRENT_ARY_LEN(clients) > 1) {
+		gflog_error(GFARM_MSG_1000018,
+					"client record may not be unique: %s", errmsg);
+	}
+
+	*total_hits  = SQL_WRAPPER_ENTRY(clients)[0].total_hits;
+	*total_reads = SQL_WRAPPER_ENTRY(clients)[0].total_reads;
+
+	free(clients.entries);
+	return GFARM_ERR_NO_ERROR;
+}
+
 void
 gfp_show_client_hitrates(struct gfp_xdr *conn)
 {
-	gflog_info(GFARM_MSG_1004204, "############## <IP:%d> CACHE HIT RATE %lf (hit: %lu / read: %lu) ##############",
-			   conn->client_addr, (double)conn->total_cache_hit / (double)conn->total_read, 
-		       conn->total_cache_hit, conn->total_read);
+	/* TODO: total_cache_hit and total_read is stored into DB */
+	double hitrate = (double)conn->total_cache_hit / (double)conn->total_read;
+	
+	conn->latest_cache_hitrate = hitrate;
+
+	gflog_info(GFARM_MSG_1004204, 
+          "############## <IP:%d> CACHE HIT RATE %lf (hit: %u / read: %u) ##############",
+		  conn->client_addr, hitrate, conn->total_cache_hit, conn->total_read);
 }
 
 void
@@ -1739,6 +1872,25 @@ gfp_show_msg(struct gfp_xdr *conn, const char *msg)
 	gflog_info(GFARM_MSG_1004205, "%s", msg);
 }
 
+/* struct client_entry { */
+/* 	gfarm_uint32_t client_addr; */
+/* }; */
+/* SQL_CALLBACK_WRAPPER_STRUCTURE(client); */
+
+/* void */
+/* gfp_get_allclients(struct gfp_xdr *conn, struct wrap_cache_entry *p) */
+/* { */
+/* 	char *_sql = "SELECT cliaddr FROM clients";	 */
+
+/* 	rc = sqlite3_exec(db, _sql, callback_form_cache_entries, &cache, &errmsg); */
+/* 	if (rc != SQLITE_OK) { */
+/* 		gflog_error(GFARM_MSG_1000018, */
+/* 					"Could not obtain native lru: %s", errmsg); */
+/* 		sqlite3_free(errmsg); */
+/* 		free(cache.entries); */
+/* 		return; */
+/* 	}	 */
+/* } */
 
 struct cache_entry {
 	gfarm_uint32_t client_id;
@@ -1746,12 +1898,7 @@ struct cache_entry {
 	gfarm_uint64_t pagenum;
 	gfarm_uint32_t count;
 };
-
-struct wrap_cache_entry {
-	int valid_num_of_entry;
-	int allocated_entries_size;
-	struct cache_entry *entries;
-};
+SQL_CALLBACK_WRAPPER_STRUCTURE(cache);
 
 static int
 callback_form_cache_entries(void *ptr, int argc, 
@@ -1759,25 +1906,22 @@ callback_form_cache_entries(void *ptr, int argc,
 {
 	int i;
 	int idx;
-	struct wrap_cache_entry *p = (struct wrap_cache_entry *)ptr;
+	STRUCT_SQL_CALLBACK_WRAPPER(cache) *p = (STRUCT_SQL_CALLBACK_WRAPPER(cache)*)ptr;
 
-	if (p->allocated_entries_size < p->valid_num_of_entry) {
-		p->allocated_entries_size += 10;
-		p->entries = GFARM_REALLOC_ARRAY(p->entries, p->entries, p->allocated_entries_size);
-	}
+	SQL_CALLBACK_WRAPPER_GARD_ARYSIZE(p, 10);
 
-	p->valid_num_of_entry++;	
-	idx = p->valid_num_of_entry - 1;
+	P_INCREMENT_SQL_WRAPPER_ARY_LEN(p);
+	idx = P_GET_SQL_WRAPPER_CURRENT_ARY_LEN(p) - 1;
 	
 	for (i = 0 ; i < argc ; i++) {
 		if (strcmp(azColName[i], "client_id") == 0) {
-			p->entries[idx].client_id = atoi(argv[i]);
+			P_SQL_WRAPPER_ENTRY(p)[idx].client_id = atoi(argv[i]);
 		} else if (strcmp(azColName[i], "inum") == 0) {
-			p->entries[idx].inum = atoll(argv[i]);
+			P_SQL_WRAPPER_ENTRY(p)[idx].inum = atoll(argv[i]);
 		} else if (strcmp(azColName[i], "pagenum") == 0) {
-			p->entries[idx].pagenum = atoll(argv[i]);
+			P_SQL_WRAPPER_ENTRY(p)[idx].pagenum = atoll(argv[i]);
 		} else if (strcmp(azColName[i], "count") == 0) {
-			p->entries[idx].count = atoll(argv[i]);
+			P_SQL_WRAPPER_ENTRY(p)[idx].count = atoll(argv[i]);
 		}
 	}
 	
@@ -1798,9 +1942,9 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 		"      FROM reads where client_id = %u order by id desc limit %llu";
 	gfarm_uint64_t i, j;
 	size_t arysize = clientcachememsize / granularity;
-	struct wrap_cache_entry cache;
+	STRUCT_SQL_CALLBACK_WRAPPER(cache) cache;
 
-	memset(&cache, 0, sizeof(struct wrap_cache_entry));
+	memset(&cache, 0, sizeof(STRUCT_SQL_CALLBACK_WRAPPER(cache)));
 	GFARM_MALLOC_ARRAY(cache.entries, arysize);
 	cache.allocated_entries_size = arysize;
 
