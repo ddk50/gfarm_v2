@@ -131,3 +131,4 @@ util/gfruntest/gfruntest
 util/gfservice/gfservice
 util/gfservice/gfservice-agent
 util/gfservice/gfservice-timeout
+.libs

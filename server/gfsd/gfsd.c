@@ -2313,6 +2313,49 @@ gfs_server_statfs(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	    "illllll", bsize, blocks, bfree, bavail, files, ffree, favail);
 }
 
+/* Baysian */
+void
+gfs_server_send_hitrates(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
+{	
+	char *str;
+	int save_errno = 0;
+	
+	/*
+	 * send all clients list with number of hits and reads
+	 */
+	//gfs_server_get_request(client, size, "sendhitrates", "");
+	
+	gfp_get_totalchit_and_total_read(gfsd_db, client, str);
+	gfs_server_put_reply_with_errno(client, xid, "sendhitrates", 
+        save_errno, "s", str);
+
+	free(str);
+}
+
+/* Baysian */
+void
+gfs_server_clear_hitrates(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
+{
+	char *dir;
+	int save_errno = 0;
+
+	/* save_errno = gfsd_statfs(gfarm_spool_root, &bsize, */
+	/*     &blocks, &bfree, &bavail, */
+	/*     &files, &ffree, &favail); */
+	/* free(dir); */
+
+	/* if (save_errno == 0 && is_readonly_mode()) { */
+	/* 	/\* pretend to be disk full, to make this gfsd read-only *\/ */
+	/* 	bavail -= bfree; */
+	/* 	bfree = 0; */
+	/* } */
+
+	gflog_info(GFARM_MSG_UNFIXED, "hitrates was cleared\n");
+
+	save_errno = gfp_update_totalchit_and_total_read(gfsd_db, client);
+	gfs_server_put_reply_with_errno(client, xid, "clearhitrates", save_errno, "");
+}
+
 static gfarm_error_t
 replica_adding(gfarm_int32_t net_fd, char *src_host,
 	gfarm_ino_t *inop, gfarm_uint64_t *genp,
@@ -3796,6 +3839,11 @@ server(int client_fd, char *client_name, struct sockaddr *client_addr)
 			gfs_server_cksum_set(client, xid, size); break;
 		case GFS_PROTO_STATFS:
 			gfs_server_statfs(client, xid, size); break;
+			/* for baysian hitrate */
+		case GFS_PROTO_HITRATES_GET:
+			gfs_server_send_hitrates(client, xid, size); break;
+		case GFS_PROTO_HITRATES_CLEAR:
+			gfs_server_clear_hitrates(client, xid, size); break;
 #if 0 /* not yet in gfarm v2 */
 		case GFS_PROTO_COMMAND:
 			if (credential_exported == NULL) {

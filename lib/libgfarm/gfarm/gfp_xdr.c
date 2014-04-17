@@ -1722,7 +1722,7 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip);
 	
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);	
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 			"Could not record a client into the db %s (client ip: %d)",
@@ -1825,19 +1825,37 @@ callback_form_conn_entries(void *ptr, int argc,
 }
 
 gfarm_error_t
-gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, 
-	gfarm_uint32_t *total_reads, gfarm_uint32_t *total_hits, gfarm_uint32_t cliaddr)
+gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
+{
+	int rc;
+	char *errmsg = NULL;
+	char *_sql = 
+		"UPDATE clients SET total_reads = %u, total_hits = %u WHERE id >= 0";
+	
+	rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+		  "Could not clear total_reads and total_hits: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_SQL;
+	}
+
+	return GFARM_ERR_NO_ERROR;
+}
+
+gfarm_error_t
+gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, char **result)
 {
 	int rc;
 	int i;
+	char *s;
 	char *errmsg = NULL;
-	char sql[255];
-	char *_sql = 
-		"SELECT cliaddr, total_reads, total_hits where cliaddr = %u";
+	char tmp[255];
 	STRUCT_SQL_CALLBACK_WRAPPER(conn) clients;
-
-	snprintf(sql, sizeof(sql), _sql, cliaddr);
-	rc = sqlite3_exec(db, sql, callback_form_conn_entries, &clients, &errmsg);
+	char *_sql = 
+		"SELECT cliaddr, total_reads, total_hits from clients";
+	
+	rc = sqlite3_exec(db, _sql, callback_form_conn_entries, &clients, &errmsg);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 					"Could not obtain clients list: %s", errmsg);
@@ -1851,10 +1869,20 @@ gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn,
 					"client record may not be unique: %s", errmsg);
 	}
 
-	*total_hits  = SQL_WRAPPER_ENTRY(clients)[0].total_hits;
-	*total_reads = SQL_WRAPPER_ENTRY(clients)[0].total_reads;
+	GFARM_MALLOC_ARRAY(s, 
+	    (clients.valid_num_of_entry * (15 + 10 + 10 + 2)) + 1);
+
+	for (i = 0 ; i < clients.valid_num_of_entry ; i++) {
+		snprintf(tmp, sizeof(tmp), "%u:%u/%u\n", 
+			SQL_WRAPPER_ENTRY(clients)[i].cliaddr, 
+			SQL_WRAPPER_ENTRY(clients)[i].total_hits,
+			SQL_WRAPPER_ENTRY(clients)[i].total_reads);
+		strcat(s, tmp);
+	}
 
 	free(clients.entries);
+	*result = s;
+	
 	return GFARM_ERR_NO_ERROR;
 }
 
@@ -1941,7 +1969,6 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	char *errmsg = NULL;
 	int rc;
 	char sql[255];
-	char *_sql1 = "SELECT * FROM clients";
 	char *_sql2 =
 		"SELECT client_id, inum, pagenum, count"
 		"      FROM reads where client_id = %u order by id desc limit %llu";
@@ -1980,8 +2007,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 
 	/* gflog_debug(GFARM_MSG_UNFIXED, "<IP:%d> READ hits: %lu / reads: %lu",  */
 	/* 			conn->client_addr, conn->total_cache_hit, conn->total_read); */
-
-not_increment_cache_hit:
+	
 	free(cache.entries);
 	return;
 }

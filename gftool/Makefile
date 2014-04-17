@@ -48,6 +48,7 @@ SUBDIRS = \
 	gfxattr \
 	config-gfarm \
 	gfhostgroup \
+	gfccinfo \
 	$(optional_targets)
 
 #	gfexec \

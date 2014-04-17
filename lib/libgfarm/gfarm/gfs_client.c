@@ -2531,3 +2531,21 @@ gfs_client_get_load_result_multiplexed(
 	free(state);
 	return (error);
 }
+
+/*
+ * GFS_PROTO_HITRATES_CLEAR
+ */
+gfarm_error_t
+gfs_client_hitrates_clear(struct gfs_connection *gfs_server)
+{
+	gfarm_error_t e;
+	
+	e = gfs_client_rpc(gfs_server, 0, GFS_PROTO_HITRATES_CLEAR, "/");
+	if (e != GFARM_ERR_NO_ERROR) {
+		return (e);
+	}
+
+	return e;
+}
+
+	
