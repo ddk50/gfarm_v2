@@ -1756,8 +1756,8 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 		/* "          values(%d, 10, 10)"; */
 		"	INSERT or IGNORE into clients (cliaddr, total_reads, total_hits)"
 		"		SELECT coalesce(cliaddr, %u), "
-		"		       coalesce(max(total_reads), 0), "
-		"		       coalesce(max(total_hits), 0)"
+		"		       coalesce(total_reads, 0), "
+		"		       coalesce(total_hits, 0)"
 		"		FROM clients where cliaddr = %u";
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip, client_ip);
@@ -1851,9 +1851,6 @@ callback_form_conn_entries(void *ptr, int argc,
 	P_INCREMENT_SQL_WRAPPER_ARY_LEN(p);
 	idx = P_GET_SQL_WRAPPER_CURRENT_ARY_LEN(p) - 1;
 
-	gflog_error(GFARM_MSG_1000018,
-				"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-
 	for (i = 0 ; i < argc ; i++) {
 		if (strcmp(azColName[i], "cliaddr") == 0) {
 			P_SQL_WRAPPER_ENTRY(p)[idx].cliaddr = atoi(argv[i]);
@@ -1936,6 +1933,8 @@ gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 	char *errmsg = NULL;
 	char *_sql = 
 		"UPDATE clients SET total_reads = 0, total_hits = 0 WHERE id >= 0";
+	char *__sql = 
+		"DELETE from reads WHERE id >= 0";
 	
 	rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
 	if (rc != SQLITE_OK) {
@@ -1944,9 +1943,15 @@ gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 		sqlite3_free(errmsg);
 		return GFARM_ERR_SQL;
 	}
+
+	rc = sqlite3_exec(db, __sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+		  "Could not delete lru cache buffer: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_SQL;
+	}
 	
-	/* conn->total_cache_hit = 0; */
-	/* conn->total_read      = 0; */
 
 	return GFARM_ERR_NO_ERROR;
 }
