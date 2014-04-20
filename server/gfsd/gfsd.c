@@ -121,8 +121,7 @@ pid_t master_gfsd_pid;
 pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
 
-#define ATTACH_GFSD_DATABASE        ":memory:?cache=shared"
-//#define ATTACH_GFSD_DATABASE        "/run/shm/test.sqlite3"
+#define ATTACH_GFSD_DATABASE        "file:memdb1?mode=memory&cache=shared"
 #define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
 #define ALLCLIENTS_CACHE_SIZE       (10ULL * 1024 * 1024 * 1024)
 sqlite3 *gfsd_db = NULL;
@@ -1924,9 +1923,9 @@ gfs_server_close(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	gfarm_int32_t fd;
 	static const char diag[] = "GFS_PROTO_CLOSE";   
 
-	gfp_update_totalchit_and_total_read(gfsd_db, client);
+	//gfp_update_totalchit_and_total_read(gfsd_db, client);
 	
-	gfp_show_client_hitrates(client);
+	//gfp_show_client_hitrates(client);
 
 	gfs_server_get_request(client, size, diag, "i", &fd);
 	if (fd == REPLICATION_REMOTE_FD) {

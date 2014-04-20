@@ -1812,8 +1812,8 @@ gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 	char *_sql = 
 		"INSERT into clients (cliaddr, total_reads, total_hits)"
 		"       SELECT coalesce(cliaddr, %u), "
-		"              coalesce(max(total_reads) + %u, %u), "
-		"              coalesce(max(total_hits) + %u, %u)"
+		"              coalesce(total_reads + %u, %u), "
+		"              coalesce(total_hits + %u, %u)"
 		"                      FROM clients where cliaddr = %u";
 
 	snprintf(sql, sizeof(sql), _sql, conn->client_addr, 
@@ -1944,6 +1944,9 @@ gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 		sqlite3_free(errmsg);
 		return GFARM_ERR_SQL;
 	}
+	
+	/* conn->total_cache_hit = 0; */
+	/* conn->total_read      = 0; */
 
 	return GFARM_ERR_NO_ERROR;
 }
@@ -2056,6 +2059,9 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 		return;
 	}
 
+	conn->total_read      = 0;
+	conn->total_cache_hit = 0;
+
 	for (i = offset / granularity ; i < ((offset + size) / granularity) + 1 ; i++) {
 		for (j = 0 ; j < cache.valid_num_of_entry ; j++) {
 			if ((cache.entries[j].inum == ino) &&
@@ -2074,7 +2080,10 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 
 	/* gflog_debug(GFARM_MSG_UNFIXED, "<IP:%d> READ hits: %lu / reads: %lu",  */
 	/* 			conn->client_addr, conn->total_cache_hit, conn->total_read); */
-//	gfp_update_totalchit_and_total_read(db, conn);
+	gfp_update_totalchit_and_total_read(db, conn);
+
+	conn->total_read      = 0;
+	conn->total_cache_hit = 0;
 	
 	free(cache.entries);
 	return;
