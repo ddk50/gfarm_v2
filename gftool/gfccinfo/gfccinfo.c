@@ -32,7 +32,7 @@
 #include "config.h"
 #include "gfarm_path.h"
 
-char *program_name = "gfhost";
+char *program_name = "gfccinfo";
 
 struct gfm_connection *gfm_server = NULL;
 
@@ -761,7 +761,6 @@ gfarm_paraccess_request(struct gfarm_paraccess *pa,
 	gfarm_error_t e;
 	struct gfarm_access *a;
 	struct gfs_client_get_load_state *gls;
-	struct gfs_connection *gfs_server;
 
 	/*
 	 * Wait until at least one slot becomes available.
@@ -785,28 +784,6 @@ gfarm_paraccess_request(struct gfarm_paraccess *pa,
 	a->canonical_hostname = canonical_hostname;
 	a->port = port;
 	a->peer_addr = *peer_addr;
-
-	/* 
-	 * Few addition for Kazushi
-	 */
-	e = gfs_client_connection_acquire_by_host(gfm_server, canonical_hostname, 
-		port, &gfs_server, "127.0.0.1");
-	if (e != GFARM_ERR_NO_ERROR) {
-		fprintf(stderr, 
-		    "Could not establish to connect gfs client (%s)\n", 
-				a->canonical_hostname);
-		return (e);
-	}	
-
-	e = gfs_client_hitrates_clear(gfs_server);
-	if (e != GFARM_ERR_NO_ERROR) {
-		fprintf(stderr, 
-		    "Could not clear hitrate in (%s)\n", 
-				a->canonical_hostname);
-		return (e);
-	}
-
-	gfs_client_connection_free(gfs_server);
 
 	e = gfs_client_get_load_request_multiplexed(pa->q, &a->peer_addr,
 	    pa->try_auth ?
@@ -886,12 +863,13 @@ callback_gfsd_info(struct output *o)
  * except info->hostname are not valid. (see list_gfsd_info())
  */
 gfarm_error_t
-request_gfsd_info(struct gfarm_host_info *info,
+request_clear_gfsd_cacheinfo(struct gfarm_host_info *info,
 	struct gfarm_paraccess *pa)
 {	
 	gfarm_error_t e;
 	struct sockaddr addr;
-	char *canonical_hostname, *if_hostname;   
+	struct gfs_connection *gfs_server;
+	char *canonical_hostname, *if_hostname;
 
 	canonical_hostname = strdup(info->hostname);
 	if (canonical_hostname == NULL) {
@@ -908,8 +886,36 @@ request_gfsd_info(struct gfarm_host_info *info,
 			free(canonical_hostname);
 		return (e);
 	}
-	return (gfarm_paraccess_request(pa,
-	    if_hostname, canonical_hostname, info->port, &addr));
+
+
+	/* 
+	 * Few additions by Kazushi
+	 */
+	e = gfs_client_connection_acquire_by_host(gfm_server, canonical_hostname, 
+		info->port, &gfs_server, "127.0.0.1");
+	if (e != GFARM_ERR_NO_ERROR) {
+		fprintf(stderr, 
+		    "Could not establish to connect gfs client (%s)\n", 
+			 canonical_hostname);
+		return (e);
+	}	
+
+	e = gfs_client_hitrates_clear(gfs_server);
+	if (e != GFARM_ERR_NO_ERROR) {
+		fprintf(stderr, 
+		    "Could not clear hitrate in (%s)\n", 
+				canonical_hostname);
+		return (e);
+	}
+
+	gfs_client_connection_free(gfs_server);
+
+	fprintf(stdout, "cache information on %s:%d was cleared\n", 
+        canonical_hostname, info->port);
+
+	/* return (gfarm_paraccess_request(pa, */
+	/*     if_hostname, canonical_hostname, info->port, &addr)); */
+	return GFARM_ERR_NO_ERROR;
 }
 
 struct long_format_parameter {
@@ -1022,12 +1028,14 @@ callback_nodename(struct output *o)
 }
 
 gfarm_error_t
-request_nodename(struct gfarm_host_info *host_info,
+request_gfsd_cacheinfo(struct gfarm_host_info *host_info,
 	struct gfarm_paraccess *pa)
 {
 	gfarm_error_t e;
 	char *canonical_hostname;
+	char *str;
 	struct sockaddr addr;
+	struct gfs_connection *gfs_server;
 
 	/* dup `host_info->hostname' -> `hostname' */
 	canonical_hostname = strdup(host_info->hostname);
@@ -1046,8 +1054,35 @@ request_nodename(struct gfarm_host_info *host_info,
 		return (e);
 	}
 
-	return (gfarm_paraccess_request(pa, NULL,
-	    canonical_hostname, host_info->port, &addr));
+	/* 
+	 * Few additions by Kazushi
+	 */
+	e = gfs_client_connection_acquire_by_host(gfm_server, canonical_hostname, 
+		host_info->port, &gfs_server, "127.0.0.1");
+	if (e != GFARM_ERR_NO_ERROR) {
+		fprintf(stderr, 
+		    "Could not establish to connect gfs client (%s)\n", 
+			 canonical_hostname);
+		return (e);
+	}
+	
+	e = gfs_client_recv_hitrates(gfs_server, &str);
+	if (e != GFARM_ERR_NO_ERROR) {
+		fprintf(stderr, 
+		    "Could not clear hitrate in (%s)\n", 
+				canonical_hostname);
+		return (e);
+	}
+
+	fprintf(stdout, "<%s:%d> -- %s\n", 
+	        canonical_hostname, host_info->port, str);
+	free(str);
+
+	gfs_client_connection_free(gfs_server);
+
+	/* return (gfarm_paraccess_request(pa, */
+	/*     if_hostname, canonical_hostname, info->port, &addr)); */
+	return GFARM_ERR_NO_ERROR;
 }
 
 gfarm_error_t
@@ -1507,14 +1542,14 @@ main(int argc, char **argv)
 		    opt_architecture, opt_domainname, opt_port,
 		    opt_plain_order, opt_sort_by_loadavg,
 		    opt_use_metadb, argc, argv,
-		    request_gfsd_info, callback_gfsd_info);
+		    request_clear_gfsd_cacheinfo, callback_gfsd_info);
 		break;
 	case OP_NODENAME:
-		/* e_save = paraccess_list(opt_concurrency, opt_udp_only, */
-		/*     opt_architecture, opt_domainname, opt_port, */
-		/*     opt_plain_order, opt_sort_by_loadavg, */
-		/*     opt_use_metadb, argc, argv, */
-		/*     request_nodename, callback_nodename); */
+		e_save = paraccess_list(opt_concurrency, opt_udp_only,
+		    opt_architecture, opt_domainname, opt_port,
+		    opt_plain_order, opt_sort_by_loadavg,
+		    opt_use_metadb, argc, argv,
+		    request_gfsd_cacheinfo, callback_nodename);
 		break;
 	case OP_LIST_LONG:
 		/* e_save = paraccess_list(opt_concurrency, opt_udp_only, */

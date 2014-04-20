@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+
 #include <errno.h>
 #include <stdarg.h>
 #include <inttypes.h>	/* more portable than <stdint.h> on UNIX variants */
@@ -1710,7 +1711,7 @@ struct wrap_ ## tag ## _entry {					\
 	((val).entries)
 
 void
-gfp_record_client(sqlite3 *db, struct gfp_xdr *conn, 
+gfp_record_client_subquery(sqlite3 *db, struct gfp_xdr *conn, 
 	struct sockaddr *client_addr)
 {
 	struct sockaddr_in *sin = (struct sockaddr_in *)client_addr;
@@ -1718,7 +1719,9 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 	char *errmsg = NULL;
 	int rc;
 	char sql[255];
-	char *_sql = "insert or ignore into clients(cliaddr) values(%d)";
+	char *_sql = 
+		"insert or ignore into clients(cliaddr, total_reads, total_hits) "
+		"          values(%d, 0, 0)";
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip);
 	
@@ -1730,7 +1733,44 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 		sqlite3_free(errmsg);
 	} else 
 		gflog_debug(GFARM_MSG_1000018,
-					"insert a client (%d) into the\n", client_ip);
+					"insert a client (%d) into the table\n", client_ip);
+	
+	conn->client_addr     = client_ip;	
+	conn->total_cache_hit = 0;
+	conn->total_read      = 0;
+	
+	return;
+}
+
+void
+gfp_record_client(sqlite3 *db, struct gfp_xdr *conn, 
+	struct sockaddr *client_addr)
+{
+	struct sockaddr_in *sin = (struct sockaddr_in *)client_addr;
+	gfarm_uint32_t client_ip = (gfarm_uint32_t)sin->sin_addr.s_addr;
+	char *errmsg = NULL;
+	int rc;
+	char sql[255];
+	char *_sql = 
+		/* "insert or ignore into clients(cliaddr, total_reads, total_hits) " */
+		/* "          values(%d, 10, 10)"; */
+		"	INSERT or IGNORE into clients (cliaddr, total_reads, total_hits)"
+		"		SELECT coalesce(cliaddr, %u), "
+		"		       coalesce(max(total_reads), 0), "
+		"		       coalesce(max(total_hits), 0)"
+		"		FROM clients where cliaddr = %u";
+	
+	snprintf(sql, sizeof(sql), _sql, client_ip, client_ip);
+	
+	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+			"Could not record a client into the db %s (client ip: %d)",
+			errmsg, client_ip);
+		sqlite3_free(errmsg);
+	} else 
+		gflog_debug(GFARM_MSG_1000018,
+					"insert a client (%d) into the table\n", client_ip);
 	
 	conn->client_addr     = client_ip;	
 	conn->total_cache_hit = 0;
@@ -1811,6 +1851,9 @@ callback_form_conn_entries(void *ptr, int argc,
 	P_INCREMENT_SQL_WRAPPER_ARY_LEN(p);
 	idx = P_GET_SQL_WRAPPER_CURRENT_ARY_LEN(p) - 1;
 
+	gflog_error(GFARM_MSG_1000018,
+				"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
 	for (i = 0 ; i < argc ; i++) {
 		if (strcmp(azColName[i], "cliaddr") == 0) {
 			P_SQL_WRAPPER_ENTRY(p)[idx].cliaddr = atoi(argv[i]);
@@ -1825,26 +1868,8 @@ callback_form_conn_entries(void *ptr, int argc,
 }
 
 gfarm_error_t
-gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
-{
-	int rc;
-	char *errmsg = NULL;
-	char *_sql = 
-		"UPDATE clients SET total_reads = %u, total_hits = %u WHERE id >= 0";
-	
-	rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
-	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
-		  "Could not clear total_reads and total_hits: %s", errmsg);
-		sqlite3_free(errmsg);
-		return GFARM_ERR_SQL;
-	}
-
-	return GFARM_ERR_NO_ERROR;
-}
-
-gfarm_error_t
-gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, char **result)
+gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, 
+	const char *diag, char **result, int *result_len)
 {
 	int rc;
 	int i;
@@ -1852,25 +1877,38 @@ gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, char **resul
 	char *errmsg = NULL;
 	char tmp[255];
 	STRUCT_SQL_CALLBACK_WRAPPER(conn) clients;
+	size_t ary_size = 10;
 	char *_sql = 
-		"SELECT cliaddr, total_reads, total_hits from clients";
+		"SELECT * from clients";
+
+	memset(&clients, 0, sizeof(STRUCT_SQL_CALLBACK_WRAPPER(conn)));
+	GFARM_MALLOC_ARRAY(clients.entries, 10);
+	clients.allocated_entries_size = 10;
+	clients.valid_num_of_entry     = 0;
+	if (clients.entries == NULL) {
+		gflog_fatal_errno(GFARM_MSG_UNFIXED, "%s: no memory for %d bytes",
+						  diag, 10);
+	}
 	
 	rc = sqlite3_exec(db, _sql, callback_form_conn_entries, &clients, &errmsg);
 	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
+		gflog_error(GFARM_MSG_UNFIXED,
 					"Could not obtain clients list: %s", errmsg);
 		sqlite3_free(errmsg);
 		free(clients.entries);
 		return GFARM_ERR_SQL;
 	}
 
-	if (GET_SQL_WRAPPER_CURRENT_ARY_LEN(clients) > 1) {
-		gflog_error(GFARM_MSG_1000018,
-					"client record may not be unique: %s", errmsg);
-	}
+	/* if (GET_SQL_WRAPPER_CURRENT_ARY_LEN(clients) > 1) { */
+	/* 	gflog_error(GFARM_MSG_1000018, */
+	/* 				"client record may not be unique: %s (%d rows)",  */
+	/* 				errmsg, */
+	/* 				GET_SQL_WRAPPER_CURRENT_ARY_LEN(clients)); */
+	/* } */
 
-	GFARM_MALLOC_ARRAY(s, 
-	    (clients.valid_num_of_entry * (15 + 10 + 10 + 2)) + 1);
+	ary_size = (clients.valid_num_of_entry * (15 + 10 + 10 + 2)) + 1;
+	GFARM_MALLOC_ARRAY(s, ary_size);
+	memset(s, 0, ary_size);
 
 	for (i = 0 ; i < clients.valid_num_of_entry ; i++) {
 		snprintf(tmp, sizeof(tmp), "%u:%u/%u\n", 
@@ -1881,8 +1919,32 @@ gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn, char **resul
 	}
 
 	free(clients.entries);
-	*result = s;
+	*result     = s;
+	*result_len = strlen(s);
+
+
+	gflog_error(GFARM_MSG_UNFIXED,"send value (%d clients): %s", 
+				clients.valid_num_of_entry, s);
 	
+	return GFARM_ERR_NO_ERROR;
+}
+
+gfarm_error_t
+gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
+{
+	int rc;
+	char *errmsg = NULL;
+	char *_sql = 
+		"UPDATE clients SET total_reads = 0, total_hits = 0 WHERE id >= 0";
+	
+	rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
+	if (rc != SQLITE_OK) {
+		gflog_error(GFARM_MSG_1000018,
+		  "Could not clear total_reads and total_hits: %s", errmsg);
+		sqlite3_free(errmsg);
+		return GFARM_ERR_SQL;
+	}
+
 	return GFARM_ERR_NO_ERROR;
 }
 
@@ -1979,6 +2041,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	memset(&cache, 0, sizeof(STRUCT_SQL_CALLBACK_WRAPPER(cache)));
 	GFARM_MALLOC_ARRAY(cache.entries, arysize);
 	cache.allocated_entries_size = arysize;
+	cache.valid_num_of_entry     = 0;
 
 	/* gflog_debug(GFARM_MSG_1004206,  */
 	/* 			"update lru list: offset = %lu, size = %lu", offset, size); */
@@ -2000,6 +2063,10 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 				/* Cache hit!!! */
 				conn->total_cache_hit++;
 				j = cache.valid_num_of_entry;
+
+				gflog_info(GFARM_MSG_UNFIXED,
+						   "EEEEEEEEEEEEEEEE: %u", 
+						   cache.valid_num_of_entry);
 			}
 		}
 		conn->total_read++;
@@ -2007,6 +2074,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 
 	/* gflog_debug(GFARM_MSG_UNFIXED, "<IP:%d> READ hits: %lu / reads: %lu",  */
 	/* 			conn->client_addr, conn->total_cache_hit, conn->total_read); */
+//	gfp_update_totalchit_and_total_read(db, conn);
 	
 	free(cache.entries);
 	return;
@@ -2101,6 +2169,7 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 		sqlite3_close(db_p);
 		gflog_fatal_errno(GFARM_MSG_1000599, "Could not open database");
 	} else {
+		int second_chance = 1;
 		char *errmsg = NULL;
 		char create_clients[] = 
 			"create table clients ("
@@ -2118,19 +2187,45 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 			"                  inum       UINT8 NOT NULL,"
 			"                  pagenum    UINT8 NOT NULL,"
 			"                  count      INTEGER NOT NULL,"
-			"                  UNIQUE(entry_id) ON CONFLICT REPLACE)";
-		
+			"                  UNIQUE(entry_id) ON CONFLICT REPLACE)";		
+
+	create_table_1:
 		rc = sqlite3_exec(db_p, create_clients, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
+			if (second_chance) {
+				rc = sqlite3_exec(db_p, "DROP TABLE clients", 0, 0, &errmsg);
+				if (rc != SQLITE_OK) {
+					gflog_fatal_errno(GFARM_MSG_1000599,
+									  "Could not drop table %s",
+									  errmsg); 
+					sqlite3_free(errmsg);
+				}
+				second_chance = 0;
+				goto create_table_1;
+			}
 			gflog_fatal_errno(GFARM_MSG_1000599,
-				  "Could not create a table for recording connected clients: %s",
+				  "Could not create or recreate a table for recording connected clients: %s",
 				  errmsg);
 		}
+
+		second_chance = 1;
 		
+	create_table_2:
 		rc = sqlite3_exec(db_p, create_histgram_reads, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
+			if (second_chance) {
+				rc = sqlite3_exec(db_p, "DROP TABLE reads", 0, 0, &errmsg);
+				if (rc != SQLITE_OK) {
+					gflog_fatal_errno(GFARM_MSG_1000599,
+									  "Could not drop table %s",
+									  errmsg); 
+					sqlite3_free(errmsg);					
+				}
+				second_chance = 0;
+				goto create_table_2;
+			}
 			gflog_fatal_errno(GFARM_MSG_1000599,
-				   "Could not create a table for recording read histgrams: %s",
+				   "Could not create or recreate a table for recording read histgrams: %s",
 				   errmsg);
 		}
 	}

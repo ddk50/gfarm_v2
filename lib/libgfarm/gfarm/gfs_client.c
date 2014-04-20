@@ -2533,6 +2533,35 @@ gfs_client_get_load_result_multiplexed(
 }
 
 /*
+ * GFS_PROTO_HITRATES_GET
+ */
+gfarm_error_t
+gfs_client_recv_hitrates(struct gfs_connection *gfs_server, char **result)
+{
+	struct gfp_xdr_xid_record *xidr;
+	gfarm_error_t e;
+	char *s;
+
+	e = gfs_client_rpc_request(
+		   gfs_server, 
+		   &xidr, 
+		   GFS_PROTO_HITRATES_GET,
+		   "");
+	if (e != GFARM_ERR_NO_ERROR) {
+		return (e);
+	}	
+	
+	e = gfs_client_rpc_result(gfs_server, 0, xidr, "s", &s);
+	if (e != GFARM_ERR_NO_ERROR) {
+		return (e);
+	}
+	
+	*result = s;
+
+	return e;
+}
+
+/*
  * GFS_PROTO_HITRATES_CLEAR
  */
 gfarm_error_t
@@ -2548,4 +2577,3 @@ gfs_client_hitrates_clear(struct gfs_connection *gfs_server)
 	return e;
 }
 
-	

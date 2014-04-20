@@ -121,7 +121,8 @@ pid_t master_gfsd_pid;
 pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
 
-#define ATTACH_GFSD_DATABASE        ":memory:"
+#define ATTACH_GFSD_DATABASE        ":memory:?cache=shared"
+//#define ATTACH_GFSD_DATABASE        "/run/shm/test.sqlite3"
 #define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
 #define ALLCLIENTS_CACHE_SIZE       (10ULL * 1024 * 1024 * 1024)
 sqlite3 *gfsd_db = NULL;
@@ -2313,23 +2314,34 @@ gfs_server_statfs(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 	    "illllll", bsize, blocks, bfree, bavail, files, ffree, favail);
 }
 
-/* Baysian */
+/* for Baysian */
 void
 gfs_server_send_hitrates(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 {	
 	char *str;
+	int ret_size;
 	int save_errno = 0;
+	const char *diag = "sendhitrates";
 	
 	/*
 	 * send all clients list with number of hits and reads
 	 */
-	//gfs_server_get_request(client, size, "sendhitrates", "");
+	gflog_info(GFARM_MSG_UNFIXED, "send hitrate\n");
 	
-	gfp_get_totalchit_and_total_read(gfsd_db, client, str);
-	gfs_server_put_reply_with_errno(client, xid, "sendhitrates", 
-        save_errno, "s", str);
-
-	free(str);
+	save_errno = gfp_get_totalchit_and_total_read(gfsd_db, client,
+			diag, &str, &ret_size);
+	if (save_errno == GFARM_ERR_NO_ERROR) {
+		if (ret_size > 0) {
+			gfs_server_put_reply_with_errno(client, xid, diag, 
+			    save_errno, "s", str);
+			free(str);
+		} else {
+			char *nothing = "no clients";
+			gfs_server_put_reply_with_errno(client, xid, diag, 
+				save_errno, "s", nothing);
+		}
+	}
+	
 }
 
 /* Baysian */
@@ -2352,7 +2364,7 @@ gfs_server_clear_hitrates(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size
 
 	gflog_info(GFARM_MSG_UNFIXED, "hitrates was cleared\n");
 
-	save_errno = gfp_update_totalchit_and_total_read(gfsd_db, client);
+	save_errno = gfp_clear_totalchit_and_total_read(gfsd_db, client);
 	gfs_server_put_reply_with_errno(client, xid, "clearhitrates", save_errno, "");
 }
 
@@ -3782,7 +3794,8 @@ server(int client_fd, char *client_name, struct sockaddr *client_addr)
 			    "specified, but fails: %s", gfarm_error_string(e));
 	}
 
-	gfp_record_client(gfsd_db, client, client_addr);
+//	gfp_record_client(gfsd_db, client, client_addr);
+	gfp_record_client_subquery(gfsd_db, client, client_addr);
 
 	for (;;) {
 		e = gfp_xdr_recv_async_header(client, 0, 0,
