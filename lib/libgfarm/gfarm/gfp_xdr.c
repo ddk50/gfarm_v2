@@ -14,12 +14,14 @@
 #include <gfarm/error.h>
 #include <gfarm/gfarm_misc.h>
 #include <sqlite3.h>
+#include <pthread.h>
 
 #include "gfutil.h" /* gflog_fatal() */
 
 #include "liberror.h"
 #include "iobuffer.h"
 #include "gfp_xdr.h"
+#include "thrsubr.h"
 
 #ifndef va_copy /* since C99 standard */
 #define va_copy(dst, src)	((dst) = (src))
@@ -54,6 +56,9 @@ struct gfp_xdr {
 	gfarm_uint32_t total_read;
 	double latest_cache_hitrate;
 };
+
+static pthread_mutex_t sql_mutex = PTHREAD_MUTEX_INITIALIZER;
+static const char lock_diag[] = "sqlite3";
 
 /*
  * switch to new iobuffer operation,
@@ -1761,16 +1766,18 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 		"		FROM clients where cliaddr = %u";
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip, client_ip);
-	
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
-			"Could not record a client into the db %s (client ip: %d)",
-			errmsg, client_ip);
-		sqlite3_free(errmsg);
-	} else 
-		gflog_debug(GFARM_MSG_1000018,
-					"insert a client (%d) into the table\n", client_ip);
+
+	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_error(GFARM_MSG_1000018,
+						"Could not record a client into the db %s (client ip: %d)",
+						errmsg, client_ip);
+			sqlite3_free(errmsg);
+		} else 
+			gflog_debug(GFARM_MSG_1000018,
+						"insert a client (%d) into the table\n", client_ip);
+	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 	
 	conn->client_addr     = client_ip;	
 	conn->total_cache_hit = 0;
@@ -1795,12 +1802,14 @@ gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,
 
 	snprintf(sql, sizeof(sql), _sql, ino, pagenum, ino, pagenum);
 	
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
-					"Could not update histgram entries: %s", errmsg);
-		sqlite3_free(errmsg);
-	}	
+	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_error(GFARM_MSG_1000018,
+						"Could not update histgram entries: %s", errmsg);
+			sqlite3_free(errmsg);
+		}
+	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 }
 
 gfarm_error_t
@@ -1820,7 +1829,10 @@ gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 			 conn->total_read, conn->total_read,
 			 conn->total_cache_hit, conn->total_cache_hit,
 			 conn->client_addr);
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+
+	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 		   "Could not update cache hit rate and total read: %s", errmsg);
@@ -2113,7 +2125,9 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
 		snprintf(sql, sizeof(sql), _sql, 
 				 conn->client_addr, ino, i, conn->client_addr, ino, i);
-		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+		gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+			rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+		}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 		if (rc != SQLITE_OK) {
 			gflog_error(GFARM_MSG_1000018,
 						"Could not update reads histgram: %s", errmsg);
@@ -2135,7 +2149,9 @@ gfp_client_insert_or_increment_read_count(sqlite3 *db, struct gfp_xdr *conn)
 		"      FROM clients where cliaddr = %u";
 
 	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000510,
 					"Could not increment total read count: %s", errmsg);
@@ -2158,7 +2174,9 @@ gfp_client_insert_or_increment_total_hit(sqlite3 *db, struct gfp_xdr *conn)
 		"       FROM clients where cliaddr = %u";
 
 	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000510,
 					"Could not increment total hit: %s", errmsg);
