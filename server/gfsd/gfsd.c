@@ -1973,10 +1973,10 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 
 	fe = file_table_entry(fd);
 	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
-		fe->ino, offset, size, READ_HISTGRAM_GRANULARITY, ALLCLIENTS_CACHE_SIZE);
+	   fe->ino, fe->gen, offset, size, READ_HISTGRAM_GRANULARITY, ALLCLIENTS_CACHE_SIZE);
 
-	gfp_update_reads_histgram(gfsd_db, client, fe->ino, 
-        offset, size, READ_HISTGRAM_GRANULARITY);
+	gfp_update_reads_histgram(gfsd_db, client, fe->ino, fe->gen,
+				  offset, size, READ_HISTGRAM_GRANULARITY);
 	
 #if 0 /* XXX FIXME: pread(2) on NetBSD-3.0_BETA is broken */
 	if ((rv = pread(local_fd, buffer, iosize, offset)) == -1)
@@ -3793,7 +3793,7 @@ server(int client_fd, char *client_name, struct sockaddr *client_addr)
 			    "specified, but fails: %s", gfarm_error_string(e));
 	}
 
-//	gfp_record_client(gfsd_db, client, client_addr);
+	//	gfp_record_client(gfsd_db, client, client_addr);
 	gfp_record_client_subquery(gfsd_db, client, client_addr);
 
 	for (;;) {

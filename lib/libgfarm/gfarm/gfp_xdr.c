@@ -1,3 +1,4 @@
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -1786,31 +1787,31 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 	return;
 }
 
-void
-gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn, 
-	gfarm_int64_t ino, gfarm_int64_t pagenum)
-{
-	int rc;
-	char *errmsg = NULL;
-	char sql[255];
-	char *_sql = 
-		"INSERT INTO entries (inum, pagenum)"
-		"       SELECT %lu, %lu"
-		"              FROM dual"
-		"                   WHERE NOT EXISTS "
-		"      (SELECT id FROM entries WHERE inum = %lu AND pagenum = %lu)";
+/* void */
+/* gfp_update_histgram_entries(sqlite3 *db, struct gfp_xdr *conn,  */
+/* 	gfarm_int64_t ino, gfarm_int64_t pagenum) */
+/* { */
+/* 	int rc; */
+/* 	char *errmsg = NULL; */
+/* 	char sql[255]; */
+/* 	char *_sql =  */
+/* 		"INSERT INTO entries (inum, pagenum)" */
+/* 		"       SELECT %lu, %lu" */
+/* 		"              FROM dual" */
+/* 		"                   WHERE NOT EXISTS " */
+/* 		"      (SELECT id FROM entries WHERE inum = %lu AND pagenum = %lu)"; */
 
-	snprintf(sql, sizeof(sql), _sql, ino, pagenum, ino, pagenum);
+/* 	snprintf(sql, sizeof(sql), _sql, ino, pagenum, ino, pagenum); */
 	
-	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
-		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-		if (rc != SQLITE_OK) {
-			gflog_error(GFARM_MSG_1000018,
-						"Could not update histgram entries: %s", errmsg);
-			sqlite3_free(errmsg);
-		}
-	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
-}
+/* 	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	 */
+/* 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg); */
+/* 		if (rc != SQLITE_OK) { */
+/* 			gflog_error(GFARM_MSG_1000018, */
+/* 						"Could not update histgram entries: %s", errmsg); */
+/* 			sqlite3_free(errmsg); */
+/* 		} */
+/* 	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex"); */
+/* } */
 
 gfarm_error_t
 gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
@@ -2010,6 +2011,7 @@ gfp_show_msg(struct gfp_xdr *conn, const char *msg)
 struct cache_entry {
 	gfarm_uint32_t client_id;
 	gfarm_uint64_t inum;
+	gfarm_uint64_t gnum;
 	gfarm_uint64_t pagenum;
 	gfarm_uint32_t count;
 };
@@ -2033,6 +2035,8 @@ callback_form_cache_entries(void *ptr, int argc,
 			P_SQL_WRAPPER_ENTRY(p)[idx].client_id = atoi(argv[i]);
 		} else if (strcmp(azColName[i], "inum") == 0) {
 			P_SQL_WRAPPER_ENTRY(p)[idx].inum = atoll(argv[i]);
+		} else if (strcmp(azColName[i], "gnum") == 0) {
+			P_SQL_WRAPPER_ENTRY(p)[idx].gnum = atoll(argv[i]);
 		} else if (strcmp(azColName[i], "pagenum") == 0) {
 			P_SQL_WRAPPER_ENTRY(p)[idx].pagenum = atoll(argv[i]);
 		} else if (strcmp(azColName[i], "count") == 0) {
@@ -2045,14 +2049,15 @@ callback_form_cache_entries(void *ptr, int argc,
 
 void
 gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
-	gfarm_int64_t ino, gfarm_int64_t offset, size_t size, gfarm_uint64_t granularity,
+	gfarm_int64_t ino, gfarm_int64_t gnum, gfarm_int64_t offset, 
+	size_t size, gfarm_uint64_t granularity,
 	gfarm_uint64_t clientcachememsize)
 {
 	char *errmsg = NULL;
 	int rc;
 	char sql[255];
 	char *_sql2 =
-		"SELECT client_id, inum, pagenum, count"
+		"SELECT client_id, inum, gnum, pagenum, count"
 		"      FROM reads where client_id = %u order by id desc limit %llu";
 	gfarm_uint64_t i, j;
 	size_t arysize = clientcachememsize / granularity;
@@ -2082,6 +2087,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	for (i = offset / granularity ; i < ((offset + size) / granularity) + 1 ; i++) {
 		for (j = 0 ; j < cache.valid_num_of_entry ; j++) {
 			if ((cache.entries[j].inum == ino) &&
+				(cache.entries[j].gnum == gnum) &&
 				(cache.entries[j].pagenum == i)) {
 				/* Cache hit!!! */
 				conn->total_cache_hit++;
@@ -2108,7 +2114,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 
 void
 gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn, 
-	gfarm_int64_t ino, gfarm_int64_t offset, 
+	gfarm_int64_t ino, gfarm_int64_t gnum, gfarm_int64_t offset, 
 	size_t size, gfarm_uint64_t granularity)
 {
 	char *errmsg = NULL;
@@ -2117,14 +2123,15 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 	int rc;
 	char sql[1024];
 	char *_sql = 
-		"INSERT into reads (entry_id, client_id, inum, pagenum, count)"
-		"       SELECT coalesce(entry_id, LAST_INSERT_ROWID()) , coalesce(client_id, %u), coalesce(inum, %u),"
+		"INSERT into reads (entry_id, client_id, inum, gnum, pagenum, count)"
+		"       SELECT coalesce(entry_id, LAST_INSERT_ROWID()) , "
+		"              coalesce(client_id, %u), coalesce(inum, %u), coalesce(gnum, %u),"
 		"              coalesce(pagenum, %llu), coalesce(max(count) + 1, 1)"
-		"                     FROM reads where client_id = %u AND inum = %llu AND pagenum = %llu";
+		"                     FROM reads where client_id = %u AND inum = %llu AND gnum = %llu AND pagenum = %llu";
 
 	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
 		snprintf(sql, sizeof(sql), _sql, 
-				 conn->client_addr, ino, i, conn->client_addr, ino, i);
+				 conn->client_addr, ino, gnum, i, conn->client_addr, ino, gnum, i);
 		gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
 			rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 		}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
@@ -2217,6 +2224,7 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 			"                  entry_id   INTEGER NOT NULL,"
 			"                  client_id  INTEGER NOT NULL,"
 			"                  inum       UINT8 NOT NULL,"
+			"                  gnum       UINT8 NOT NULL,"
 			"                  pagenum    UINT8 NOT NULL,"
 			"                  count      INTEGER NOT NULL,"
 			"                  UNIQUE(entry_id) ON CONFLICT REPLACE)";		
