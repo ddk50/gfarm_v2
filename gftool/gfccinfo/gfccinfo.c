@@ -892,7 +892,7 @@ request_clear_gfsd_cacheinfo(struct gfarm_host_info *info,
 	 * Few additions by Kazushi
 	 */
 	e = gfs_client_connection_acquire_by_host(gfm_server, canonical_hostname, 
-		info->port, &gfs_server, "127.0.0.1");
+		info->port, &gfs_server, "192.168.100.1");
 	if (e != GFARM_ERR_NO_ERROR) {
 		fprintf(stderr, 
 		    "Could not establish to connect gfs client (%s)\n", 
@@ -1058,7 +1058,7 @@ request_gfsd_cacheinfo(struct gfarm_host_info *host_info,
 	 * Few additions by Kazushi
 	 */
 	e = gfs_client_connection_acquire_by_host(gfm_server, canonical_hostname, 
-		host_info->port, &gfs_server, "172.16.1.1");
+		host_info->port, &gfs_server, "192.168.100.1");
 	if (e != GFARM_ERR_NO_ERROR) {
 		fprintf(stderr, 
 		    "Could not establish to connect gfs client (%s)\n", 

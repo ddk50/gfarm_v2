@@ -15,7 +15,8 @@
 #include <gfarm/error.h>
 #include <gfarm/gfarm_misc.h>
 #include <sqlite3.h>
-#include <pthread.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 
 #include "gfutil.h" /* gflog_fatal() */
 
@@ -58,8 +59,31 @@ struct gfp_xdr {
 	double latest_cache_hitrate;
 };
 
-static pthread_mutex_t sql_mutex = PTHREAD_MUTEX_INITIALIZER;
-static const char lock_diag[] = "sqlite3";
+static int db_semid;
+
+void 
+db_lock(int semid)
+{
+	struct sembuf sb[1];
+	sb[0].sem_num = 0;
+	sb[0].sem_op  = -1;
+	sb[0].sem_flg = 0;	
+	if (EOF == semop(semid, sb, 1)) {
+		gflog_fatal(GFARM_MSG_UNFIXED, "semaphore lock error");
+	}
+}
+
+void 
+db_unlock(int semid)
+{
+	struct sembuf sb[1];
+	sb[0].sem_num = 0;
+	sb[0].sem_op  = 1;
+	sb[0].sem_flg = 0;
+	if (EOF == semop(semid, sb, 1)) {
+		gflog_fatal(GFARM_MSG_UNFIXED, "semaphore unlock error");
+	}
+}
 
 /*
  * switch to new iobuffer operation,
@@ -1731,7 +1755,9 @@ gfp_record_client_subquery(sqlite3 *db, struct gfp_xdr *conn,
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip);
 	
-	rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	db_lock(db_semid); {
+		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
+	}; db_unlock(db_semid);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 			"Could not record a client into the db %s (client ip: %d)",
@@ -1768,7 +1794,7 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 	
 	snprintf(sql, sizeof(sql), _sql, client_ip, client_ip);
 
-	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+	db_lock(db_semid); {
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
 		if (rc != SQLITE_OK) {
 			gflog_error(GFARM_MSG_1000018,
@@ -1778,7 +1804,7 @@ gfp_record_client(sqlite3 *db, struct gfp_xdr *conn,
 		} else 
 			gflog_debug(GFARM_MSG_1000018,
 						"insert a client (%d) into the table\n", client_ip);
-	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
+	}; db_unlock(db_semid);
 	
 	conn->client_addr     = client_ip;	
 	conn->total_cache_hit = 0;
@@ -1831,9 +1857,9 @@ gfp_update_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 			 conn->total_cache_hit, conn->total_cache_hit,
 			 conn->client_addr);
 
-	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+	db_lock(db_semid); {	
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
+	}; db_unlock(db_semid);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 		   "Could not update cache hit rate and total read: %s", errmsg);
@@ -1900,7 +1926,10 @@ gfp_get_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn,
 						  diag, 10);
 	}
 	
-	rc = sqlite3_exec(db, _sql, callback_form_conn_entries, &clients, &errmsg);
+	db_lock(db_semid); {	
+		rc = sqlite3_exec(db, _sql, callback_form_conn_entries, &clients, &errmsg);
+	}; db_unlock(db_semid);
+	
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_UNFIXED,
 					"Could not obtain clients list: %s", errmsg);
@@ -1943,30 +1972,36 @@ gfarm_error_t
 gfp_clear_totalchit_and_total_read(sqlite3 *db, struct gfp_xdr *conn)
 {
 	int rc;
+	gfarm_error_t ret = GFARM_ERR_NO_ERROR;
 	char *errmsg = NULL;
 	char *_sql = 
 		"UPDATE clients SET total_reads = 0, total_hits = 0 WHERE id >= 0";
 	char *__sql = 
 		"DELETE from reads WHERE id >= 0";
 	
-	rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
-	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
-		  "Could not clear total_reads and total_hits: %s", errmsg);
-		sqlite3_free(errmsg);
-		return GFARM_ERR_SQL;
-	}
+	db_lock(db_semid); {	
+		rc = sqlite3_exec(db, _sql, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_error(GFARM_MSG_1000018,
+						"Could not clear total_reads and total_hits: %s", errmsg);
+			sqlite3_free(errmsg);
+			ret = GFARM_ERR_SQL;
+			goto exit;
+		}
 
-	rc = sqlite3_exec(db, __sql, 0, 0, &errmsg);
-	if (rc != SQLITE_OK) {
-		gflog_error(GFARM_MSG_1000018,
-		  "Could not delete lru cache buffer: %s", errmsg);
-		sqlite3_free(errmsg);
-		return GFARM_ERR_SQL;
+		rc = sqlite3_exec(db, __sql, 0, 0, &errmsg);
+		if (rc != SQLITE_OK) {
+			gflog_error(GFARM_MSG_1000018,
+						"Could not delete lru cache buffer: %s", errmsg);
+			sqlite3_free(errmsg);
+			ret = GFARM_ERR_SQL;
+			goto exit;
+		}
 	}
-	
+ exit:
+	db_unlock(db_semid);
 
-	return GFARM_ERR_NO_ERROR;
+	return ret;
 }
 
 void
@@ -2072,7 +2107,11 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	/* 			"update lru list: offset = %lu, size = %lu", offset, size); */
 
 	snprintf(sql, sizeof(sql), _sql2, conn->client_addr, arysize);
-	rc = sqlite3_exec(db, sql, callback_form_cache_entries, &cache, &errmsg);
+
+	db_lock(db_semid); {	
+		rc = sqlite3_exec(db, sql, callback_form_cache_entries, &cache, &errmsg);
+	}; db_unlock(db_semid);
+	
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000018,
 					"Could not obtain native lru: %s", errmsg);
@@ -2093,9 +2132,9 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 				conn->total_cache_hit++;
 				j = cache.valid_num_of_entry;
 
-				gflog_info(GFARM_MSG_UNFIXED,
-						   "EEEEEEEEEEEEEEEE: %u", 
-						   cache.valid_num_of_entry);
+				/* gflog_info(GFARM_MSG_UNFIXED, */
+				/* 		   "EEEEEEEEEEEEEEEE: %u",  */
+				/* 		   cache.valid_num_of_entry); */
 			}
 		}
 		conn->total_read++;
@@ -2132,9 +2171,9 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
 		snprintf(sql, sizeof(sql), _sql, 
 				 conn->client_addr, ino, gnum, i, conn->client_addr, ino, gnum, i);
-		gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+		db_lock(db_semid); {
 			rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-		}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
+		}; db_unlock(db_semid);
 		if (rc != SQLITE_OK) {
 			gflog_error(GFARM_MSG_1000018,
 						"Could not update reads histgram: %s", errmsg);
@@ -2156,9 +2195,9 @@ gfp_client_insert_or_increment_read_count(sqlite3 *db, struct gfp_xdr *conn)
 		"      FROM clients where cliaddr = %u";
 
 	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
-	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+	db_lock(db_semid); {	
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
+	}; db_unlock(db_semid);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000510,
 					"Could not increment total read count: %s", errmsg);
@@ -2181,9 +2220,9 @@ gfp_client_insert_or_increment_total_hit(sqlite3 *db, struct gfp_xdr *conn)
 		"       FROM clients where cliaddr = %u";
 
 	snprintf(sql, sizeof(sql), _sql, conn->client_addr, conn->client_addr);
-	gfarm_mutex_lock(&sql_mutex, lock_diag, "mutex"); {	
+	db_lock(db_semid); {	
 		rc = sqlite3_exec(db, sql, 0, 0, &errmsg);
-	}; gfarm_mutex_unlock(&sql_mutex, lock_diag, "mutex");
+	}; db_unlock(db_semid);
 	if (rc != SQLITE_OK) {
 		gflog_error(GFARM_MSG_1000510,
 					"Could not increment total hit: %s", errmsg);
@@ -2271,6 +2310,19 @@ gfp_create_histgram(sqlite3 **db, const char *dbname)
 	}
 
 	*db = db_p;
+}
+
+void
+gfp_init_semaphore(void)
+{
+	db_semid = semget(IPC_PRIVATE, 1, 0666);
+	if (db_semid == EOF) {
+		gflog_fatal(GFARM_MSG_UNFIXED, "semaphore init error 1");
+	}
+	
+	if ((semctl(db_semid, 0, SETVAL, 1)) == EOF) {
+		gflog_fatal(GFARM_MSG_UNFIXED, "semaphore init error 2");
+	}
 }
 
 void gfp_free_histgram(sqlite3 *db)

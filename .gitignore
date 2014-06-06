@@ -117,6 +117,8 @@ gftool/gfwhoami/.libs/
 gftool/gfwhoami/gfwhoami
 gftool/gfxattr/.libs/
 gftool/gfxattr/gfxattr
+gftool/gfccinfo/gfccinfo
+gftool/gfwhere-pipe/gfwhere-pipe
 ignores
 lib/libgfarm/.libs/
 lib/libgfarm/gfarm/.libs/

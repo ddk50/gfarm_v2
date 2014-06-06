@@ -122,7 +122,8 @@ pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
 
 #define ATTACH_GFSD_DATABASE        "file:memdb1?mode=memory&cache=shared"
-#define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
+//#define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
+#define READ_HISTGRAM_GRANULARITY   (4ULL * 1024)
 #define ALLCLIENTS_CACHE_SIZE       (10ULL * 1024 * 1024 * 1024)
 sqlite3 *gfsd_db = NULL;
 
@@ -5042,6 +5043,8 @@ main(int argc, char **argv)
 		    "accepting TCP socket O_NONBLOCK");
 
 	gfp_create_histgram(&gfsd_db, ATTACH_GFSD_DATABASE);
+
+	gfp_init_semaphore();
 
 	for (;;) {
 		FD_ZERO(&requests);

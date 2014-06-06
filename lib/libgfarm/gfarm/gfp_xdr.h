@@ -183,6 +183,7 @@ gfarm_error_t gfp_get_totalchit_and_total_read(sqlite3 *, struct gfp_xdr *,
 	 const char *, char **, int *);
 void gfp_show_client_hitrates(struct gfp_xdr *);
 void gfp_create_histgram(sqlite3 **, const char *);
+void gfp_init_semaphore(void);
 void gfp_free_histgram(sqlite3 *);
 
 void gfp_count_client_cachehits_by_naive_lru(sqlite3 *, struct gfp_xdr *,

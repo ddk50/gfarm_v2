@@ -44,6 +44,7 @@ SUBDIRS = \
 	gfusage \
 	$(gfvoms_sync_targets) \
 	gfwhere \
+	gfwhere-pipe \
 	gfwhoami \
 	gfxattr \
 	config-gfarm \
