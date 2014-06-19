@@ -122,8 +122,8 @@ pid_t back_channel_gfsd_pid;
 uid_t gfsd_uid = -1;
 
 #define ATTACH_GFSD_DATABASE        "file:memdb1?mode=memory&cache=shared"
-//#define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
-#define READ_HISTGRAM_GRANULARITY   (4ULL * 1024)
+#define READ_HISTGRAM_GRANULARITY   (1ULL * 1024 * 1024)
+//#define READ_HISTGRAM_GRANULARITY   (4ULL * 1024)
 #define ALLCLIENTS_CACHE_SIZE       (10ULL * 1024 * 1024 * 1024)
 sqlite3 *gfsd_db = NULL;
 
@@ -1948,6 +1948,7 @@ gfs_server_close(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 void
 gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 {
+	static gfarm_uint64_t culm_iosize = 0;
 	gfarm_int32_t fd, iosize;
 	gfarm_int64_t offset;
 	ssize_t rv;
@@ -1958,7 +1959,7 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 
 	gfs_server_get_request(client, size, "pread",
 	    "iil", &fd, &iosize, &offset);
-
+	
 	GFARM_TIMEVAL_FIX_INITIALIZE_WARNING(t1);
 	gfs_profile(gfarm_gettimerval(&t1));
 
@@ -1972,12 +1973,16 @@ gfs_server_pread(struct gfp_xdr *client, gfp_xdr_xid_t xid, size_t size)
 		local_fd = file_table_get(fd);
 	}
 
+	culm_iosize += iosize;
+	gflog_debug(GFARM_MSG_UNFIXED, 
+				"AAAAAAAAAAAAAAAA = %llu", culm_iosize);
+
 	fe = file_table_entry(fd);
 	gfp_count_client_cachehits_by_naive_lru(gfsd_db, client,
-	   fe->ino, fe->gen, offset, size, READ_HISTGRAM_GRANULARITY, ALLCLIENTS_CACHE_SIZE);
+	   fe->ino, fe->gen, offset, iosize, READ_HISTGRAM_GRANULARITY, ALLCLIENTS_CACHE_SIZE);
 
 	gfp_update_reads_histgram(gfsd_db, client, fe->ino, fe->gen,
-				  offset, size, READ_HISTGRAM_GRANULARITY);
+				  offset, iosize, READ_HISTGRAM_GRANULARITY);
 	
 #if 0 /* XXX FIXME: pread(2) on NetBSD-3.0_BETA is broken */
 	if ((rv = pread(local_fd, buffer, iosize, offset)) == -1)

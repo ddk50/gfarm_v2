@@ -2088,14 +2088,19 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	size_t size, gfarm_uint64_t granularity,
 	gfarm_uint64_t clientcachememsize)
 {
+	static gfarm_uint64_t culm_iosize = 0;
+	static gfarm_uint64_t culm_count = 0;
 	char *errmsg = NULL;
 	int rc;
 	char sql[255];
+	/* char *_sql2 = */
+	/* 	"SELECT client_id, inum, gnum, pagenum, count" */
+	/* 	"      FROM reads where client_id = %u order by id desc limit %llu"; */
 	char *_sql2 =
 		"SELECT client_id, inum, gnum, pagenum, count"
-		"      FROM reads where client_id = %u order by id desc limit %llu";
-	gfarm_uint64_t i, j;
-	size_t arysize = clientcachememsize / granularity;
+		"      FROM reads order by id desc limit %llu";
+	gfarm_uint64_t i, j;	
+	gfarm_uint64_t arysize = clientcachememsize / granularity;
 	STRUCT_SQL_CALLBACK_WRAPPER(cache) cache;
 
 	memset(&cache, 0, sizeof(STRUCT_SQL_CALLBACK_WRAPPER(cache)));
@@ -2106,7 +2111,7 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	/* gflog_debug(GFARM_MSG_1004206,  */
 	/* 			"update lru list: offset = %lu, size = %lu", offset, size); */
 
-	snprintf(sql, sizeof(sql), _sql2, conn->client_addr, arysize);
+	snprintf(sql, sizeof(sql), _sql2, arysize);
 
 	db_lock(db_semid); {	
 		rc = sqlite3_exec(db, sql, callback_form_cache_entries, &cache, &errmsg);
@@ -2123,7 +2128,9 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 	conn->total_read      = 0;
 	conn->total_cache_hit = 0;
 
-	for (i = offset / granularity ; i < ((offset + size) / granularity) + 1 ; i++) {
+	for (i = offset / granularity ; 
+		 i <= ((offset / granularity) + (size / granularity)) 
+			 ; i++) {
 		for (j = 0 ; j < cache.valid_num_of_entry ; j++) {
 			if ((cache.entries[j].inum == ino) &&
 				(cache.entries[j].gnum == gnum) &&
@@ -2132,16 +2139,15 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 				conn->total_cache_hit++;
 				j = cache.valid_num_of_entry;
 
-				/* gflog_info(GFARM_MSG_UNFIXED, */
-				/* 		   "EEEEEEEEEEEEEEEE: %u",  */
-				/* 		   cache.valid_num_of_entry); */
+				gflog_info(GFARM_MSG_UNFIXED,
+						   "EEEEEEEEEEEEEEEE: %llu",
+						   i);
 			}
 		}
 		conn->total_read++;
+		culm_count++;	   
 	}
-
-	/* gflog_debug(GFARM_MSG_UNFIXED, "<IP:%d> READ hits: %lu / reads: %lu",  */
-	/* 			conn->client_addr, conn->total_cache_hit, conn->total_read); */
+	
 	gfp_update_totalchit_and_total_read(db, conn);
 
 	conn->total_read      = 0;
@@ -2168,7 +2174,9 @@ gfp_update_reads_histgram(sqlite3 *db, struct gfp_xdr *conn,
 		"              coalesce(pagenum, %llu), coalesce(max(count) + 1, 1)"
 		"                     FROM reads where client_id = %u AND inum = %llu AND gnum = %llu AND pagenum = %llu";
 
-	for (i = offset / granularity; i < ((offset + size) / granularity) + 1 ; i++) {
+	for (i = offset / granularity ;
+		 i <= ((offset / granularity) + (size / granularity))
+			 ; i++) {
 		snprintf(sql, sizeof(sql), _sql, 
 				 conn->client_addr, ino, gnum, i, conn->client_addr, ino, gnum, i);
 		db_lock(db_semid); {
