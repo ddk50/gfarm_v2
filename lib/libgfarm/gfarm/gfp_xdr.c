@@ -2138,10 +2138,6 @@ gfp_count_client_cachehits_by_naive_lru(sqlite3 *db, struct gfp_xdr *conn,
 				/* Cache hit!!! */
 				conn->total_cache_hit++;
 				j = cache.valid_num_of_entry;
-
-				gflog_info(GFARM_MSG_UNFIXED,
-						   "EEEEEEEEEEEEEEEE: %llu",
-						   i);
 			}
 		}
 		conn->total_read++;
